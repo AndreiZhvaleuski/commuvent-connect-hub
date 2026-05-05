@@ -77,10 +77,6 @@ export function TopNav() {
                       </DropdownMenuLabel>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate("/tickets")}>My Tickets</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/my-events")}>My Events</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>Dashboard</DropdownMenuItem>
-                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={async () => { await signOut(); navigate("/"); }}>Sign out</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
