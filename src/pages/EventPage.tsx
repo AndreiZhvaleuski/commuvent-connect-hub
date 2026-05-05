@@ -259,6 +259,9 @@ export default function EventPage() {
                 </DialogContent>
               </Dialog>
             </div>
+
+            <EventGallery eventId={event.id} />
+            {ended && <EventFeedback eventId={event.id} />}
           </div>
 
           <aside>
