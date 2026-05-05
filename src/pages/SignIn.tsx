@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { toast } from "sonner";
 import { useSEO } from "@/hooks/use-seo";
 
@@ -58,19 +58,7 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
     finally { setBusy(false); }
   };
 
-  const handleMagic = async () => {
-    if (!email) return toast.error("Enter your email first");
-    setBusy(true);
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: `${window.location.origin}${redirect}` },
-      });
-      if (error) throw error;
-      toast.success("Magic link sent — check your email.");
-    } catch (e: any) { toast.error(e.message); }
-    finally { setBusy(false); }
-  };
+
 
   return (
     <AppLayout>
@@ -83,44 +71,31 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="password">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="password">Password</TabsTrigger>
-                <TabsTrigger value="magic">Magic link</TabsTrigger>
-              </TabsList>
-              <TabsContent value="password" className="space-y-4 pt-4">
-                {mode === "signup" && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First name</Label>
-                      <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last name</Label>
-                      <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                    </div>
-                  </div>
-                )}
+            {mode === "signup" && (
+              <div className="grid grid-cols-2 gap-3 pb-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <Label htmlFor="firstName">First name</Label>
+                  <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <Label htmlFor="lastName">Last name</Label>
+                  <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} />
                 </div>
-                <Button className="w-full" onClick={handlePassword} disabled={busy}>
-                  {mode === "signin" ? "Sign in" : "Create account"}
-                </Button>
-              </TabsContent>
-              <TabsContent value="magic" className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email-m">Email</Label>
-                  <Input id="email-m" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                </div>
-                <Button className="w-full" onClick={handleMagic} disabled={busy}>Send magic link</Button>
-              </TabsContent>
-            </Tabs>
+              </div>
+            )}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+              </div>
+              <Button className="w-full" onClick={handlePassword} disabled={busy}>
+                {mode === "signin" ? "Sign in" : "Create account"}
+              </Button>
+            </div>
             <p className="mt-6 text-center text-sm text-muted-foreground">
               {mode === "signin" ? (
                 <>No account? <Link to={`/sign-up?redirect=${encodeURIComponent(redirect)}`} className="text-foreground underline">Sign up</Link></>
