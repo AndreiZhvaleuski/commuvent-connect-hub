@@ -18,7 +18,7 @@ export function useSEO({ title, description }: { title: string; description?: st
       if (!m) {
         m = document.createElement("meta");
         const [k, v] = sel.replace("meta[", "").replace("]", "").split("=");
-        m.setAttribute(k, v.replaceAll('"', ""));
+        m.setAttribute(k, v.replace(/"/g, ""));
         document.head.appendChild(m);
       }
       m.setAttribute(attr, val);
