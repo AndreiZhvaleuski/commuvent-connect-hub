@@ -68,18 +68,32 @@ export function TopNav() {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right">
-              <SheetHeader><SheetTitle>Commuvent</SheetTitle></SheetHeader>
-              <div className="mt-6 flex flex-col gap-2">
+            <SheetContent side="right" className="gap-0">
+              <SheetHeader>
+                <SheetTitle className="font-heading">Commuvent</SheetTitle>
+              </SheetHeader>
+              <nav className="flex flex-col gap-1 px-4 py-2">
                 {links.map((l) => (
-                  <NavLink key={l.to} to={l.to} className="rounded-md px-3 py-2 text-sm hover:bg-accent">
+                  <NavLink
+                    key={l.to}
+                    to={l.to}
+                    className={({ isActive }) =>
+                      `rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent ${
+                        isActive ? "bg-accent text-foreground" : "text-muted-foreground"
+                      }`
+                    }
+                  >
                     {l.label}
                   </NavLink>
                 ))}
-                {!user && (
-                  <Button className="mt-2" onClick={() => navigate("/sign-in")}>Sign in</Button>
-                )}
-              </div>
+              </nav>
+              {!user && (
+                <div className="mt-auto border-t p-4">
+                  <Button size="sm" className="w-full" onClick={() => navigate("/sign-in")}>
+                    Sign in
+                  </Button>
+                </div>
+              )}
             </SheetContent>
           </Sheet>
         </div>
