@@ -17,7 +17,9 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
   });
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const redirect = params.get("redirect") || "/";
+  const intent = params.get("intent");
+  const baseRedirect = params.get("redirect") || "/";
+  const redirect = intent ? `${baseRedirect}${baseRedirect.includes("?") ? "&" : "?"}intent=${encodeURIComponent(intent)}` : baseRedirect;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

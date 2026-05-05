@@ -5,15 +5,19 @@ Deno.serve(async (req) => {
   try {
     const user = await getUser(req);
     if (!user) return json({ error: "unauthenticated" }, 401);
-    const { rsvp_id } = await req.json();
-    if (!rsvp_id) return json({ error: "rsvp_id required" }, 400);
+    const body = await req.json().catch(() => ({}));
+    const { rsvp_id, event_id } = body as { rsvp_id?: string; event_id?: string };
+    if (!rsvp_id && !event_id) return json({ error: "rsvp_id or event_id required" }, 400);
 
     const db = admin();
-    const { data: r } = await db.from("rsvps").select("*").eq("id", rsvp_id).maybeSingle();
+    const q = db.from("rsvps").select("*");
+    const { data: r } = rsvp_id
+      ? await q.eq("id", rsvp_id).maybeSingle()
+      : await q.eq("event_id", event_id!).eq("user_id", user.id).neq("status", "cancelled").maybeSingle();
     if (!r) return json({ error: "not_found" }, 404);
     if (r.user_id !== user.id) return json({ error: "forbidden" }, 403);
 
-    await db.from("rsvps").update({ status: "cancelled", cancelled_at: new Date().toISOString(), position: null }).eq("id", rsvp_id);
+    await db.from("rsvps").update({ status: "cancelled", cancelled_at: new Date().toISOString(), position: null }).eq("id", r.id);
 
     // Promote next waitlist if there's room
     const { data: ev } = await db.from("events").select("capacity").eq("id", r.event_id).single();

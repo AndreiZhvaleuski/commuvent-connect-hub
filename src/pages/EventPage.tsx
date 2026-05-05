@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Calendar, Clock, ExternalLink, Flag, Globe, MapPin, Users } from "lucide-react";
 import { formatInTimeZone } from "date-fns-tz";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +30,8 @@ export default function EventPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [event, setEvent] = useState<Ev | null>(null);
   const [host, setHost] = useState<Host | null>(null);
   const [going, setGoing] = useState(0);
@@ -81,6 +83,22 @@ export default function EventPage() {
     return () => { supabase.removeChannel(ch); };
   }, [eventId]);
 
+  // Auto-open RSVP confirm after sign-in redirect with intent=rsvp
+  useEffect(() => {
+    if (!event || !user) return;
+    if (params.get("intent") !== "rsvp") return;
+    if (rsvp && rsvp.status !== "cancelled") {
+      const next = new URLSearchParams(params); next.delete("intent"); setParams(next, { replace: true });
+      return;
+    }
+    if (new Date(event.end_at).getTime() < Date.now()) {
+      const next = new URLSearchParams(params); next.delete("intent"); setParams(next, { replace: true });
+      return;
+    }
+    setConfirmOpen(true);
+    const next = new URLSearchParams(params); next.delete("intent"); setParams(next, { replace: true });
+  }, [event, user, rsvp, params, setParams]);
+
   if (notFound) return <AppLayout><div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Event not found.</p></div></AppLayout>;
   if (busy || !event) return <AppLayout><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></AppLayout>;
 
@@ -102,13 +120,17 @@ export default function EventPage() {
   const isFull = event.capacity > 0 && going >= event.capacity;
   const activeRsvp = rsvp && rsvp.status !== "cancelled" ? rsvp : null;
 
-  const requireAuth = () => {
-    if (!user) { navigate(`/sign-in?redirect=${encodeURIComponent(`/e/${event.id}`)}`); return false; }
+  const requireAuth = (intent?: string) => {
+    if (!user) {
+      const q = new URLSearchParams({ redirect: `/e/${event.id}` });
+      if (intent) q.set("intent", intent);
+      navigate(`/sign-in?${q.toString()}`); return false;
+    }
     return true;
   };
 
   const onRsvp = async () => {
-    if (!requireAuth()) return;
+    if (!requireAuth("rsvp")) return;
     setActing(true);
     try {
       const { data, error } = await supabase.functions.invoke("rsvp_create", { body: { event_id: event.id } });
@@ -262,9 +284,9 @@ export default function EventPage() {
                     <Button onClick={onCancel} disabled={acting} variant="ghost" className="w-full">Cancel RSVP</Button>
                   </div>
                 ) : isFull ? (
-                  <Button onClick={onRsvp} disabled={acting} className="w-full" variant="secondary">Join waitlist</Button>
+                  <Button onClick={() => (user ? setConfirmOpen(true) : requireAuth("rsvp"))} disabled={acting} className="w-full" variant="secondary">Join waitlist</Button>
                 ) : (
-                  <Button onClick={onRsvp} disabled={acting} className="w-full">RSVP</Button>
+                  <Button onClick={() => (user ? setConfirmOpen(true) : requireAuth("rsvp"))} disabled={acting} className="w-full">RSVP</Button>
                 )}
 
                 <p className="text-xs text-muted-foreground text-center">Free event · No fees</p>
@@ -273,6 +295,28 @@ export default function EventPage() {
           </aside>
         </div>
       </div>
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{isFull ? "Join the waitlist?" : "Confirm your RSVP"}</DialogTitle>
+            <DialogDescription>
+              {isFull
+                ? "This event is full. We'll automatically promote you and email a notification when a seat opens."
+                : `You'll be marked as going to "${event.title}". You can cancel anytime.`}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>Not now</Button>
+            <Button
+              disabled={acting}
+              onClick={async () => { setConfirmOpen(false); await onRsvp(); }}
+            >
+              {isFull ? "Join waitlist" : "Confirm RSVP"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
