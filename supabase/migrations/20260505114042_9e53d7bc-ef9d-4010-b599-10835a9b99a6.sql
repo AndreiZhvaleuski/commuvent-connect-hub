@@ -1,0 +1,16 @@
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.hosts TO authenticated;
+GRANT SELECT ON public.hosts TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.host_members TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.host_invites TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.events TO authenticated;
+GRANT SELECT ON public.events TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.rsvps TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.check_ins TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.feedback TO authenticated;
+GRANT SELECT ON public.feedback TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.gallery_photos TO authenticated;
+GRANT SELECT ON public.gallery_photos TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.profiles TO authenticated;
+GRANT SELECT ON public.profiles TO anon;
+GRANT SELECT, INSERT, UPDATE ON public.notifications TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.reports TO authenticated;
