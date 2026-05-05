@@ -112,7 +112,7 @@ export default function EventPage() {
   };
 
   const onRsvp = async () => {
-    if (!requireAuth()) return;
+    if (!requireAuth("rsvp")) return;
     setActing(true);
     try {
       const { data, error } = await supabase.functions.invoke("rsvp_create", { body: { event_id: event.id } });
