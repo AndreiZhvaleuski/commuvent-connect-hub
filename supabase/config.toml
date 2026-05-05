@@ -1,1 +1,16 @@
 project_id = "ilrtlyixbvgawbytfvxz"
+
+[functions.rsvp_create]
+verify_jwt = false
+
+[functions.rsvp_cancel]
+verify_jwt = false
+
+[functions.event_set_capacity]
+verify_jwt = false
+
+[functions.check_in_by_code]
+verify_jwt = false
+
+[functions.check_in_undo]
+verify_jwt = false
