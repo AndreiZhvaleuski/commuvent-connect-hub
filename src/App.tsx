@@ -13,6 +13,8 @@ import Dashboard from "./pages/Dashboard.tsx";
 import HostDashboard from "./pages/HostDashboard.tsx";
 import EventEditor from "./pages/EventEditor.tsx";
 import HostPublic from "./pages/HostPublic.tsx";
+import Explore from "./pages/Explore.tsx";
+import EventPage from "./pages/EventPage.tsx";
 
 const queryClient = new QueryClient();
 
