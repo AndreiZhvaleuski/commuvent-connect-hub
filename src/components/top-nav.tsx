@@ -55,11 +55,19 @@ export function TopNav() {
                 : (user.email?.[0] ?? "U").toUpperCase();
               return (
                 <DropdownMenu>
-                  <DropdownMenuTrigger render={<Button variant="outline" size="sm" className="gap-2 pl-1.5 pr-2.5" />}>
-                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground">
+                  <DropdownMenuTrigger
+                    render={
+                      <button
+                        type="button"
+                        aria-label="Account menu"
+                        className="flex items-center gap-2 rounded-full outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      />
+                    }
+                  >
+                    <span className="hidden text-sm font-medium text-foreground sm:inline">{displayName}</span>
+                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                       {initials}
                     </span>
-                    <span className="hidden sm:inline">{displayName}</span>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="min-w-56">
                     <DropdownMenuGroup>
