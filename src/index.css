@@ -152,7 +152,7 @@ All colors MUST be HSL.
   [data-slot="hover-card-content"],
   [data-slot="command"],
   [data-slot="navigation-menu-viewport"] {
-    background-color: hsl(var(--popover)) !important;
+    background-color: var(--popover) !important;
   }
 
   [data-slot="dropdown-menu-content"]::before,
