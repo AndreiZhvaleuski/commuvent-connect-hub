@@ -15,6 +15,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@base-ui/react": "^1.4.1",
     "@fontsource-variable/noto-sans": "^5.2.10",
     "@fontsource-variable/oxanium": "^5.2.8",
     "@hookform/resolvers": "^3.10.0",
@@ -65,7 +66,7 @@
     "react-hook-form": "^7.61.1",
     "react-resizable-panels": "^4.11.0",
     "react-router-dom": "^6.30.1",
-    "recharts": "3.8.0",
+    "recharts": "^3.8.0",
     "shadcn": "^4.6.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
