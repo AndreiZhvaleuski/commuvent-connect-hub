@@ -83,6 +83,22 @@ export default function EventPage() {
     return () => { supabase.removeChannel(ch); };
   }, [eventId]);
 
+  // Auto-open RSVP confirm after sign-in redirect with intent=rsvp
+  useEffect(() => {
+    if (!event || !user) return;
+    if (params.get("intent") !== "rsvp") return;
+    if (rsvp && rsvp.status !== "cancelled") {
+      const next = new URLSearchParams(params); next.delete("intent"); setParams(next, { replace: true });
+      return;
+    }
+    if (new Date(event.end_at).getTime() < Date.now()) {
+      const next = new URLSearchParams(params); next.delete("intent"); setParams(next, { replace: true });
+      return;
+    }
+    setConfirmOpen(true);
+    const next = new URLSearchParams(params); next.delete("intent"); setParams(next, { replace: true });
+  }, [event, user, rsvp, params, setParams]);
+
   if (notFound) return <AppLayout><div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Event not found.</p></div></AppLayout>;
   if (busy || !event) return <AppLayout><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></AppLayout>;
 
