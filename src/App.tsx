@@ -27,8 +27,8 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/explore" element={<Placeholder title="Explore events" />} />
-            <Route path="/e/:eventId" element={<Placeholder title="Event" />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/e/:eventId" element={<EventPage />} />
             <Route path="/h/:slug" element={<HostPublic />} />
             <Route path="/sign-in" element={<SignIn mode="signin" />} />
             <Route path="/sign-up" element={<SignIn mode="signup" />} />
