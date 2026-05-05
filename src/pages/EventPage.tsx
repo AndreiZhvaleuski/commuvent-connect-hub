@@ -30,6 +30,8 @@ export default function EventPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [event, setEvent] = useState<Ev | null>(null);
   const [host, setHost] = useState<Host | null>(null);
   const [going, setGoing] = useState(0);
