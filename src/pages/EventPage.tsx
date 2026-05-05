@@ -102,8 +102,12 @@ export default function EventPage() {
   const isFull = event.capacity > 0 && going >= event.capacity;
   const activeRsvp = rsvp && rsvp.status !== "cancelled" ? rsvp : null;
 
-  const requireAuth = () => {
-    if (!user) { navigate(`/sign-in?redirect=${encodeURIComponent(`/e/${event.id}`)}`); return false; }
+  const requireAuth = (intent?: string) => {
+    if (!user) {
+      const q = new URLSearchParams({ redirect: `/e/${event.id}` });
+      if (intent) q.set("intent", intent);
+      navigate(`/sign-in?${q.toString()}`); return false;
+    }
     return true;
   };
 
