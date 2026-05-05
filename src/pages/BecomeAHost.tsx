@@ -61,7 +61,15 @@ export default function BecomeAHost() {
         })
         .select()
         .single();
-      if (error) throw error;
+      if (error) {
+        if (error.code === "23505") {
+          form.setError("slug", { message: "This slug is already taken. Try another." });
+          toast.error("That URL slug is already taken");
+          setSubmitting(false);
+          return;
+        }
+        throw error;
+      }
 
       // 2. Add creator as host member with role "host"
       const { error: hmError } = await supabase
