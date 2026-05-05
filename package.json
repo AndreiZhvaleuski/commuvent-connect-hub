@@ -13,7 +13,6 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@fontsource-variable/geist": "^5.2.8",
     "@fontsource-variable/noto-sans": "^5.2.10",
     "@fontsource-variable/oxanium": "^5.2.8",
     "@hookform/resolvers": "^3.10.0",
