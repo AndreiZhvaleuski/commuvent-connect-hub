@@ -14,13 +14,423 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      check_ins: {
+        Row: {
+          checked_in_at: string
+          checked_in_by: string | null
+          event_id: string
+          id: string
+          rsvp_id: string
+          undone: boolean
+        }
+        Insert: {
+          checked_in_at?: string
+          checked_in_by?: string | null
+          event_id: string
+          id?: string
+          rsvp_id: string
+          undone?: boolean
+        }
+        Update: {
+          checked_in_at?: string
+          checked_in_by?: string | null
+          event_id?: string
+          id?: string
+          rsvp_id?: string
+          undone?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "check_ins_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "check_ins_rsvp_id_fkey"
+            columns: ["rsvp_id"]
+            isOneToOne: true
+            referencedRelation: "rsvps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          capacity: number
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_at: string
+          host_id: string
+          id: string
+          is_paid: boolean
+          online_url: string | null
+          slug: string | null
+          start_at: string
+          status: string
+          time_zone: string
+          title: string
+          updated_at: string
+          venue_address: string | null
+          visibility: string
+        }
+        Insert: {
+          capacity?: number
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_at: string
+          host_id: string
+          id?: string
+          is_paid?: boolean
+          online_url?: string | null
+          slug?: string | null
+          start_at: string
+          status?: string
+          time_zone?: string
+          title: string
+          updated_at?: string
+          venue_address?: string | null
+          visibility?: string
+        }
+        Update: {
+          capacity?: number
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_at?: string
+          host_id?: string
+          id?: string
+          is_paid?: boolean
+          online_url?: string | null
+          slug?: string | null
+          start_at?: string
+          status?: string
+          time_zone?: string
+          title?: string
+          updated_at?: string
+          venue_address?: string | null
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "hosts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback: {
+        Row: {
+          comment: string | null
+          created_at: string
+          event_id: string
+          id: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          event_id: string
+          id?: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gallery_photos: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          status: string
+          storage_path: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          status?: string
+          storage_path: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          status?: string
+          storage_path?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_photos_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      host_invites: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          host_id: string
+          id: string
+          role: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at: string
+          host_id: string
+          id?: string
+          role: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          host_id?: string
+          id?: string
+          role?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "host_invites_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "hosts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      host_members: {
+        Row: {
+          created_at: string
+          host_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          host_id: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          host_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "host_members_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "hosts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hosts: {
+        Row: {
+          bio: string | null
+          contact_email: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          slug: string
+        }
+        Insert: {
+          bio?: string | null
+          contact_email?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          slug: string
+        }
+        Update: {
+          bio?: string | null
+          contact_email?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          read_at: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          read_at?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          read_at?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          reporter_id: string | null
+          status: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason: string
+          reporter_id?: string | null
+          status?: string
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_id?: string | null
+          status?: string
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: []
+      }
+      rsvps: {
+        Row: {
+          cancelled_at: string | null
+          code: string
+          created_at: string
+          event_id: string
+          id: string
+          position: number | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          code: string
+          created_at?: string
+          event_id: string
+          id?: string
+          position?: number | null
+          status: string
+          user_id: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          code?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          position?: number | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rsvps_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_host_role: {
+        Args: { p_host_id: string; p_role: string }
+        Returns: boolean
+      }
+      is_event_host_member: { Args: { p_event_id: string }; Returns: boolean }
+      is_host_member: { Args: { p_host_id: string }; Returns: boolean }
+      is_report_target_host_member: {
+        Args: { p_target_id: string; p_target_type: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
