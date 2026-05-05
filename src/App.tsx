@@ -16,6 +16,7 @@ import HostPublic from "./pages/HostPublic.tsx";
 import Explore from "./pages/Explore.tsx";
 import EventPage from "./pages/EventPage.tsx";
 import Tickets from "./pages/Tickets.tsx";
+import CheckIn from "./pages/CheckIn.tsx";
 
 const queryClient = new QueryClient();
 
