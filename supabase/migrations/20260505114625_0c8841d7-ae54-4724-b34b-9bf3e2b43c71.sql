@@ -1,0 +1,1 @@
+GRANT ALL ON public.hosts, public.host_members, public.host_invites, public.events, public.rsvps, public.check_ins, public.feedback, public.gallery_photos, public.profiles, public.notifications, public.reports TO service_role;
