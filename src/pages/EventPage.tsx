@@ -17,6 +17,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { EventGallery } from "@/components/event-gallery";
+import { EventFeedback } from "@/components/event-feedback";
 
 type Ev = {
   id: string; title: string; description: string | null; cover_image_url: string | null;
