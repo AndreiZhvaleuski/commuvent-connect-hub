@@ -90,7 +90,7 @@ export default function Explore() {
               <Label htmlFor="to">To</Label>
               <Input id="to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
             </div>
-            <div className="flex items-end gap-3 lg:col-span-5">
+            <div className="flex items-center gap-3 lg:col-span-5">
               <div className="flex items-center gap-2">
                 <Switch id="past" checked={includePast} onCheckedChange={setIncludePast} />
                 <Label htmlFor="past" className="cursor-pointer">Include past events</Label>
