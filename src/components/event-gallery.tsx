@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Flag, ImagePlus, Loader2 } from "lucide-react";
+import { FlagIcon as Flag, ImageSquareIcon as ImagePlus, SpinnerIcon as Loader2 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";

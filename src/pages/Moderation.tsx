@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Check, EyeOff, X } from "lucide-react";
+import { ArrowLeftIcon as ArrowLeft, CheckIcon as Check, EyeSlashIcon as EyeOff, XIcon as X } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";

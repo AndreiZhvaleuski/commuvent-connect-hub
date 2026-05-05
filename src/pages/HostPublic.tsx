@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Calendar, Mail, MapPin } from "lucide-react";
+import { CalendarIcon as Calendar, EnvelopeIcon as Mail, MapPinIcon as MapPin } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/hooks/use-seo";
 import { AppLayout } from "@/components/app-layout";

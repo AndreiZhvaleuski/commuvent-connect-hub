@@ -1,4 +1,4 @@
-import { Download } from "lucide-react";
+import { DownloadSimpleIcon as Download } from "@phosphor-icons/react";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Check, ChevronsUpDown, Copy, Eye, EyeOff } from "lucide-react";
+import { CheckIcon as Check, CaretUpDownIcon as ChevronsUpDown, CopyIcon as Copy, EyeIcon as Eye, EyeSlashIcon as EyeOff } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useSEO } from "@/hooks/use-seo";
