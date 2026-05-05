@@ -12,8 +12,7 @@ const FALLBACK = [
 ];
 
 export function listTimezones(): string[] {
-  // @ts-expect-error not in older TS lib
-  const fn = (Intl as any).supportedValuesOf;
+  const fn = (Intl as unknown as { supportedValuesOf?: (k: string) => string[] }).supportedValuesOf;
   if (typeof fn === "function") {
     try { return fn("timeZone") as string[]; } catch { /* noop */ }
   }
