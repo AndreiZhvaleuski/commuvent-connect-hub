@@ -58,19 +58,7 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
     finally { setBusy(false); }
   };
 
-  const handleMagic = async () => {
-    if (!email) return toast.error("Enter your email first");
-    setBusy(true);
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: `${window.location.origin}${redirect}` },
-      });
-      if (error) throw error;
-      toast.success("Magic link sent — check your email.");
-    } catch (e: any) { toast.error(e.message); }
-    finally { setBusy(false); }
-  };
+
 
   return (
     <AppLayout>
