@@ -33,7 +33,7 @@ const App = () => (
             <Route path="/h/:slug" element={<HostPublic />} />
             <Route path="/sign-in" element={<SignIn mode="signin" />} />
             <Route path="/sign-up" element={<SignIn mode="signup" />} />
-            <Route path="/tickets" element={<Placeholder title="My Tickets" />} />
+            <Route path="/tickets" element={<Tickets />} />
             <Route path="/my-events" element={<Placeholder title="My Events" />} />
             <Route path="/become-a-host" element={<BecomeAHost />} />
             <Route path="/dashboard" element={<Dashboard />} />
