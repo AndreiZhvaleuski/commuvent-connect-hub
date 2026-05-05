@@ -19,6 +19,7 @@ import Tickets from "./pages/Tickets.tsx";
 import CheckIn from "./pages/CheckIn.tsx";
 import EventRsvps from "./pages/EventRsvps.tsx";
 import About from "./pages/About.tsx";
+import Moderation from "./pages/Moderation.tsx";
 
 const queryClient = new QueryClient();
 
