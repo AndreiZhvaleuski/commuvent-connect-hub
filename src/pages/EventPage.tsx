@@ -94,7 +94,7 @@ export default function EventPage() {
     catch { return new Date(iso).toLocaleString(); }
   };
   const fmtLocal = (iso: string) => {
-    try { return format(new Date(iso), "EEE, MMM d · h:mm a zzz", { timeZone: localTz }); }
+    try { return formatInTimeZone(new Date(iso), localTz, "EEE, MMM d · h:mm a zzz"); }
     catch { return new Date(iso).toLocaleString(); }
   };
 
