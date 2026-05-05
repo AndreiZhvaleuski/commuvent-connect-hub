@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Moon, Sun } from "lucide-react";
+import { MoonIcon as Moon, SunIcon as Sun } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 
 function readInitialTheme(): "light" | "dark" {

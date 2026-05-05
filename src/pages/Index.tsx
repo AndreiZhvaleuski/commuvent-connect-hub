@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Calendar, MapPin, Users } from "lucide-react";
+import { ArrowRightIcon as ArrowRight, CalendarIcon as Calendar, MapPinIcon as MapPin, UsersIcon as Users } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, Navigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Undo2 } from "lucide-react";
+import { ArrowLeftIcon as ArrowLeft, ArrowCounterClockwiseIcon as Undo2 } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { TopNav } from "@/components/top-nav";

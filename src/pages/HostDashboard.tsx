@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Plus, Calendar, Users, Clock, CheckCircle2, ExternalLink } from "lucide-react";
+import { PlusIcon as Plus, CalendarIcon as Calendar, UsersIcon as Users, ClockIcon as Clock, CheckCircleIcon as CheckCircle2, ArrowSquareOutIcon as ExternalLink } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useSEO } from "@/hooks/use-seo";

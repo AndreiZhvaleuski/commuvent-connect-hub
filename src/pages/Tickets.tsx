@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
-import { Calendar as CalIcon, Clock, Download, ExternalLink, MapPin, Ticket } from "lucide-react";
+import { CalendarIcon as CalIcon, ClockIcon as Clock, DownloadSimpleIcon as Download, ArrowSquareOutIcon as ExternalLink, MapPinIcon as MapPin, TicketIcon as Ticket } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
