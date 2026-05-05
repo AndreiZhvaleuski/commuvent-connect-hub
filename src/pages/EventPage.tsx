@@ -295,6 +295,28 @@ export default function EventPage() {
           </aside>
         </div>
       </div>
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{isFull ? "Join the waitlist?" : "Confirm your RSVP"}</DialogTitle>
+            <DialogDescription>
+              {isFull
+                ? "This event is full. We'll automatically promote you and email a notification when a seat opens."
+                : `You'll be marked as going to "${event.title}". You can cancel anytime.`}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>Not now</Button>
+            <Button
+              disabled={acting}
+              onClick={async () => { setConfirmOpen(false); await onRsvp(); }}
+            >
+              {isFull ? "Join waitlist" : "Confirm RSVP"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
