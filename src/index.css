@@ -114,9 +114,9 @@ All colors MUST be HSL.
     --chart-5: oklch(0.473 0.137 46.201);
     --sidebar: oklch(0.214 0.009 43.1);
   }
-  .theme {
-    --font-heading: 'Oxanium Variable', sans-serif;
-    --font-sans: 'Noto Sans Variable', sans-serif;
+  :root {
+    --font-heading: 'Oxanium Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Noto Sans Variable', ui-sans-serif, system-ui, sans-serif;
   }
   * {
     @apply border-border;
