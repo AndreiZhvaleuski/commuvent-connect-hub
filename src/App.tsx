@@ -17,6 +17,8 @@ import Explore from "./pages/Explore.tsx";
 import EventPage from "./pages/EventPage.tsx";
 import Tickets from "./pages/Tickets.tsx";
 import CheckIn from "./pages/CheckIn.tsx";
+import EventRsvps from "./pages/EventRsvps.tsx";
+import About from "./pages/About.tsx";
 
 const queryClient = new QueryClient();
 
@@ -41,12 +43,12 @@ const App = () => (
             <Route path="/dashboard/:hostId" element={<HostDashboard />} />
             <Route path="/dashboard/:hostId/events/new" element={<EventEditor />} />
             <Route path="/dashboard/:hostId/events/:eventId/edit" element={<EventEditor />} />
-            <Route path="/dashboard/:hostId/events/:eventId/rsvps" element={<Placeholder title="Event RSVPs" />} />
+            <Route path="/dashboard/:hostId/events/:eventId/rsvps" element={<EventRsvps />} />
             <Route path="/dashboard/:hostId/members" element={<Placeholder title="Members" />} />
             <Route path="/dashboard/:hostId/moderation" element={<Placeholder title="Moderation" />} />
             <Route path="/checkin/:eventId" element={<CheckIn />} />
             <Route path="/invite/:token" element={<Placeholder title="Invite" />} />
-            <Route path="/about" element={<Placeholder title="About Commuvent" />} />
+            <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
