@@ -110,7 +110,7 @@ export default function Tickets() {
               <Ticket className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
               <p className="text-lg font-medium">No tickets yet</p>
               <p className="text-muted-foreground mt-1">RSVP to an event to see it here.</p>
-              <Button asChild className="mt-6"><Link to="/explore">Explore events</Link></Button>
+              <Button render={<Link to="/explore" />} className="mt-6">Explore events</Button>
             </CardContent>
           </Card>
         ) : (
@@ -191,8 +191,8 @@ function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; on
             </div>
             {!pastView && (
               <div className="flex flex-wrap gap-2">
-                <Button asChild size="sm" variant="outline">
-                  <a href={googleCalendarUrl(calEvent)} target="_blank" rel="noreferrer"><CalIcon className="mr-1 h-4 w-4" />Google Calendar</a>
+                <Button render={<a href={googleCalendarUrl(calEvent)} target="_blank" rel="noreferrer" />} size="sm" variant="outline">
+                  <CalIcon className="mr-1 h-4 w-4" />Google Calendar
                 </Button>
                 <Button size="sm" variant="outline" onClick={ics}><Download className="mr-1 h-4 w-4" />.ics</Button>
                 <Button size="sm" variant="ghost" onClick={onCancel}>Cancel RSVP</Button>

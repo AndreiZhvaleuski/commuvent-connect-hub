@@ -45,7 +45,7 @@ export default function Dashboard() {
             <h1 className="text-3xl font-semibold tracking-tight">Your hosts</h1>
             <p className="text-muted-foreground mt-1">Pick a host to manage its events.</p>
           </div>
-          <Button asChild><Link to="/become-a-host"><Plus className="mr-1 h-4 w-4" />New host</Link></Button>
+          <Button render={<Link to="/become-a-host" />}><Plus className="mr-1 h-4 w-4" />New host</Button>
         </div>
 
         {busy ? (
@@ -58,7 +58,7 @@ export default function Dashboard() {
               <Users className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
               <p className="text-lg font-medium">No hosts yet</p>
               <p className="text-muted-foreground mt-1">Create one to start publishing events.</p>
-              <Button asChild className="mt-6"><Link to="/become-a-host">Become a host</Link></Button>
+              <Button render={<Link to="/become-a-host" />} className="mt-6">Become a host</Button>
             </CardContent>
           </Card>
         ) : (

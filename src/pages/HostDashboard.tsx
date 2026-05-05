@@ -79,8 +79,8 @@ export default function HostDashboard() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button asChild variant="outline"><Link to={`/dashboard/${host.id}/members`}>Members</Link></Button>
-            <Button asChild><Link to={`/dashboard/${host.id}/events/new`}><Plus className="mr-1 h-4 w-4" />New event</Link></Button>
+            <Button render={<Link to={`/dashboard/${host.id}/members`} />} variant="outline">Members</Button>
+            <Button render={<Link to={`/dashboard/${host.id}/events/new`} />}><Plus className="mr-1 h-4 w-4" />New event</Button>
           </div>
         </div>
 
@@ -123,9 +123,9 @@ function EventList({ events, stats, hostId, emptyText }: { events: Ev[]; stats: 
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button asChild size="sm" variant="outline"><Link to={`/dashboard/${hostId}/events/${e.id}/edit`}>Edit</Link></Button>
-                <Button asChild size="sm" variant="outline"><Link to={`/dashboard/${hostId}/events/${e.id}/rsvps`}>RSVPs</Link></Button>
-                <Button asChild size="sm" variant="outline"><Link to={`/checkin/${e.id}`}>Check-in</Link></Button>
+                <Button render={<Link to={`/dashboard/${hostId}/events/${e.id}/edit`} />} size="sm" variant="outline">Edit</Button>
+                <Button render={<Link to={`/dashboard/${hostId}/events/${e.id}/rsvps`} />} size="sm" variant="outline">RSVPs</Button>
+                <Button render={<Link to={`/checkin/${e.id}`} />} size="sm" variant="outline">Check-in</Button>
               </div>
             </CardHeader>
             <CardContent>

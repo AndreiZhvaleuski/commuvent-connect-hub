@@ -208,8 +208,8 @@ export default function EventPage() {
                 <Calendar className="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <div>
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <p className="font-medium cursor-help">{fmt(event.start_at)}</p>
+                    <TooltipTrigger render={<p className="font-medium cursor-help" />}>
+                      {fmt(event.start_at)}
                     </TooltipTrigger>
                     <TooltipContent>{sameTz ? "Same as your local time" : `Your local: ${fmtLocal(event.start_at)}`}</TooltipContent>
                   </Tooltip>
@@ -240,8 +240,8 @@ export default function EventPage() {
 
             <div className="mt-6">
               <Dialog open={reportOpen} onOpenChange={setReportOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="ghost" size="sm"><Flag className="mr-1 h-4 w-4" />Report event</Button>
+                <DialogTrigger render={<Button variant="ghost" size="sm" />}>
+                  <Flag className="mr-1 h-4 w-4" />Report event
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
@@ -285,7 +285,7 @@ export default function EventPage() {
                       </p>
                       <p className="font-mono text-xs text-muted-foreground mt-1">Code: {activeRsvp.code}</p>
                     </div>
-                    <Button asChild variant="outline" className="w-full"><Link to="/tickets">View ticket</Link></Button>
+                    <Button render={<Link to="/tickets" />} variant="outline" className="w-full">View ticket</Button>
                     <Button onClick={onCancel} disabled={acting} variant="ghost" className="w-full">Cancel RSVP</Button>
                   </div>
                 ) : isFull ? (

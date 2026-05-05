@@ -45,8 +45,8 @@ export function TopNav() {
           <ThemeToggle />
           {user ? (
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">{user.email?.split("@")[0] ?? "Account"}</Button>
+              <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>
+                {user.email?.split("@")[0] ?? "Account"}
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel className="text-xs text-muted-foreground">{user.email}</DropdownMenuLabel>
@@ -63,10 +63,8 @@ export function TopNav() {
           )}
 
           <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Menu">
-                <Menu className="h-5 w-5" />
-              </Button>
+            <SheetTrigger render={<Button variant="ghost" size="icon" className="md:hidden" aria-label="Menu" />}>
+              <Menu className="h-5 w-5" />
             </SheetTrigger>
             <SheetContent side="right" className="gap-0">
               <SheetHeader>

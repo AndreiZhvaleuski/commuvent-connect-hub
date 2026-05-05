@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { useSEO } from "@/hooks/use-seo";
 

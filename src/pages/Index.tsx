@@ -45,11 +45,11 @@ export default function Index() {
             Host, attend, and check-in to events your community actually shows up for. No fees, no fluff.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Button asChild size="lg">
-              <Link to="/explore">Explore events <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            <Button render={<Link to="/explore" />} size="lg">
+              Explore events <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/become-a-host">Become a host</Link>
+            <Button render={<Link to="/become-a-host" />} size="lg" variant="outline">
+              Become a host
             </Button>
           </div>
         </div>
@@ -61,7 +61,7 @@ export default function Index() {
             <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">Upcoming events</h2>
             <p className="text-muted-foreground mt-1">Fresh from the community.</p>
           </div>
-          <Button asChild variant="ghost"><Link to="/explore">See all</Link></Button>
+          <Button render={<Link to="/explore" />} variant="ghost">See all</Button>
         </div>
 
         {loading ? (
@@ -76,7 +76,7 @@ export default function Index() {
               <Users className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
               <p className="text-lg font-medium">No upcoming events yet</p>
               <p className="text-muted-foreground mt-1">Be the first — host one for your community.</p>
-              <Button asChild className="mt-6"><Link to="/become-a-host">Become a host</Link></Button>
+              <Button render={<Link to="/become-a-host" />} className="mt-6">Become a host</Button>
             </CardContent>
           </Card>
         ) : (

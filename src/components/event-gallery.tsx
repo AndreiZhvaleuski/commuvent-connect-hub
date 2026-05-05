@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
@@ -83,7 +83,7 @@ export function EventGallery({ eventId }: { eventId: string }) {
             </Button>
           </>
         ) : (
-          <Button asChild size="sm" variant="outline"><Link to="/sign-in">Sign in to upload</Link></Button>
+          <Button render={<Link to="/sign-in" />} size="sm" variant="outline">Sign in to upload</Button>
         )}
       </CardHeader>
       <CardContent>

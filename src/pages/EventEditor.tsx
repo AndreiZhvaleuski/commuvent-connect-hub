@@ -255,8 +255,8 @@ export default function EventEditor() {
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-muted-foreground">Free</span>
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="inline-flex"><Switch checked={false} disabled aria-label="Paid (coming soon)" /></span>
+                    <TooltipTrigger render={<span className="inline-flex" />}>
+                      <Switch checked={false} disabled aria-label="Paid (coming soon)" />
                     </TooltipTrigger>
                     <TooltipContent>Coming soon</TooltipContent>
                   </Tooltip>
@@ -306,11 +306,9 @@ function TimezonePicker({ value, onChange, options }: { value: string; onChange:
   const [open, setOpen] = useState(false);
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
-          {value || "Pick a time zone"}
-          <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-        </Button>
+      <PopoverTrigger render={<Button variant="outline" role="combobox" className="w-full justify-between font-normal" />}>
+        {value || "Pick a time zone"}
+        <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
       </PopoverTrigger>
       <PopoverContent className="p-0 w-[--radix-popover-trigger-width]" align="start">
         <Command>
