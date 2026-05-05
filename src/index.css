@@ -137,3 +137,40 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Disable translucency / backdrop blur on shadcn surfaces — use solid theme tokens */
+@layer components {
+  [data-slot="dropdown-menu-content"],
+  [data-slot="dropdown-menu-sub-content"],
+  [data-slot="context-menu-content"],
+  [data-slot="context-menu-sub-content"],
+  [data-slot="menubar-content"],
+  [data-slot="menubar-sub-content"],
+  [data-slot="select-content"],
+  [data-slot="popover-content"],
+  [data-slot="combobox-content"],
+  [data-slot="hover-card-content"],
+  [data-slot="command"],
+  [data-slot="navigation-menu-viewport"] {
+    background-color: hsl(var(--popover)) !important;
+  }
+
+  [data-slot="dropdown-menu-content"]::before,
+  [data-slot="dropdown-menu-sub-content"]::before,
+  [data-slot="context-menu-content"]::before,
+  [data-slot="context-menu-sub-content"]::before,
+  [data-slot="menubar-content"]::before,
+  [data-slot="menubar-sub-content"]::before,
+  [data-slot="select-content"]::before,
+  [data-slot="popover-content"]::before {
+    display: none !important;
+  }
+
+  [data-slot="dialog-overlay"],
+  [data-slot="sheet-overlay"],
+  [data-slot="drawer-overlay"],
+  [data-slot="alert-dialog-overlay"] {
+    background-color: hsl(var(--foreground) / 0.5) !important;
+    backdrop-filter: none !important;
+  }
+}
