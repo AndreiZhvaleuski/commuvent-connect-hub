@@ -27,7 +27,7 @@ export function TopNav() {
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <Users className="h-4 w-4" />
           </span>
-          <span className="text-lg">Commuvent</span>
+          <span className="font-heading text-lg">Commuvent</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
