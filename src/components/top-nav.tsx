@@ -44,22 +44,40 @@ export function TopNav() {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>
-                {user.email?.split("@")[0] ?? "Account"}
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuGroup>
-                  <DropdownMenuLabel className="text-xs text-muted-foreground">{user.email}</DropdownMenuLabel>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/tickets")}>My Tickets</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/my-events")}>My Events</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/dashboard")}>Dashboard</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={async () => { await signOut(); navigate("/"); }}>Sign out</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            (() => {
+              const meta = (user.user_metadata ?? {}) as { first_name?: string; last_name?: string; display_name?: string };
+              const first = meta.first_name?.trim() ?? "";
+              const last = meta.last_name?.trim() ?? "";
+              const fullName = [first, last].filter(Boolean).join(" ");
+              const displayName = meta.display_name?.trim() || fullName || user.email?.split("@")[0] || "Account";
+              const initials = (first || last)
+                ? `${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase()
+                : (user.email?.[0] ?? "U").toUpperCase();
+              return (
+                <DropdownMenu>
+                  <DropdownMenuTrigger render={<Button variant="outline" size="sm" className="gap-2 pl-1.5 pr-2.5" />}>
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground">
+                      {initials}
+                    </span>
+                    <span className="hidden sm:inline">{displayName}</span>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="min-w-56">
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel className="flex flex-col gap-0.5">
+                        <span className="text-sm font-medium text-foreground">{fullName || displayName}</span>
+                        <span className="text-xs font-normal text-muted-foreground">{user.email}</span>
+                      </DropdownMenuLabel>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate("/tickets")}>My Tickets</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/my-events")}>My Events</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>Dashboard</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={async () => { await signOut(); navigate("/"); }}>Sign out</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              );
+            })()
           ) : (
             <Button size="sm" onClick={() => navigate("/sign-in")} className="hidden sm:inline-flex">Sign in</Button>
           )}

@@ -23,15 +23,29 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [busy, setBusy] = useState(false);
 
   const handlePassword = async () => {
     setBusy(true);
     try {
       if (mode === "signup") {
+        if (!firstName.trim() || !lastName.trim()) {
+          setBusy(false);
+          return toast.error("Please enter your first and last name");
+        }
+        const display_name = `${firstName.trim()} ${lastName.trim()}`;
         const { error } = await supabase.auth.signUp({
           email, password,
-          options: { emailRedirectTo: `${window.location.origin}${redirect}` },
+          options: {
+            emailRedirectTo: `${window.location.origin}${redirect}`,
+            data: {
+              first_name: firstName.trim(),
+              last_name: lastName.trim(),
+              display_name,
+            },
+          },
         });
         if (error) throw error;
         toast.success("Check your email to confirm.");
@@ -75,6 +89,18 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
                 <TabsTrigger value="magic">Magic link</TabsTrigger>
               </TabsList>
               <TabsContent value="password" className="space-y-4 pt-4">
+                {mode === "signup" && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">First name</Label>
+                      <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Last name</Label>
+                      <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
