@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     if (!r) return json({ error: "not_found" }, 404);
     if (r.user_id !== user.id) return json({ error: "forbidden" }, 403);
 
-    await db.from("rsvps").update({ status: "cancelled", cancelled_at: new Date().toISOString(), position: null }).eq("id", rsvp_id);
+    await db.from("rsvps").update({ status: "cancelled", cancelled_at: new Date().toISOString(), position: null }).eq("id", r.id);
 
     // Promote next waitlist if there's room
     const { data: ev } = await db.from("events").select("capacity").eq("id", r.event_id).single();
