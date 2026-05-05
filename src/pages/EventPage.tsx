@@ -284,9 +284,9 @@ export default function EventPage() {
                     <Button onClick={onCancel} disabled={acting} variant="ghost" className="w-full">Cancel RSVP</Button>
                   </div>
                 ) : isFull ? (
-                  <Button onClick={onRsvp} disabled={acting} className="w-full" variant="secondary">Join waitlist</Button>
+                  <Button onClick={() => (user ? setConfirmOpen(true) : requireAuth("rsvp"))} disabled={acting} className="w-full" variant="secondary">Join waitlist</Button>
                 ) : (
-                  <Button onClick={onRsvp} disabled={acting} className="w-full">RSVP</Button>
+                  <Button onClick={() => (user ? setConfirmOpen(true) : requireAuth("rsvp"))} disabled={acting} className="w-full">RSVP</Button>
                 )}
 
                 <p className="text-xs text-muted-foreground text-center">Free event · No fees</p>
