@@ -49,7 +49,9 @@ export function TopNav() {
                 {user.email?.split("@")[0] ?? "Account"}
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel className="text-xs text-muted-foreground">{user.email}</DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="text-xs text-muted-foreground">{user.email}</DropdownMenuLabel>
+                </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/tickets")}>My Tickets</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/my-events")}>My Events</DropdownMenuItem>
