@@ -96,7 +96,7 @@ export default function Explore() {
                 <Label htmlFor="past" className="cursor-pointer">Include past events</Label>
               </div>
               {(q || location || from || to || includePast) && (
-                <Button variant="ghost" size="sm" onClick={() => { setQ(""); setLocation(""); setFrom(""); setTo(""); setIncludePast(false); }}>
+                <Button variant="ghost" size="sm" className="ml-auto" onClick={() => { setQ(""); setLocation(""); setFrom(""); setTo(""); setIncludePast(false); }}>
                   Clear
                 </Button>
               )}
