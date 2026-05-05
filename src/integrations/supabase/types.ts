@@ -421,6 +421,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      event_stats: {
+        Args: { p_host_id: string }
+        Returns: {
+          checked_in_count: number
+          event_id: string
+          going_count: number
+          waitlist_count: number
+        }[]
+      }
       has_host_role: {
         Args: { p_host_id: string; p_role: string }
         Returns: boolean
