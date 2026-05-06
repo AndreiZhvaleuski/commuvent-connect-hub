@@ -26,6 +26,8 @@ export default function HostDashboard() {
   const [events, setEvents] = useState<Ev[]>([]);
   const [stats, setStats] = useState<Record<string, Stat>>({});
   const [busy, setBusy] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get("tab") === "past" ? "past" : "upcoming";
 
   useSEO({ title: host ? `${host.name} — Commuvent` : "Host dashboard — Commuvent", description: "Manage your community's events." });
 
