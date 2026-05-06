@@ -359,11 +359,7 @@ export default function EventEditor() {
                 error={form.formState.errors.time_zone?.message}
                 hint={tz ? `Now in ${tz}: ${formatNowIn(tz)}` : undefined}
               >
-                <TimezonePicker
-                  value={tz}
-                  onChange={(v) => form.setValue("time_zone", v, { shouldValidate: true, shouldDirty: true })}
-                  options={tzs}
-                />
+                <TimezonePicker value={tz} onChange={onTzChange} options={tzs} />
               </Field>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Start" error={form.formState.errors.start_at?.message}>
