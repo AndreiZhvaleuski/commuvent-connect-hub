@@ -84,12 +84,20 @@ export default function Explore() {
               <Input id="loc" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="City, venue…" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="from">From</Label>
-              <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+              <Label>From</Label>
+              <DatePicker
+                value={from ? new Date(from) : null}
+                onChange={(d) => setFrom(d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "")}
+                placeholder="Pick a date"
+              />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="to">To</Label>
-              <Input id="to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+              <Label>To</Label>
+              <DatePicker
+                value={to ? new Date(to) : null}
+                onChange={(d) => setTo(d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "")}
+                placeholder="Pick a date"
+              />
             </div>
             <div className="flex h-8 items-center gap-3 lg:col-span-5">
               <div className="flex items-center gap-2">
