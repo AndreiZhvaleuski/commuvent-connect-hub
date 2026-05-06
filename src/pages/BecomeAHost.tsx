@@ -4,8 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { UploadSimpleIcon as Upload, TrashIcon as Trash2 } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -13,16 +11,25 @@ import { useSEO } from "@/hooks/use-seo";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MarkdownEditor } from "@/components/markdown-editor";
 
 const Schema = z.object({
-  name: z.string().min(2).max(80),
-  bio: z.string().max(2000).optional().or(z.literal("")),
-  contact_email: z.string().email().optional().or(z.literal("")),
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: "Host name must be at least 2 characters" })
+    .max(80, { message: "Host name must be 80 characters or less" }),
+  bio: z
+    .string()
+    .max(2000, { message: "Bio must be 2000 characters or less" })
+    .optional()
+    .or(z.literal("")),
+  contact_email: z
+    .union([z.literal(""), z.string().trim().email({ message: "Enter a valid email address" }).max(255)])
+    .optional(),
 });
 type Form = z.infer<typeof Schema>;
 
@@ -37,6 +44,8 @@ export default function BecomeAHost() {
 
   const form = useForm<Form>({
     resolver: zodResolver(Schema),
+    mode: "onBlur",
+    reValidateMode: "onChange",
     defaultValues: { name: "", bio: "", contact_email: "" },
   });
   const bioValue = form.watch("bio") || "";
@@ -161,32 +170,21 @@ export default function BecomeAHost() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="bio">Bio</Label>
-                  <span className="text-xs text-muted-foreground">Markdown supported</span>
+                  <span className="text-xs text-muted-foreground">{bioValue.length}/2000</span>
                 </div>
-                <Tabs defaultValue="write">
-                  <TabsList>
-                    <TabsTrigger value="write">Write</TabsTrigger>
-                    <TabsTrigger value="preview">Preview</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="write" className="pt-2">
-                    <Textarea id="bio" rows={6} {...form.register("bio")} placeholder="What does your community do? **Markdown** like _italics_, lists, and [links](https://example.com) are supported." />
-                  </TabsContent>
-                  <TabsContent value="preview" className="pt-2">
-                    <div className="min-h-[10rem] rounded-lg border p-4 prose prose-sm dark:prose-invert max-w-none">
-                      {bioValue.trim() ? (
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{bioValue}</ReactMarkdown>
-                      ) : (
-                        <p className="text-muted-foreground !my-0">Nothing to preview yet.</p>
-                      )}
-                    </div>
-                  </TabsContent>
-                </Tabs>
+                <MarkdownEditor
+                  value={bioValue}
+                  onChange={(md) => form.setValue("bio", md, { shouldValidate: true, shouldDirty: true })}
+                  placeholder="What does your community do? Use the toolbar to format text, add headings, lists, quotes, and links."
+                />
+                {form.formState.errors.bio && <p className="text-sm text-destructive">{form.formState.errors.bio.message}</p>}
               </div>
 
               {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="contact_email">Contact email</Label>
-                <Input id="contact_email" type="email" {...form.register("contact_email")} />
+                <Input id="contact_email" type="email" placeholder="you@example.com" {...form.register("contact_email")} />
+                {form.formState.errors.contact_email && <p className="text-sm text-destructive">{form.formState.errors.contact_email.message}</p>}
               </div>
 
               <Button type="submit" disabled={submitting} className="w-full">
