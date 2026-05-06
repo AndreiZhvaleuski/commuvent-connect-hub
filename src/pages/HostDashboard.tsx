@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { PlusIcon as Plus, CalendarIcon as Calendar, UsersIcon as Users, ClockIcon as Clock, CheckCircleIcon as CheckCircle2, ArrowSquareOutIcon as ExternalLink } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
