@@ -111,34 +111,14 @@ export default function BecomeAHost() {
               {/* Logo */}
               <div className="space-y-2">
                 <Label>Logo</Label>
-                <div className="flex items-center gap-4 rounded-lg border border-dashed p-4">
-                  <Avatar className="h-20 w-20">
-                    {logoPreview && <AvatarImage src={logoPreview} alt="Logo preview" />}
-                    <AvatarFallback className="text-lg">{initials}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium">{logoFile ? logoFile.name : "No logo selected"}</p>
-                    <p className="text-xs text-muted-foreground">PNG, JPG or WebP. Square works best.</p>
-                    <div className="flex gap-2 pt-1">
-                      <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-                        <Upload className="mr-1 h-4 w-4" />
-                        {logoFile ? "Replace" : "Choose file"}
-                      </Button>
-                      {logoFile && (
-                        <Button type="button" variant="ghost" size="sm" onClick={() => pickFile(null)}>
-                          <Trash2 className="mr-1 h-4 w-4" /> Remove
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
-                  />
-                </div>
+                <ImageUpload
+                  value={null}
+                  file={logoFile}
+                  onFileChange={setLogoFile}
+                  aspect="square"
+                  fallbackText={initials}
+                  helpText="PNG, JPG or WebP. Square works best."
+                />
               </div>
 
               {/* Name */}
