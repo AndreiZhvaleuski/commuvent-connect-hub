@@ -55,14 +55,19 @@ export function ImageUpload({
   const initials = (fallbackText || "?").slice(0, 2).toUpperCase();
 
   return (
-    <div className={cn("flex items-center gap-4 rounded-lg border border-dashed p-4", className)}>
+    <div
+      className={cn(
+        "flex flex-col items-stretch gap-4 rounded-lg border border-dashed p-4 sm:flex-row sm:items-center",
+        className
+      )}
+    >
       {aspect === "square" ? (
-        <Avatar className="h-20 w-20 shrink-0">
+        <Avatar className="h-20 w-20 shrink-0 self-start">
           {preview && <AvatarImage src={preview} alt="Preview" />}
           <AvatarFallback className="text-lg">{initials}</AvatarFallback>
         </Avatar>
       ) : (
-        <div className="aspect-video w-48 shrink-0 overflow-hidden rounded-md bg-muted">
+        <div className="aspect-video w-full shrink-0 overflow-hidden rounded-md bg-muted sm:w-48">
           {preview ? (
             <img src={preview} alt="Preview" className="h-full w-full object-cover" />
           ) : (
