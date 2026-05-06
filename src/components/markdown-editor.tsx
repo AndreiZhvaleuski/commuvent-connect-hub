@@ -9,8 +9,6 @@ import {
   TextStrikethroughIcon as Strikethrough,
   ListBulletsIcon as List,
   ListNumbersIcon as ListOrdered,
-  QuotesIcon as Quote,
-  CodeIcon as Code,
   ArrowUUpLeftIcon as Undo,
   ArrowUUpRightIcon as Redo,
 } from "@phosphor-icons/react";
@@ -27,7 +25,14 @@ type Props = {
 export function MarkdownEditor({ value, onChange, placeholder, className }: Props) {
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({ heading: false, link: false }),
+      StarterKit.configure({
+        heading: false,
+        link: false,
+        blockquote: false,
+        codeBlock: false,
+        code: false,
+        horizontalRule: false,
+      }),
       Placeholder.configure({ placeholder: placeholder ?? "Write something…" }),
       Markdown.configure({ html: false, linkify: false, breaks: true, transformPastedText: true }),
     ],
@@ -72,8 +77,6 @@ function Toolbar({ editor }: { editor: Editor }) {
       <Sep />
       <ToolBtn active={editor.isActive("bulletList")} onClick={() => editor.chain().focus().toggleBulletList().run()} label="Bullet list"><List className="h-4 w-4" /></ToolBtn>
       <ToolBtn active={editor.isActive("orderedList")} onClick={() => editor.chain().focus().toggleOrderedList().run()} label="Numbered list"><ListOrdered className="h-4 w-4" /></ToolBtn>
-      <ToolBtn active={editor.isActive("blockquote")} onClick={() => editor.chain().focus().toggleBlockquote().run()} label="Quote"><Quote className="h-4 w-4" /></ToolBtn>
-      <ToolBtn active={editor.isActive("codeBlock")} onClick={() => editor.chain().focus().toggleCodeBlock().run()} label="Code block"><Code className="h-4 w-4" /></ToolBtn>
       <Sep />
       <ToolBtn onClick={() => editor.chain().focus().undo().run()} label="Undo"><Undo className="h-4 w-4" /></ToolBtn>
       <ToolBtn onClick={() => editor.chain().focus().redo().run()} label="Redo"><Redo className="h-4 w-4" /></ToolBtn>
