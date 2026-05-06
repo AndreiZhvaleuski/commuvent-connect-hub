@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { CalendarIcon as Calendar, MapPinIcon as MapPin, MagnifyingGlassIcon as Search, GlobeIcon, SparkleIcon } from "@phosphor-icons/react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,11 +24,29 @@ type Ev = {
 
 export default function Explore() {
   useSEO({ title: "Explore events — Commuvent", description: "Discover upcoming community events near you on Commuvent." });
-  const [q, setQ] = useState("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [includePast, setIncludePast] = useState(false);
-  const [mode, setMode] = useState<LocationMode>("any");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const q = searchParams.get("q") ?? "";
+  const from = searchParams.get("from") ?? "";
+  const to = searchParams.get("to") ?? "";
+  const includePast = searchParams.get("past") === "1";
+  const mode = (searchParams.get("type") as LocationMode) || "any";
+
+  const updateParam = (key: string, value: string | null) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (!value) next.delete(key);
+      else next.set(key, value);
+      return next;
+    }, { replace: true });
+  };
+  const setQ = (v: string) => updateParam("q", v);
+  const setFrom = (v: string) => updateParam("from", v);
+  const setTo = (v: string) => updateParam("to", v);
+  const setIncludePast = (v: boolean) => updateParam("past", v ? "1" : null);
+  const setMode = (v: LocationMode) => updateParam("type", v === "any" ? null : v);
+  const clearAll = () => setSearchParams({}, { replace: true });
+
   const [events, setEvents] = useState<Ev[]>([]);
   const [busy, setBusy] = useState(true);
 
@@ -141,7 +159,7 @@ export default function Explore() {
                 <Label htmlFor="past" className="cursor-pointer">Include past events</Label>
               </div>
               {(q || from || to || includePast || mode !== "any") && (
-                <Button variant="ghost" size="sm" className="sm:ml-auto lg:ml-0" onClick={() => { setQ(""); setFrom(""); setTo(""); setIncludePast(false); setMode("any"); }}>
+                <Button variant="ghost" size="sm" className="sm:ml-auto lg:ml-0" onClick={clearAll}>
                   Clear
                 </Button>
               )}
