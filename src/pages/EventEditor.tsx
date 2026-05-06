@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -310,6 +310,11 @@ export default function EventEditor() {
   }
 
   const tz = form.watch("time_zone");
+  const { setValue } = form;
+  const onTzChange = useCallback(
+    (v: string) => setValue("time_zone", v, { shouldValidate: true, shouldDirty: true }),
+    [setValue]
+  );
   const description = form.watch("description") || "";
   const locationMode = form.watch("location_mode");
 
@@ -359,11 +364,7 @@ export default function EventEditor() {
                 error={form.formState.errors.time_zone?.message}
                 hint={tz ? `Now in ${tz}: ${formatNowIn(tz)}` : undefined}
               >
-                <TimezonePicker
-                  value={tz}
-                  onChange={(v) => form.setValue("time_zone", v, { shouldValidate: true, shouldDirty: true })}
-                  options={tzs}
-                />
+                <TimezonePicker value={tz} onChange={onTzChange} options={tzs} />
               </Field>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Start" error={form.formState.errors.start_at?.message}>

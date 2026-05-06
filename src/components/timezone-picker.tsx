@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { CheckIcon as Check, CaretUpDownIcon as ChevronsUpDown, MagnifyingGlassIcon as Search } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,7 @@ type Props = {
 const ROW_HEIGHT = 36;
 const LIST_HEIGHT = 320;
 
-export function TimezonePicker({ value, onChange, options }: Props) {
+function TimezonePickerImpl({ value, onChange, options }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
@@ -115,3 +115,6 @@ export function TimezonePicker({ value, onChange, options }: Props) {
     </Popover>
   );
 }
+
+export const TimezonePicker = memo(TimezonePickerImpl);
+
