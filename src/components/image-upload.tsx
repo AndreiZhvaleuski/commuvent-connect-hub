@@ -80,7 +80,7 @@ export function ImageUpload({
       <div className="flex-1 space-y-1 min-w-0">
         <p className="truncate text-sm font-medium">{file ? file.name : preview ? "Current image" : "No image selected"}</p>
         <p className="text-xs text-muted-foreground">{helpText} Max {maxSizeMB} MB.</p>
-        <div className="flex gap-2 pt-1">
+        <div className="flex flex-wrap gap-2 pt-1">
           <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()}>
             <Upload className="mr-1 h-4 w-4" />
             {file || preview ? "Replace" : "Choose file"}
