@@ -134,7 +134,7 @@ function EventList({ events, stats, hostId, emptyText }: { events: Ev[]; stats: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <Stat label="Going" value={s.going_count} icon={<Users className="h-4 w-4" />} suffix={e.capacity ? `/ ${e.capacity}` : ""} />
                 <Stat label="Waitlist" value={s.waitlist_count} icon={<Clock className="h-4 w-4" />} />
                 <Stat label="Checked-in" value={s.checked_in_count} icon={<CheckCircle2 className="h-4 w-4" />} />
