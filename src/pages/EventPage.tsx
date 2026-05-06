@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { EventGallery } from "@/components/event-gallery";
+import { MarkdownView } from "@/components/markdown-view";
 import { EventFeedback } from "@/components/event-feedback";
 
 type Ev = {
