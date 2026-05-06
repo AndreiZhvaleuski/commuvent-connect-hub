@@ -20,9 +20,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Schema = z.object({
-  name: z.string().min(2).max(80),
-  bio: z.string().max(2000).optional().or(z.literal("")),
-  contact_email: z.string().email().optional().or(z.literal("")),
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: "Host name must be at least 2 characters" })
+    .max(80, { message: "Host name must be 80 characters or less" }),
+  bio: z
+    .string()
+    .max(2000, { message: "Bio must be 2000 characters or less" })
+    .optional()
+    .or(z.literal("")),
+  contact_email: z
+    .union([z.literal(""), z.string().trim().email({ message: "Enter a valid email address" }).max(255)])
+    .optional(),
 });
 type Form = z.infer<typeof Schema>;
 
@@ -37,6 +47,8 @@ export default function BecomeAHost() {
 
   const form = useForm<Form>({
     resolver: zodResolver(Schema),
+    mode: "onBlur",
+    reValidateMode: "onChange",
     defaultValues: { name: "", bio: "", contact_email: "" },
   });
   const bioValue = form.watch("bio") || "";
