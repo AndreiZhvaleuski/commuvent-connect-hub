@@ -235,7 +235,7 @@ export default function EventPage() {
             {event.description && (
               <Card className="mt-8">
                 <CardHeader><CardTitle>About</CardTitle></CardHeader>
-                <CardContent><p className="whitespace-pre-line text-sm leading-relaxed">{event.description}</p></CardContent>
+                <CardContent><MarkdownView className="text-sm leading-relaxed">{event.description}</MarkdownView></CardContent>
               </Card>
             )}
 
