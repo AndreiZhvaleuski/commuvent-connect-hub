@@ -55,14 +55,19 @@ export function ImageUpload({
   const initials = (fallbackText || "?").slice(0, 2).toUpperCase();
 
   return (
-    <div className={cn("flex items-center gap-4 rounded-lg border border-dashed p-4", className)}>
+    <div
+      className={cn(
+        "flex flex-col items-stretch gap-4 rounded-lg border border-dashed p-4 sm:flex-row sm:items-center",
+        className
+      )}
+    >
       {aspect === "square" ? (
-        <Avatar className="h-20 w-20 shrink-0">
+        <Avatar className="h-20 w-20 shrink-0 self-start">
           {preview && <AvatarImage src={preview} alt="Preview" />}
           <AvatarFallback className="text-lg">{initials}</AvatarFallback>
         </Avatar>
       ) : (
-        <div className="aspect-video w-48 shrink-0 overflow-hidden rounded-md bg-muted">
+        <div className="aspect-video w-full shrink-0 overflow-hidden rounded-md bg-muted sm:w-48">
           {preview ? (
             <img src={preview} alt="Preview" className="h-full w-full object-cover" />
           ) : (
@@ -75,7 +80,7 @@ export function ImageUpload({
       <div className="flex-1 space-y-1 min-w-0">
         <p className="truncate text-sm font-medium">{file ? file.name : preview ? "Current image" : "No image selected"}</p>
         <p className="text-xs text-muted-foreground">{helpText} Max {maxSizeMB} MB.</p>
-        <div className="flex gap-2 pt-1">
+        <div className="flex flex-wrap gap-2 pt-1">
           <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()}>
             <Upload className="mr-1 h-4 w-4" />
             {file || preview ? "Replace" : "Choose file"}
