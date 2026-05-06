@@ -24,10 +24,10 @@ type Ev = {
 export default function Explore() {
   useSEO({ title: "Explore events — Commuvent", description: "Discover upcoming community events near you on Commuvent." });
   const [q, setQ] = useState("");
-  const [location, setLocation] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [includePast, setIncludePast] = useState(false);
+  const [mode, setMode] = useState<LocationMode>("any");
   const [events, setEvents] = useState<Ev[]>([]);
   const [busy, setBusy] = useState(true);
 
@@ -51,16 +51,14 @@ export default function Explore() {
         const safe = q.trim().replace(/[%,()]/g, " ");
         qb = qb.or(`title.ilike.%${safe}%,venue_address.ilike.%${safe}%`);
       }
-      if (location.trim()) {
-        const safe = location.trim().replace(/[%,()]/g, " ");
-        qb = qb.ilike("venue_address", `%${safe}%`);
-      }
+      if (mode === "online") qb = qb.not("online_url", "is", null);
+      else if (mode === "in_person") qb = qb.not("venue_address", "is", null);
 
       const { data } = await qb;
       if (!cancelled) { setEvents((data ?? []) as Ev[]); setBusy(false); }
     }, 250);
     return () => { cancelled = true; clearTimeout(t); };
-  }, [q, location, from, to, includePast]);
+  }, [q, from, to, includePast, mode]);
 
   const now = useMemo(() => Date.now(), [events]);
 
