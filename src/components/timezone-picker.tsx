@@ -186,12 +186,13 @@ function TimezonePickerImpl({ value, onChange, options }: Props) {
                     style={{ height: vi.size, transform: `translateY(${vi.start}px)` }}
                   >
                     <Check className={cn("h-4 w-4 shrink-0", isSelected ? "opacity-100" : "opacity-0")} />
-                    <span className="w-20 shrink-0 text-xs tabular-nums text-muted-foreground">{m.offsetLabel}</span>
-                    <span className="flex-1 truncate">
-                      {m.city}
-                      <span className="ml-2 text-xs text-muted-foreground">{m.region}</span>
+                    <span className="w-[72px] shrink-0 text-xs tabular-nums text-muted-foreground">{m.offsetLabel}</span>
+                    <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                      <span className="truncate">{m.city}</span>
+                      <span className="truncate text-xs text-muted-foreground">
+                        {m.region}{m.abbr && !/^GMT/i.test(m.abbr) ? ` · ${m.abbr}` : ""}
+                      </span>
                     </span>
-                    {m.abbr && <span className="text-xs text-muted-foreground">{m.abbr}</span>}
                   </button>
                 );
               })}
