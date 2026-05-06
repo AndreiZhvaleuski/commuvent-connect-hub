@@ -111,7 +111,7 @@ export default function EventPage() {
   const sameTz = tz === localTz;
 
   const fmt = (iso: string) => {
-    try { return `${formatInTimeZone(new Date(iso), tz, "EEE, MMM d · h:mm a")} (${tz})`; }
+    try { return formatInTimeZone(new Date(iso), tz, "EEE, MMM d · h:mm a"); }
     catch { return new Date(iso).toLocaleString(); }
   };
   const fmtLocal = (iso: string) => {
@@ -207,7 +207,7 @@ export default function EventPage() {
             <div className="mt-6 space-y-3 text-sm">
               <div className="flex items-start gap-3">
                 <Calendar className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                <div>
+                <div className="space-y-0.5">
                   <Tooltip>
                     <TooltipTrigger render={<p className="font-medium cursor-help" />}>
                       {fmt(event.start_at)}
@@ -215,6 +215,7 @@ export default function EventPage() {
                     <TooltipContent>{sameTz ? "Same as your local time" : `Your local: ${fmtLocal(event.start_at)}`}</TooltipContent>
                   </Tooltip>
                   <p className="text-muted-foreground inline-flex items-center gap-1"><Clock className="h-3 w-3" />Until {fmt(event.end_at)}</p>
+                  <p className="text-xs text-muted-foreground">{tz}</p>
                 </div>
               </div>
               {(event.venue_address || event.online_url) && (
