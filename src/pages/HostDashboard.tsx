@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type Host = { id: string; name: string; slug: string; logo_url: string | null; bio: string | null };
+type Host = { id: string; name: string; logo_url: string | null; bio: string | null };
 type Ev = {
   id: string; title: string; status: string; visibility: string;
   start_at: string; end_at: string; capacity: number; cover_image_url: string | null;
@@ -36,7 +36,7 @@ export default function HostDashboard() {
     (async () => {
       setBusy(true);
       const [{ data: h }, { data: ev }, { data: st }] = await Promise.all([
-        supabase.from("hosts").select("id,name,slug,logo_url,bio").eq("id", hostId).maybeSingle(),
+        supabase.from("hosts").select("id,name,logo_url,bio").eq("id", hostId).maybeSingle(),
         supabase.from("events")
           .select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url")
           .eq("host_id", hostId).order("start_at", { ascending: false }),
@@ -73,8 +73,8 @@ export default function HostDashboard() {
             </Avatar>
             <div>
               <h1 className="text-2xl font-semibold tracking-tight">{host.name}</h1>
-              <Link to={`/h/${host.slug}`} className="text-sm text-muted-foreground inline-flex items-center gap-1 hover:text-foreground">
-                /h/{host.slug} <ExternalLink className="h-3 w-3" />
+              <Link to={`/h/${host.id}`} className="text-sm text-muted-foreground inline-flex items-center gap-1 hover:text-foreground">
+                View public page <ExternalLink className="h-3 w-3" />
               </Link>
             </div>
           </div>

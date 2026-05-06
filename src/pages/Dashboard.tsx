@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type Host = { id: string; name: string; slug: string; logo_url: string | null; bio: string | null };
+type Host = { id: string; name: string; logo_url: string | null; bio: string | null };
 
 export default function Dashboard() {
   useSEO({ title: "Dashboard — Commuvent", description: "Manage your hosts and events on Commuvent." });
@@ -30,7 +30,7 @@ export default function Dashboard() {
       if (ids.length === 0) { setHosts([]); setBusy(false); return; }
       const { data } = await supabase
         .from("hosts")
-        .select("id,name,slug,logo_url,bio")
+        .select("id,name,logo_url,bio")
         .in("id", ids);
       setHosts((data ?? []) as Host[]);
       setBusy(false);
@@ -73,7 +73,7 @@ export default function Dashboard() {
                     </Avatar>
                     <div>
                       <CardTitle className="text-base">{h.name}</CardTitle>
-                      <p className="text-xs text-muted-foreground">/h/{h.slug}</p>
+                      <p className="text-xs text-muted-foreground">Manage events</p>
                     </div>
                   </CardHeader>
                   {h.bio && <CardContent className="text-sm text-muted-foreground line-clamp-2">{h.bio}</CardContent>}

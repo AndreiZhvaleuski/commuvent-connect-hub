@@ -8,12 +8,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
-type Host = { id: string; name: string; slug: string; bio: string | null; logo_url: string | null; contact_email: string | null };
+type Host = { id: string; name: string; bio: string | null; logo_url: string | null; contact_email: string | null };
 type Ev = { id: string; title: string; cover_image_url: string | null; start_at: string; end_at: string; venue_address: string | null; online_url: string | null };
 
 export default function HostPublic() {
-  const { slug } = useParams<{ slug: string }>();
+  const { id } = useParams<{ id: string }>();
   const [host, setHost] = useState<Host | null>(null);
   const [events, setEvents] = useState<Ev[]>([]);
   const [busy, setBusy] = useState(true);
@@ -25,10 +27,10 @@ export default function HostPublic() {
   });
 
   useEffect(() => {
-    if (!slug) return;
+    if (!id) return;
     (async () => {
       setBusy(true);
-      const { data: h } = await supabase.from("hosts").select("id,name,slug,bio,logo_url,contact_email").eq("slug", slug).maybeSingle();
+      const { data: h } = await supabase.from("hosts").select("id,name,bio,logo_url,contact_email").eq("id", id).maybeSingle();
       if (!h) { setNotFound(true); setBusy(false); return; }
       setHost(h as Host);
       const { data: ev } = await supabase
@@ -39,7 +41,7 @@ export default function HostPublic() {
       setEvents((ev ?? []) as Ev[]);
       setBusy(false);
     })();
-  }, [slug]);
+  }, [id]);
 
   const now = new Date().toISOString();
   const upcoming = useMemo(() => events.filter((e) => e.end_at >= now), [events, now]);
@@ -59,7 +61,11 @@ export default function HostPublic() {
             </Avatar>
             <div className="min-w-0 flex-1">
               <h1 className="text-3xl font-semibold tracking-tight">{host.name}</h1>
-              {host.bio && <p className="mt-2 text-muted-foreground whitespace-pre-line">{host.bio}</p>}
+              {host.bio && (
+                <div className="mt-2 prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{host.bio}</ReactMarkdown>
+                </div>
+              )}
               {host.contact_email && (
                 <a href={`mailto:${host.contact_email}`} className="mt-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
                   <Mail className="h-4 w-4" /> {host.contact_email}
