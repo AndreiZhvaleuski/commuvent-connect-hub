@@ -506,11 +506,12 @@ function Field({
 }: { label: string; error?: string; hint?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <Label>{label}</Label>
-        {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
+        {hint && <span className="hidden text-xs text-muted-foreground sm:inline">{hint}</span>}
       </div>
       {children}
+      {hint && <p className="text-xs text-muted-foreground sm:hidden">{hint}</p>}
       {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
