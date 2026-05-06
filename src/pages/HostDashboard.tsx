@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { PlusIcon as Plus, CalendarIcon as Calendar, UsersIcon as Users, ClockIcon as Clock, CheckCircleIcon as CheckCircle2, ArrowSquareOutIcon as ExternalLink } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -26,6 +26,8 @@ export default function HostDashboard() {
   const [events, setEvents] = useState<Ev[]>([]);
   const [stats, setStats] = useState<Record<string, Stat>>({});
   const [busy, setBusy] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get("tab") === "past" ? "past" : "upcoming";
 
   useSEO({ title: host ? `${host.name} — Commuvent` : "Host dashboard — Commuvent", description: "Manage your community's events." });
 
@@ -84,7 +86,10 @@ export default function HostDashboard() {
           </div>
         </div>
 
-        <Tabs defaultValue="upcoming">
+        <Tabs
+          value={tab}
+          onValueChange={(v) => setSearchParams(v === "upcoming" ? {} : { tab: v }, { replace: true })}
+        >
           <TabsList>
             <TabsTrigger value="upcoming">Upcoming ({upcoming.length})</TabsTrigger>
             <TabsTrigger value="past">Past ({past.length})</TabsTrigger>
