@@ -36,6 +36,14 @@ function TimezonePickerImpl({ value, onChange, options }: Props) {
     overscan: 8,
   });
 
+  // When the popover opens, the scroll parent is measured as 0px on first render.
+  // Re-measure once it's mounted so rows render immediately.
+  useEffect(() => {
+    if (!open) return;
+    const id = requestAnimationFrame(() => virtualizer.measure());
+    return () => cancelAnimationFrame(id);
+  }, [open, virtualizer]);
+
   const select = (tz: string) => {
     onChange(tz);
     setOpen(false);
