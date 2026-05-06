@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { UploadSimpleIcon as Upload, TrashIcon as Trash2 } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useSEO } from "@/hooks/use-seo";
@@ -13,8 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MarkdownEditor } from "@/components/markdown-editor";
+import { ImageUpload } from "@/components/image-upload";
 
 const Schema = z.object({
   name: z
@@ -38,9 +37,7 @@ export default function BecomeAHost() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<Form>({
     resolver: zodResolver(Schema),
@@ -51,25 +48,10 @@ export default function BecomeAHost() {
   const bioValue = form.watch("bio") || "";
   const nameValue = form.watch("name") || "";
 
-  useEffect(() => {
-    if (!logoFile) { setLogoPreview(null); return; }
-    const url = URL.createObjectURL(logoFile);
-    setLogoPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [logoFile]);
-
   if (!loading && !user) {
     navigate(`/sign-in?redirect=${encodeURIComponent("/become-a-host")}`);
     return null;
   }
-
-  const pickFile = (f: File | null) => {
-    if (f && !f.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
-    setLogoFile(f);
-  };
 
   const onSubmit = async (values: Form) => {
     if (!user) return;
@@ -129,34 +111,14 @@ export default function BecomeAHost() {
               {/* Logo */}
               <div className="space-y-2">
                 <Label>Logo</Label>
-                <div className="flex items-center gap-4 rounded-lg border border-dashed p-4">
-                  <Avatar className="h-20 w-20">
-                    {logoPreview && <AvatarImage src={logoPreview} alt="Logo preview" />}
-                    <AvatarFallback className="text-lg">{initials}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium">{logoFile ? logoFile.name : "No logo selected"}</p>
-                    <p className="text-xs text-muted-foreground">PNG, JPG or WebP. Square works best.</p>
-                    <div className="flex gap-2 pt-1">
-                      <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-                        <Upload className="mr-1 h-4 w-4" />
-                        {logoFile ? "Replace" : "Choose file"}
-                      </Button>
-                      {logoFile && (
-                        <Button type="button" variant="ghost" size="sm" onClick={() => pickFile(null)}>
-                          <Trash2 className="mr-1 h-4 w-4" /> Remove
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
-                  />
-                </div>
+                <ImageUpload
+                  value={null}
+                  file={logoFile}
+                  onFileChange={setLogoFile}
+                  aspect="square"
+                  fallbackText={initials}
+                  helpText="PNG, JPG or WebP. Square works best."
+                />
               </div>
 
               {/* Name */}
