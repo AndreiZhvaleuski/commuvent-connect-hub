@@ -37,9 +37,7 @@ export default function BecomeAHost() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<Form>({
     resolver: zodResolver(Schema),
@@ -50,25 +48,10 @@ export default function BecomeAHost() {
   const bioValue = form.watch("bio") || "";
   const nameValue = form.watch("name") || "";
 
-  useEffect(() => {
-    if (!logoFile) { setLogoPreview(null); return; }
-    const url = URL.createObjectURL(logoFile);
-    setLogoPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [logoFile]);
-
   if (!loading && !user) {
     navigate(`/sign-in?redirect=${encodeURIComponent("/become-a-host")}`);
     return null;
   }
-
-  const pickFile = (f: File | null) => {
-    if (f && !f.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
-    setLogoFile(f);
-  };
 
   const onSubmit = async (values: Form) => {
     if (!user) return;
