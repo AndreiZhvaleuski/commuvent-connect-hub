@@ -273,7 +273,6 @@ export type Database = {
           id: string
           logo_url: string | null
           name: string
-          slug: string
         }
         Insert: {
           bio?: string | null
@@ -283,7 +282,6 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name: string
-          slug: string
         }
         Update: {
           bio?: string | null
@@ -293,7 +291,6 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name?: string
-          slug?: string
         }
         Relationships: []
       }

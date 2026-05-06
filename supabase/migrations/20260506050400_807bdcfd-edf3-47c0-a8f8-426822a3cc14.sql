@@ -1,0 +1,1 @@
+ALTER TABLE public.hosts DROP COLUMN IF EXISTS slug;
