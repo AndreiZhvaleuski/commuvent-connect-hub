@@ -99,7 +99,7 @@ export default function Explore() {
                     <label
                       htmlFor={`mode-${opt.v}`}
                       className={cn(
-                        "flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-2 text-sm transition-colors whitespace-nowrap",
+                        "flex h-10 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 text-sm transition-colors whitespace-nowrap",
                         selected ? "border-primary bg-primary/5 flex-1" : "hover:bg-accent"
                       )}
                     >
