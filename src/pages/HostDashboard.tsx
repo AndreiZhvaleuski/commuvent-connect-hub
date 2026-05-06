@@ -113,9 +113,9 @@ function EventList({ events, stats, hostId, emptyText }: { events: Ev[]; stats: 
           <Card key={e.id}>
             <CardHeader className="flex-row items-start justify-between gap-4">
               <div className="min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge variant={e.status === "published" ? "default" : "secondary"}>{e.status}</Badge>
-                  <Badge variant="outline">{e.visibility}</Badge>
+                <div className="flex items-center gap-2 mb-3 uppercase">
+                  <Badge variant={e.status === "published" ? "default" : "secondary"} className="uppercase tracking-wide">{e.status}</Badge>
+                  <Badge variant="outline" className="uppercase tracking-wide">{e.visibility}</Badge>
                 </div>
                 <CardTitle className="truncate">{e.title}</CardTitle>
                 <p className="text-xs text-muted-foreground mt-1 inline-flex items-center gap-1">
