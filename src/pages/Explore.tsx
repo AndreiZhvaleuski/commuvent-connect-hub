@@ -135,7 +135,7 @@ export default function Explore() {
                 placeholder="Pick a date"
               />
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:col-span-2 lg:col-span-4 lg:justify-end">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:col-span-2 lg:col-span-4">
               <div className="flex items-center gap-2">
                 <Switch id="past" checked={includePast} onCheckedChange={setIncludePast} />
                 <Label htmlFor="past" className="cursor-pointer">Include past events</Label>
