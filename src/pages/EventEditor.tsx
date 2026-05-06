@@ -310,6 +310,11 @@ export default function EventEditor() {
   }
 
   const tz = form.watch("time_zone");
+  const { setValue } = form;
+  const onTzChange = useCallback(
+    (v: string) => setValue("time_zone", v, { shouldValidate: true, shouldDirty: true }),
+    [setValue]
+  );
   const description = form.watch("description") || "";
   const locationMode = form.watch("location_mode");
 
