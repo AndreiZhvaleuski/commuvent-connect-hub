@@ -82,22 +82,6 @@ export default function Explore() {
                 <Input id="q" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Title, venue or city" className="pl-8" />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>From</Label>
-              <DatePicker
-                value={from ? new Date(from) : null}
-                onChange={(d) => setFrom(d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "")}
-                placeholder="Pick a date"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>To</Label>
-              <DatePicker
-                value={to ? new Date(to) : null}
-                onChange={(d) => setTo(d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "")}
-                placeholder="Pick a date"
-              />
-            </div>
             <div className="space-y-2 lg:col-span-2">
               <Label>Type</Label>
               <RadioGroup
@@ -134,6 +118,22 @@ export default function Explore() {
                   );
                 })}
               </RadioGroup>
+            </div>
+            <div className="space-y-2">
+              <Label>From</Label>
+              <DatePicker
+                value={from ? new Date(from) : null}
+                onChange={(d) => setFrom(d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "")}
+                placeholder="Pick a date"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>To</Label>
+              <DatePicker
+                value={to ? new Date(to) : null}
+                onChange={(d) => setTo(d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "")}
+                placeholder="Pick a date"
+              />
             </div>
             <div className="flex h-8 items-center gap-3 sm:col-span-2 lg:col-span-2 lg:justify-end">
               <div className="flex items-center gap-2">
