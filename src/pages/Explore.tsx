@@ -106,19 +106,20 @@ export default function Explore() {
               >
                 {([
                   { v: "any", label: "Any", icon: null },
-                  { v: "in_person", label: "In person", icon: <MapPin className="h-4 w-4" /> },
-                  { v: "online", label: "Online", icon: <GlobeIcon className="h-4 w-4" /> },
+                  { v: "in_person", label: "In person", icon: <MapPin className="h-4 w-4 shrink-0" /> },
+                  { v: "online", label: "Online", icon: <GlobeIcon className="h-4 w-4 shrink-0" /> },
                 ] as const).map((opt) => (
                   <label
                     key={opt.v}
+                    htmlFor={`mode-${opt.v}`}
                     className={cn(
-                      "flex cursor-pointer items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
+                      "flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-2 text-sm transition-colors whitespace-nowrap",
                       mode === opt.v ? "border-primary bg-primary/5" : "hover:bg-accent"
                     )}
                   >
-                    <RadioGroupItem value={opt.v} id={`mode-${opt.v}`} className="sr-only" />
+                    <RadioGroupItem value={opt.v} id={`mode-${opt.v}`} className="shrink-0" />
                     {opt.icon}
-                    {opt.label}
+                    <span className="truncate">{opt.label}</span>
                   </label>
                 ))}
               </RadioGroup>
