@@ -44,7 +44,7 @@ export function MarkdownEditor({ value, onChange, placeholder, className }: Prop
       },
     },
     onUpdate: ({ editor }) => {
-      const md = editor.storage.markdown?.getMarkdown?.() ?? "";
+      const md = (editor.storage as any).markdown?.getMarkdown?.() ?? "";
       onChange(md);
     },
   });
@@ -52,7 +52,7 @@ export function MarkdownEditor({ value, onChange, placeholder, className }: Prop
   // Sync external value changes (e.g. form reset)
   useEffect(() => {
     if (!editor) return;
-    const current = editor.storage.markdown?.getMarkdown?.() ?? "";
+    const current = (editor.storage as any).markdown?.getMarkdown?.() ?? "";
     if (value !== current) {
       editor.commands.setContent(value || "", { emitUpdate: false });
     }
