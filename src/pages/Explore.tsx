@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarIcon as Calendar, MapPinIcon as MapPin, MagnifyingGlassIcon as Search } from "@phosphor-icons/react";
+import { CalendarIcon as Calendar, MapPinIcon as MapPin, MagnifyingGlassIcon as Search, GlobeIcon } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/hooks/use-seo";
 import { AppLayout } from "@/components/app-layout";
@@ -11,6 +11,10 @@ import { DatePicker } from "@/components/date-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { cn } from "@/lib/utils";
+
+type LocationMode = "any" | "in_person" | "online";
 
 type Ev = {
   id: string; title: string; description: string | null; cover_image_url: string | null;
