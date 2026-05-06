@@ -103,7 +103,7 @@ export default function Explore() {
               <RadioGroup
                 value={mode}
                 onValueChange={(v) => setMode(v as LocationMode)}
-                className="grid grid-cols-3 gap-2"
+                className="flex flex-wrap gap-2"
               >
                 {([
                   { v: "any", label: "Any", icon: <SparkleIcon className="h-4 w-4 shrink-0" /> },
@@ -115,17 +115,17 @@ export default function Explore() {
                     <label
                       htmlFor={`mode-${opt.v}`}
                       className={cn(
-                        "flex cursor-pointer items-center justify-center gap-1.5 rounded-md border px-2 py-2 text-sm transition-colors whitespace-nowrap",
-                        selected ? "border-primary bg-primary/5" : "hover:bg-accent"
+                        "flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-2 text-sm transition-colors whitespace-nowrap",
+                        selected ? "border-primary bg-primary/5 flex-1" : "hover:bg-accent"
                       )}
                     >
-                      <RadioGroupItem value={opt.v} id={`mode-${opt.v}`} className="sr-only" />
+                      <RadioGroupItem value={opt.v} id={`mode-${opt.v}`} className="shrink-0" />
                       {opt.icon}
                       {selected && <span className="truncate">{opt.label}</span>}
                     </label>
                   );
                   return selected ? (
-                    <div key={opt.v}>{content}</div>
+                    <div key={opt.v} className="flex-1">{content}</div>
                   ) : (
                     <Tooltip key={opt.v}>
                       <TooltipTrigger render={content} />
