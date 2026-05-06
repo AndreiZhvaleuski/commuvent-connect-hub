@@ -84,7 +84,10 @@ export default function HostDashboard() {
           </div>
         </div>
 
-        <Tabs defaultValue="upcoming">
+        <Tabs
+          value={tab}
+          onValueChange={(v) => setSearchParams(v === "upcoming" ? {} : { tab: v }, { replace: true })}
+        >
           <TabsList>
             <TabsTrigger value="upcoming">Upcoming ({upcoming.length})</TabsTrigger>
             <TabsTrigger value="past">Past ({past.length})</TabsTrigger>
