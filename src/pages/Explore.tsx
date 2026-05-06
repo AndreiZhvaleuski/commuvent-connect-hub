@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarIcon as Calendar, MapPinIcon as MapPin, MagnifyingGlassIcon as Search, GlobeIcon } from "@phosphor-icons/react";
+import { CalendarIcon as Calendar, MapPinIcon as MapPin, MagnifyingGlassIcon as Search, GlobeIcon, SparkleIcon } from "@phosphor-icons/react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/hooks/use-seo";
 import { AppLayout } from "@/components/app-layout";
@@ -105,23 +106,33 @@ export default function Explore() {
                 className="grid grid-cols-3 gap-2"
               >
                 {([
-                  { v: "any", label: "Any", icon: null },
+                  { v: "any", label: "Any", icon: <SparkleIcon className="h-4 w-4 shrink-0" /> },
                   { v: "in_person", label: "In person", icon: <MapPin className="h-4 w-4 shrink-0" /> },
                   { v: "online", label: "Online", icon: <GlobeIcon className="h-4 w-4 shrink-0" /> },
-                ] as const).map((opt) => (
-                  <label
-                    key={opt.v}
-                    htmlFor={`mode-${opt.v}`}
-                    className={cn(
-                      "flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-2 text-sm transition-colors whitespace-nowrap",
-                      mode === opt.v ? "border-primary bg-primary/5" : "hover:bg-accent"
-                    )}
-                  >
-                    <RadioGroupItem value={opt.v} id={`mode-${opt.v}`} className="shrink-0" />
-                    {opt.icon}
-                    <span className="truncate">{opt.label}</span>
-                  </label>
-                ))}
+                ] as const).map((opt) => {
+                  const selected = mode === opt.v;
+                  const content = (
+                    <label
+                      htmlFor={`mode-${opt.v}`}
+                      className={cn(
+                        "flex cursor-pointer items-center justify-center gap-1.5 rounded-md border px-2 py-2 text-sm transition-colors whitespace-nowrap",
+                        selected ? "border-primary bg-primary/5" : "hover:bg-accent"
+                      )}
+                    >
+                      <RadioGroupItem value={opt.v} id={`mode-${opt.v}`} className="sr-only" />
+                      {opt.icon}
+                      {selected && <span className="truncate">{opt.label}</span>}
+                    </label>
+                  );
+                  return selected ? (
+                    <div key={opt.v}>{content}</div>
+                  ) : (
+                    <Tooltip key={opt.v}>
+                      <TooltipTrigger render={content} />
+                      <TooltipContent>{opt.label}</TooltipContent>
+                    </Tooltip>
+                  );
+                })}
               </RadioGroup>
             </div>
             <div className="flex h-8 items-center gap-3 sm:col-span-2 lg:col-span-2 lg:justify-end">
