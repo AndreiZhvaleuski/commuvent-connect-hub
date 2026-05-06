@@ -12,8 +12,56 @@ type Props = {
   options: string[];
 };
 
-const ROW_HEIGHT = 36;
+type TzMeta = {
+  id: string;          // IANA name e.g. "Europe/Berlin"
+  city: string;        // "Berlin"
+  region: string;      // "Europe"
+  abbr: string;        // "CEST"
+  offsetMin: number;   // 120
+  offsetLabel: string; // "GMT+02:00"
+  search: string;      // lowercase haystack
+};
+
+const ROW_HEIGHT = 44;
 const LIST_HEIGHT = 320;
+
+function getTzMeta(id: string, now: Date): TzMeta {
+  let offsetMin = 0;
+  let abbr = "";
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: id,
+      timeZoneName: "shortOffset",
+      hour: "2-digit",
+    }).formatToParts(now);
+    const off = parts.find((p) => p.type === "timeZoneName")?.value ?? "GMT+0";
+    // Parse "GMT", "GMT+2", "GMT-5:30", "UTC"
+    const m = /GMT([+-])(\d{1,2})(?::?(\d{2}))?/i.exec(off);
+    if (m) {
+      const sign = m[1] === "-" ? -1 : 1;
+      offsetMin = sign * (parseInt(m[2], 10) * 60 + parseInt(m[3] || "0", 10));
+    }
+  } catch { /* noop */ }
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: id,
+      timeZoneName: "short",
+      hour: "2-digit",
+    }).formatToParts(now);
+    abbr = parts.find((p) => p.type === "timeZoneName")?.value ?? "";
+  } catch { /* noop */ }
+
+  const sign = offsetMin >= 0 ? "+" : "-";
+  const abs = Math.abs(offsetMin);
+  const offsetLabel = `GMT${sign}${String(Math.floor(abs / 60)).padStart(2, "0")}:${String(abs % 60).padStart(2, "0")}`;
+  const segs = id.split("/");
+  const region = segs[0];
+  const city = segs[segs.length - 1].replace(/_/g, " ");
+  return {
+    id, city, region, abbr, offsetMin, offsetLabel,
+    search: `${id} ${city} ${region} ${abbr} ${offsetLabel} gmt${sign}${Math.floor(abs / 60)} utc${sign}${Math.floor(abs / 60)}`.toLowerCase(),
+  };
+}
 
 function TimezonePickerImpl({ value, onChange, options }: Props) {
   const [open, setOpen] = useState(false);
@@ -21,11 +69,20 @@ function TimezonePickerImpl({ value, onChange, options }: Props) {
   const [active, setActive] = useState(0);
   const parentRef = useRef<HTMLDivElement>(null);
 
+  const meta = useMemo(() => {
+    const now = new Date();
+    return options
+      .map((id) => getTzMeta(id, now))
+      .sort((a, b) => a.offsetMin - b.offsetMin || a.id.localeCompare(b.id));
+  }, [options]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return options;
-    return options.filter((o) => o.toLowerCase().includes(q));
-  }, [options, query]);
+    if (!q) return meta;
+    // Allow "+2", "-5:30" style queries
+    const normalized = q.replace(/\s+/g, "");
+    return meta.filter((m) => m.search.includes(q) || m.offsetLabel.toLowerCase().includes(normalized));
+  }, [meta, query]);
 
   useEffect(() => { setActive(0); }, [query]);
 
@@ -36,13 +93,19 @@ function TimezonePickerImpl({ value, onChange, options }: Props) {
     overscan: 8,
   });
 
-  // When the popover opens, the scroll parent is measured as 0px on first render.
-  // Re-measure once it's mounted so rows render immediately.
   useEffect(() => {
     if (!open) return;
-    const id = requestAnimationFrame(() => virtualizer.measure());
+    const id = requestAnimationFrame(() => {
+      virtualizer.measure();
+      const idx = filtered.findIndex((m) => m.id === value);
+      if (idx >= 0) {
+        setActive(idx);
+        virtualizer.scrollToIndex(idx, { align: "center" });
+      }
+    });
     return () => cancelAnimationFrame(id);
-  }, [open, virtualizer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const select = (tz: string) => {
     onChange(tz);
@@ -68,17 +131,28 @@ function TimezonePickerImpl({ value, onChange, options }: Props) {
     } else if (e.key === "Enter") {
       e.preventDefault();
       const tz = filtered[active];
-      if (tz) select(tz);
+      if (tz) select(tz.id);
     }
   };
+
+  const selectedMeta = useMemo(() => meta.find((m) => m.id === value), [meta, value]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger render={<Button variant="outline" role="combobox" className="w-full justify-between font-normal" />}>
-        {value || "Pick a time zone"}
-        <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+        <span className="truncate">
+          {selectedMeta ? (
+            <>
+              <span className="text-muted-foreground tabular-nums mr-2">({selectedMeta.offsetLabel})</span>
+              {selectedMeta.id.replace(/_/g, " ")}
+            </>
+          ) : (
+            "Pick a time zone"
+          )}
+        </span>
+        <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50 shrink-0" />
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-[--radix-popover-trigger-width] min-w-[280px]" align="start">
+      <PopoverContent className="p-0 w-[--radix-popover-trigger-width] min-w-[320px]" align="start">
         <div className="flex items-center gap-2 border-b px-2">
           <Search className="h-4 w-4 text-muted-foreground" />
           <Input
@@ -86,7 +160,7 @@ function TimezonePickerImpl({ value, onChange, options }: Props) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKey}
-            placeholder="Search time zones…"
+            placeholder="Search by city, region, GMT+2, CEST…"
             className="h-9 border-0 px-0 shadow-none focus-visible:ring-0"
           />
         </div>
@@ -96,23 +170,28 @@ function TimezonePickerImpl({ value, onChange, options }: Props) {
           <div ref={parentRef} style={{ height: LIST_HEIGHT, overflow: "auto" }}>
             <div style={{ height: virtualizer.getTotalSize(), width: "100%", position: "relative" }}>
               {virtualizer.getVirtualItems().map((vi) => {
-                const tz = filtered[vi.index];
-                const isSelected = tz === value;
+                const m = filtered[vi.index];
+                const isSelected = m.id === value;
                 const isActive = vi.index === active;
                 return (
                   <button
                     key={vi.key}
                     type="button"
                     onMouseEnter={() => setActive(vi.index)}
-                    onClick={() => select(tz)}
+                    onClick={() => select(m.id)}
                     className={cn(
-                      "absolute left-0 top-0 flex w-full items-center px-3 text-left text-sm outline-none",
+                      "absolute left-0 top-0 flex w-full items-center gap-3 px-3 text-left text-sm outline-none",
                       isActive && "bg-accent text-accent-foreground"
                     )}
                     style={{ height: vi.size, transform: `translateY(${vi.start}px)` }}
                   >
-                    <Check className={cn("mr-2 h-4 w-4 shrink-0", isSelected ? "opacity-100" : "opacity-0")} />
-                    <span className="truncate">{tz}</span>
+                    <Check className={cn("h-4 w-4 shrink-0", isSelected ? "opacity-100" : "opacity-0")} />
+                    <span className="w-20 shrink-0 text-xs tabular-nums text-muted-foreground">{m.offsetLabel}</span>
+                    <span className="flex-1 truncate">
+                      {m.city}
+                      <span className="ml-2 text-xs text-muted-foreground">{m.region}</span>
+                    </span>
+                    {m.abbr && <span className="text-xs text-muted-foreground">{m.abbr}</span>}
                   </button>
                 );
               })}
@@ -125,4 +204,3 @@ function TimezonePickerImpl({ value, onChange, options }: Props) {
 }
 
 export const TimezonePicker = memo(TimezonePickerImpl);
-
