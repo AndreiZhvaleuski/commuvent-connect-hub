@@ -387,6 +387,23 @@ export default function EventEditor() {
                   />
                 </Field>
               </div>
+              {(() => {
+                const s = form.watch("start_at");
+                const e = form.watch("end_at");
+                if (!s || !e) return null;
+                const ms = e.getTime() - s.getTime();
+                if (ms <= 0) return null;
+                const totalMin = Math.round(ms / 60000);
+                const d = Math.floor(totalMin / 1440);
+                const h = Math.floor((totalMin % 1440) / 60);
+                const m = totalMin % 60;
+                const parts = [
+                  d && `${d}d`,
+                  h && `${h}h`,
+                  m && `${m}m`,
+                ].filter(Boolean).join(" ") || "0m";
+                return <p className="text-xs text-muted-foreground">Duration: {parts}</p>;
+              })()}
 
               <Field label="Location">
                 <RadioGroup
