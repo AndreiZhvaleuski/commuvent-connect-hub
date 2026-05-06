@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarIcon as Calendar, MapPinIcon as MapPin, MagnifyingGlassIcon as Search } from "@phosphor-icons/react";
+import { CalendarIcon as Calendar, MapPinIcon as MapPin, MagnifyingGlassIcon as Search, GlobeIcon } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/hooks/use-seo";
 import { AppLayout } from "@/components/app-layout";
@@ -11,6 +11,10 @@ import { DatePicker } from "@/components/date-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { cn } from "@/lib/utils";
+
+type LocationMode = "any" | "in_person" | "online";
 
 type Ev = {
   id: string; title: string; description: string | null; cover_image_url: string | null;
@@ -20,10 +24,10 @@ type Ev = {
 export default function Explore() {
   useSEO({ title: "Explore events — Commuvent", description: "Discover upcoming community events near you on Commuvent." });
   const [q, setQ] = useState("");
-  const [location, setLocation] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [includePast, setIncludePast] = useState(false);
+  const [mode, setMode] = useState<LocationMode>("any");
   const [events, setEvents] = useState<Ev[]>([]);
   const [busy, setBusy] = useState(true);
 
@@ -47,16 +51,14 @@ export default function Explore() {
         const safe = q.trim().replace(/[%,()]/g, " ");
         qb = qb.or(`title.ilike.%${safe}%,venue_address.ilike.%${safe}%`);
       }
-      if (location.trim()) {
-        const safe = location.trim().replace(/[%,()]/g, " ");
-        qb = qb.ilike("venue_address", `%${safe}%`);
-      }
+      if (mode === "online") qb = qb.not("online_url", "is", null);
+      else if (mode === "in_person") qb = qb.not("venue_address", "is", null);
 
       const { data } = await qb;
       if (!cancelled) { setEvents((data ?? []) as Ev[]); setBusy(false); }
     }, 250);
     return () => { cancelled = true; clearTimeout(t); };
-  }, [q, location, from, to, includePast]);
+  }, [q, from, to, includePast, mode]);
 
   const now = useMemo(() => Date.now(), [events]);
 
@@ -71,17 +73,13 @@ export default function Explore() {
 
       <section className="container mx-auto max-w-6xl px-4 py-8">
         <Card className="mb-6">
-          <CardContent className="grid gap-4 pt-4 sm:grid-cols-2 lg:grid-cols-5">
+          <CardContent className="grid gap-4 pt-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="lg:col-span-2 space-y-2">
               <Label htmlFor="q">Search</Label>
               <div className="relative">
                 <Search className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="q" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Title or venue" className="pl-8" />
+                <Input id="q" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Title, venue or city" className="pl-8" />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="loc">Location</Label>
-              <Input id="loc" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="City, venue…" />
             </div>
             <div className="space-y-2">
               <Label>From</Label>
@@ -99,13 +97,39 @@ export default function Explore() {
                 placeholder="Pick a date"
               />
             </div>
-            <div className="flex h-8 items-center gap-3 lg:col-span-5">
+            <div className="space-y-2 lg:col-span-2">
+              <Label>Type</Label>
+              <RadioGroup
+                value={mode}
+                onValueChange={(v) => setMode(v as LocationMode)}
+                className="grid grid-cols-3 gap-2"
+              >
+                {([
+                  { v: "any", label: "Any", icon: null },
+                  { v: "in_person", label: "In person", icon: <MapPin className="h-4 w-4" /> },
+                  { v: "online", label: "Online", icon: <GlobeIcon className="h-4 w-4" /> },
+                ] as const).map((opt) => (
+                  <label
+                    key={opt.v}
+                    className={cn(
+                      "flex cursor-pointer items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
+                      mode === opt.v ? "border-primary bg-primary/5" : "hover:bg-accent"
+                    )}
+                  >
+                    <RadioGroupItem value={opt.v} id={`mode-${opt.v}`} className="sr-only" />
+                    {opt.icon}
+                    {opt.label}
+                  </label>
+                ))}
+              </RadioGroup>
+            </div>
+            <div className="flex h-8 items-center gap-3 sm:col-span-2 lg:col-span-2 lg:justify-end">
               <div className="flex items-center gap-2">
                 <Switch id="past" checked={includePast} onCheckedChange={setIncludePast} />
                 <Label htmlFor="past" className="cursor-pointer">Include past events</Label>
               </div>
-              {(q || location || from || to || includePast) && (
-                <Button variant="ghost" size="sm" className="ml-auto" onClick={() => { setQ(""); setLocation(""); setFrom(""); setTo(""); setIncludePast(false); }}>
+              {(q || from || to || includePast || mode !== "any") && (
+                <Button variant="ghost" size="sm" onClick={() => { setQ(""); setFrom(""); setTo(""); setIncludePast(false); setMode("any"); }}>
                   Clear
                 </Button>
               )}
