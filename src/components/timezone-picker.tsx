@@ -115,3 +115,6 @@ function TimezonePickerImpl({ value, onChange, options }: Props) {
     </Popover>
   );
 }
+
+export const TimezonePicker = memo(TimezonePickerImpl);
+
