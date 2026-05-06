@@ -111,7 +111,7 @@ export default function EventPage() {
   const sameTz = tz === localTz;
 
   const fmt = (iso: string) => {
-    try { return `${formatInTimeZone(new Date(iso), tz, "EEE, MMM d · h:mm a")} (${tz})`; }
+    try { return formatInTimeZone(new Date(iso), tz, "EEE, MMM d · h:mm a"); }
     catch { return new Date(iso).toLocaleString(); }
   };
   const fmtLocal = (iso: string) => {
