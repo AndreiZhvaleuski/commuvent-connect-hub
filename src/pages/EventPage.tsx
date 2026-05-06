@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { EventGallery } from "@/components/event-gallery";
+import { MarkdownView } from "@/components/markdown-view";
 import { EventFeedback } from "@/components/event-feedback";
 
 type Ev = {
@@ -234,7 +235,7 @@ export default function EventPage() {
             {event.description && (
               <Card className="mt-8">
                 <CardHeader><CardTitle>About</CardTitle></CardHeader>
-                <CardContent><p className="whitespace-pre-line text-sm leading-relaxed">{event.description}</p></CardContent>
+                <CardContent><MarkdownView className="text-sm leading-relaxed">{event.description}</MarkdownView></CardContent>
               </Card>
             )}
 
