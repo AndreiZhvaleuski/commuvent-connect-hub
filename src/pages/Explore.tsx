@@ -24,11 +24,29 @@ type Ev = {
 
 export default function Explore() {
   useSEO({ title: "Explore events — Commuvent", description: "Discover upcoming community events near you on Commuvent." });
-  const [q, setQ] = useState("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [includePast, setIncludePast] = useState(false);
-  const [mode, setMode] = useState<LocationMode>("any");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const q = searchParams.get("q") ?? "";
+  const from = searchParams.get("from") ?? "";
+  const to = searchParams.get("to") ?? "";
+  const includePast = searchParams.get("past") === "1";
+  const mode = (searchParams.get("type") as LocationMode) || "any";
+
+  const updateParam = (key: string, value: string | null) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (!value) next.delete(key);
+      else next.set(key, value);
+      return next;
+    }, { replace: true });
+  };
+  const setQ = (v: string) => updateParam("q", v);
+  const setFrom = (v: string) => updateParam("from", v);
+  const setTo = (v: string) => updateParam("to", v);
+  const setIncludePast = (v: boolean) => updateParam("past", v ? "1" : null);
+  const setMode = (v: LocationMode) => updateParam("type", v === "any" ? null : v);
+  const clearAll = () => setSearchParams({}, { replace: true });
+
   const [events, setEvents] = useState<Ev[]>([]);
   const [busy, setBusy] = useState(true);
 
