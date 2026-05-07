@@ -1,21 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { PlusIcon as Plus, CalendarIcon as Calendar, UsersIcon as Users, ClockIcon as Clock, CheckCircleIcon as CheckCircle2, ArrowSquareOutIcon as ExternalLink } from "@phosphor-icons/react";
+import { PlusIcon as Plus, ArrowSquareOutIcon as ExternalLink } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EventManagementCard, type ManagedEvent as Ev, type EventStat as Stat } from "@/components/event-management-card";
 
 type Host = { id: string; name: string; logo_url: string | null; bio: string | null };
-type Ev = {
-  id: string; title: string; status: string; visibility: string;
-  start_at: string; end_at: string; capacity: number; cover_image_url: string | null;
-};
-type Stat = { event_id: string; going_count: number; waitlist_count: number; checked_in_count: number };
 
 export default function HostDashboard() {
   const { hostId } = useParams<{ hostId: string }>();
