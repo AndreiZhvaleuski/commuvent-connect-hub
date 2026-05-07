@@ -18,7 +18,7 @@ type LocationMode = "any" | "in_person" | "online";
 
 type Ev = {
   id: string; title: string; description: string | null; cover_image_url: string | null;
-  start_at: string; end_at: string; venue_address: string | null; online_url: string | null;
+  start_at: string; end_at: string; time_zone: string | null; venue_address: string | null; online_url: string | null;
 };
 
 export default function Explore() {
