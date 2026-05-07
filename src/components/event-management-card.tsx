@@ -56,7 +56,7 @@ export function EventManagementCard({ event, stat, hostId, showManage = true }: 
             <Badge variant="outline" className="uppercase tracking-wide">{event.visibility}</Badge>
           </div>
           <CardTitle className="truncate">
-            <Link to={`/dashboard/${hostId}/events/${event.id}`} className="hover:underline">{event.title}</Link>
+            <Link to={`/events/${event.id}`} className="hover:underline">{event.title}</Link>
           </CardTitle>
           <div className="mt-2 space-y-1 text-xs text-muted-foreground">
             <p className="flex items-start gap-1.5">
