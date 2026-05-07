@@ -1,21 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { PlusIcon as Plus, CalendarIcon as Calendar, UsersIcon as Users, ClockIcon as Clock, CheckCircleIcon as CheckCircle2, ArrowSquareOutIcon as ExternalLink } from "@phosphor-icons/react";
+import { PlusIcon as Plus, ArrowSquareOutIcon as ExternalLink } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EventManagementCard, type ManagedEvent as Ev, type EventStat as Stat } from "@/components/event-management-card";
 
 type Host = { id: string; name: string; logo_url: string | null; bio: string | null };
-type Ev = {
-  id: string; title: string; status: string; visibility: string;
-  start_at: string; end_at: string; capacity: number; cover_image_url: string | null;
-};
-type Stat = { event_id: string; going_count: number; waitlist_count: number; checked_in_count: number };
 
 export default function HostDashboard() {
   const { hostId } = useParams<{ hostId: string }>();
@@ -108,49 +103,9 @@ function EventList({ events, stats, hostId, emptyText }: { events: Ev[]; stats: 
   }
   return (
     <div className="grid gap-3">
-      {events.map((e) => {
-        const s = stats[e.id] ?? { going_count: 0, waitlist_count: 0, checked_in_count: 0 } as Stat;
-        return (
-          <Card key={e.id}>
-            <CardHeader className="flex-row items-start justify-between gap-4">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 mb-3 uppercase">
-                  <Badge variant={e.status === "published" ? "default" : "secondary"} className="uppercase tracking-wide">{e.status}</Badge>
-                  <Badge variant="outline" className="uppercase tracking-wide">{e.visibility}</Badge>
-                </div>
-                <CardTitle className="truncate">{e.title}</CardTitle>
-                <p className="text-xs text-muted-foreground mt-1 inline-flex items-center gap-1">
-                  <Calendar className="h-3 w-3" /> {new Date(e.start_at).toLocaleString()}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button render={<Link to={`/dashboard/${hostId}/events/${e.id}/edit`} />} size="sm" variant="outline">Edit</Button>
-                <Button render={<Link to={`/dashboard/${hostId}/events/${e.id}/rsvps`} />} size="sm" variant="outline">RSVPs</Button>
-                <Button render={<Link to={`/checkin/${e.id}`} />} size="sm" variant="outline">Check-in</Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <Stat label="Going" value={s.going_count} icon={<Users className="h-4 w-4" />} suffix={e.capacity ? `/ ${e.capacity}` : ""} />
-                <Stat label="Waitlist" value={s.waitlist_count} icon={<Clock className="h-4 w-4" />} />
-                <Stat label="Checked-in" value={s.checked_in_count} icon={<CheckCircle2 className="h-4 w-4" />} />
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
-    </div>
-  );
-}
-
-function Stat({ label, value, icon, suffix }: { label: string; value: number; icon: React.ReactNode; suffix?: string }) {
-  return (
-    <div className="rounded-lg border bg-card p-3">
-      <div className="text-xs text-muted-foreground flex items-center gap-1">
-        <span className="shrink-0">{icon}</span>
-        <span className="truncate">{label}</span>
-      </div>
-      <div className="mt-1 text-xl font-semibold tabular-nums">{value}{suffix && <span className="text-sm font-normal text-muted-foreground ml-1">{suffix}</span>}</div>
+      {events.map((e) => (
+        <EventManagementCard key={e.id} event={e} stat={stats[e.id]} hostId={hostId} />
+      ))}
     </div>
   );
 }

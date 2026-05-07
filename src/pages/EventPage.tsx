@@ -302,11 +302,8 @@ export default function EventPage() {
                 <p className="text-xs text-muted-foreground text-center">Free event · No fees</p>
 
                 {canManage && (
-                  <div className="border-t pt-3 space-y-2">
-                    <p className="text-xs text-muted-foreground text-center">Host tools</p>
-                    <Button render={<Link to={`/dashboard/${event.host_id}/events/${event.id}/edit`} />} variant="outline" size="sm" className="w-full">Edit event</Button>
-                    <Button render={<Link to={`/dashboard/${event.host_id}/events/${event.id}/rsvps`} />} variant="outline" size="sm" className="w-full">Manage RSVPs</Button>
-                    <Button render={<Link to={`/checkin/${event.id}`} />} variant="outline" size="sm" className="w-full">Check-in</Button>
+                  <div className="border-t pt-3">
+                    <Button render={<Link to={`/dashboard/${event.host_id}/events/${event.id}`} />} variant="outline" size="sm" className="w-full">Manage event</Button>
                   </div>
                 )}
               </CardContent>
