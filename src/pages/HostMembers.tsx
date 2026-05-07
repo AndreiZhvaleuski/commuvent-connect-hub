@@ -35,6 +35,7 @@ export default function HostMembers() {
   const [invites, setInvites] = useState<Invite[]>([]);
   const [busy, setBusy] = useState(true);
   const [generating, setGenerating] = useState<Role | null>(null);
+  const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
   const myRole = useMemo(() => members.find((m) => m.user_id === user?.id)?.role ?? null, [members, user?.id]);
   const isHost = myRole === "host";
