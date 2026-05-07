@@ -10,9 +10,22 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: (cropped: File) => void;
+  aspect?: number;
+  output?: { width: number; height: number; quality?: number };
+  cropShape?: "rect" | "round";
+  title?: string;
 };
 
-export function CoverCropDialog({ file, open, onOpenChange, onConfirm }: Props) {
+export function ImageCropDialog({
+  file,
+  open,
+  onOpenChange,
+  onConfirm,
+  aspect = 16 / 9,
+  output = { width: 1600, height: 900, quality: 0.85 },
+  cropShape = "rect",
+  title = "Crop image",
+}: Props) {
   const [url, setUrl] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -34,7 +47,7 @@ export function CoverCropDialog({ file, open, onOpenChange, onConfirm }: Props) 
     if (!url || !area) return;
     setBusy(true);
     try {
-      const f = await cropToFile(url, area, { width: 1600, height: 900, quality: 0.85 });
+      const f = await cropToFile(url, area, output);
       onConfirm(f);
       onOpenChange(false);
     } finally {
@@ -45,14 +58,15 @@ export function CoverCropDialog({ file, open, onOpenChange, onConfirm }: Props) 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
-        <DialogHeader><DialogTitle>Crop cover image</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
         <div className="relative h-80 w-full overflow-hidden rounded-md bg-muted">
           {url && (
             <Cropper
               image={url}
               crop={crop}
               zoom={zoom}
-              aspect={16 / 9}
+              aspect={aspect}
+              cropShape={cropShape}
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={onCropComplete}

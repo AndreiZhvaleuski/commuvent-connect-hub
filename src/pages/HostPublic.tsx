@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { EnvelopeIcon as Mail, MapPinIcon as MapPin, ShareIcon } from "@phosphor-icons/react";
+import { EnvelopeIcon as Mail, MapPinIcon as MapPin, ShareIcon, GearIcon } from "@phosphor-icons/react";
 import { EventDateTime } from "@/components/event-datetime";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
 import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,10 +19,12 @@ type Ev = { id: string; title: string; cover_image_url: string | null; start_at:
 
 export default function HostPublic() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
   const [host, setHost] = useState<Host | null>(null);
   const [events, setEvents] = useState<Ev[]>([]);
   const [busy, setBusy] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [canManage, setCanManage] = useState(false);
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -35,9 +38,20 @@ export default function HostPublic() {
         .eq("host_id", h.id).eq("status", "published").eq("visibility", "public")
         .order("start_at", { ascending: true });
       setEvents((ev ?? []) as Ev[]);
+      if (user) {
+        const { data: hm } = await supabase
+          .from("host_members")
+          .select("role")
+          .eq("host_id", h.id)
+          .eq("user_id", user.id)
+          .maybeSingle();
+        setCanManage(!!hm);
+      } else {
+        setCanManage(false);
+      }
       setBusy(false);
     })();
-  }, [id]);
+  }, [id, user]);
 
   const now = new Date().toISOString();
   const upcoming = useMemo(() => events.filter((e) => e.end_at >= now), [events, now]);
@@ -67,7 +81,7 @@ export default function HostPublic() {
                   <Mail className="h-4 w-4" /> {host.contact_email}
                 </a>
               )}
-              <div className="mt-3">
+              <div className="mt-3 flex flex-wrap gap-2">
                 <Button variant="outline" size="sm" onClick={async () => {
                   const shareUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-preview?type=host&id=${host.id}`;
                   await navigator.clipboard.writeText(shareUrl);
@@ -75,6 +89,11 @@ export default function HostPublic() {
                 }}>
                   <ShareIcon className="mr-1 h-4 w-4" />Share this page
                 </Button>
+                {canManage && (
+                  <Button render={<Link to={`/dashboard/${host.id}`} />} variant="outline" size="sm">
+                    <GearIcon className="mr-1 h-4 w-4" />Manage
+                  </Button>
+                )}
               </div>
             </div>
           </div>

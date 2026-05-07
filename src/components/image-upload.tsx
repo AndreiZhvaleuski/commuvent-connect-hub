@@ -4,7 +4,7 @@ import { UploadSimpleIcon as Upload, TrashIcon as Trash2, ImageIcon, CropIcon } 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CoverCropDialog } from "@/components/cover-crop-dialog";
+import { ImageCropDialog } from "@/components/image-crop-dialog";
 
 type Props = {
   value: string | null;
@@ -50,11 +50,9 @@ export function ImageUpload({
   const pick = (f: File | null) => {
     if (f) {
       if (!validate(f)) return;
-      if (aspect === "video") {
-        setPendingFile(f);
-        setCropOpen(true);
-        return;
-      }
+      setPendingFile(f);
+      setCropOpen(true);
+      return;
     }
     onFileChange(f);
   };
@@ -66,6 +64,10 @@ export function ImageUpload({
   };
 
   const initials = (fallbackText || "?").slice(0, 2).toUpperCase();
+  const cropAspect = aspect === "square" ? 1 : 16 / 9;
+  const cropOutput = aspect === "square"
+    ? { width: 512, height: 512, quality: 0.9 }
+    : { width: 1600, height: 900, quality: 0.85 };
 
   return (
     <div
@@ -98,13 +100,13 @@ export function ImageUpload({
             <Upload className="mr-1 h-4 w-4" />
             {file || preview ? "Replace" : "Choose file"}
           </Button>
-          {aspect === "video" && file && (
+          {file && (
             <Button type="button" variant="outline" size="sm" onClick={reCrop}>
               <CropIcon className="mr-1 h-4 w-4" /> Re-crop
             </Button>
           )}
           {(file || preview) && (
-            <Button type="button" variant="ghost" size="sm" onClick={() => { pick(null); setPreview(null); }}>
+            <Button type="button" variant="ghost" size="sm" onClick={() => { onFileChange(null); setPreview(null); }}>
               <Trash2 className="mr-1 h-4 w-4" /> Remove
             </Button>
           )}
@@ -117,11 +119,14 @@ export function ImageUpload({
           onChange={(e) => { pick(e.target.files?.[0] ?? null); if (inputRef.current) inputRef.current.value = ""; }}
         />
       </div>
-      <CoverCropDialog
+      <ImageCropDialog
         file={pendingFile}
         open={cropOpen}
         onOpenChange={(o) => { setCropOpen(o); if (!o) setPendingFile(null); }}
         onConfirm={(f) => onFileChange(f)}
+        aspect={cropAspect}
+        output={cropOutput}
+        title={aspect === "square" ? "Crop logo" : "Crop cover image"}
       />
     </div>
   );

@@ -8,7 +8,7 @@ import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import SignIn from "./pages/SignIn.tsx";
 import { Placeholder } from "./pages/Placeholder.tsx";
-import BecomeAHost from "./pages/BecomeAHost.tsx";
+import HostEditor from "./pages/HostEditor.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import HostDashboard from "./pages/HostDashboard.tsx";
 import EventEditor from "./pages/EventEditor.tsx";
@@ -40,7 +40,8 @@ const App = () => (
             <Route path="/sign-up" element={<SignIn mode="signup" />} />
             <Route path="/tickets" element={<Tickets />} />
             <Route path="/my-events" element={<Placeholder title="My Events" />} />
-            <Route path="/become-a-host" element={<BecomeAHost />} />
+            <Route path="/become-a-host" element={<HostEditor mode="create" />} />
+            <Route path="/dashboard/:hostId/edit" element={<HostEditor mode="edit" />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/:hostId" element={<HostDashboard />} />
             <Route path="/dashboard/:hostId/events/new" element={<EventEditor />} />
