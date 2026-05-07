@@ -50,7 +50,7 @@ export default function EventPage() {
     if (!ev) { setNotFound(true); setBusy(false); return; }
     setEvent(ev as Ev);
     const [{ data: h }, { count }] = await Promise.all([
-      supabase.from("hosts").select("id,name,slug,logo_url,bio").eq("id", ev.host_id).maybeSingle(),
+      supabase.from("hosts").select("id,name,logo_url,bio,contact_email").eq("id", ev.host_id).maybeSingle(),
       supabase.from("rsvps").select("id", { count: "exact", head: true }).eq("event_id", eventId).eq("status", "going"),
     ]);
     setHost((h ?? null) as Host | null);
