@@ -232,9 +232,16 @@ export default function EventPage() {
               </Card>
             )}
 
-            <div className="mt-6">
+            <div className="mt-6 flex items-center justify-between gap-2">
+              <Button variant="outline" size="sm" onClick={async () => {
+                const shareUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-preview?type=event&id=${event.id}`;
+                await navigator.clipboard.writeText(shareUrl);
+                toast.success("Link copied! Share it anywhere to show a preview.");
+              }}>
+                <ShareIcon className="mr-1 h-4 w-4" />Share this event
+              </Button>
               <Dialog open={reportOpen} onOpenChange={setReportOpen}>
-                <DialogTrigger render={<Button variant="ghost" size="sm" />}>
+                <DialogTrigger render={<Button variant="destructive" size="sm" />}>
                   <Flag className="mr-1 h-4 w-4" />Report event
                 </DialogTrigger>
                 <DialogContent>
@@ -252,13 +259,6 @@ export default function EventPage() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-              <Button variant="outline" size="sm" className="ml-2" onClick={async () => {
-                const shareUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-preview?type=event&id=${event.id}`;
-                await navigator.clipboard.writeText(shareUrl);
-                toast.success("Link copied! Share it anywhere to show a preview.");
-              }}>
-                <ShareIcon className="mr-1 h-4 w-4" />Share this event
-              </Button>
             </div>
 
             <EventGallery eventId={event.id} />
