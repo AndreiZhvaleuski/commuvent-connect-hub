@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { UploadSimpleIcon as Upload, TrashIcon as Trash2, ImageIcon } from "@phosphor-icons/react";
+import { UploadSimpleIcon as Upload, TrashIcon as Trash2, ImageIcon, CropIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CoverCropDialog } from "@/components/cover-crop-dialog";
 
 type Props = {
   value: string | null;
