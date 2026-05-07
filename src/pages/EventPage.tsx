@@ -200,19 +200,14 @@ export default function EventPage() {
             )}
 
             <div className="mt-6 space-y-3 text-sm">
-              <div className="flex items-start gap-3">
-                <Calendar className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                <div className="space-y-0.5">
-                  <Tooltip>
-                    <TooltipTrigger render={<p className="font-medium cursor-help" />}>
-                      {fmt(event.start_at)}
-                    </TooltipTrigger>
-                    <TooltipContent>{sameTz ? "Same as your local time" : `Your local: ${fmtLocal(event.start_at)}`}</TooltipContent>
-                  </Tooltip>
-                  <p className="text-muted-foreground inline-flex items-center gap-1"><Clock className="h-3 w-3" />Until {fmt(event.end_at)}</p>
-                  <p className="text-xs text-muted-foreground">{tz}</p>
-                </div>
-              </div>
+              <EventDateTime
+                startIso={event.start_at}
+                endIso={event.end_at}
+                timeZone={event.time_zone}
+                variant="full"
+                className="text-sm"
+              />
+            </div>
               {(event.venue_address || event.online_url) && (
                 <div className="flex items-start gap-3">
                   {event.online_url ? <Globe className="mt-0.5 h-4 w-4 text-muted-foreground" /> : <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />}
