@@ -168,17 +168,24 @@ export default function EventEditor() {
 
   const uploadCoverIfAny = async (id: string): Promise<string | null> => {
     if (!coverFile) return null;
-    const ext = coverFile.name.split(".").pop() || "jpg";
-    const path = `${id}/cover.${ext}`;
+    const path = `${id}/cover.jpg`;
+    // Clean up any legacy cover files (e.g. cover.png/.webp) for this event
+    try {
+      const { data: existing } = await supabase.storage.from("event-covers").list(id);
+      const stale = (existing || []).filter((o) => o.name && o.name !== "cover.jpg").map((o) => `${id}/${o.name}`);
+      if (stale.length) await supabase.storage.from("event-covers").remove(stale);
+    } catch { /* ignore listing failures */ }
     const { error } = await supabase.storage.from("event-covers").upload(path, coverFile, {
       upsert: true,
-      contentType: coverFile.type,
+      contentType: "image/jpeg",
     });
     if (error) {
       toast.error(`Cover upload failed: ${error.message}`);
       return null;
     }
-    return supabase.storage.from("event-covers").getPublicUrl(path).data.publicUrl;
+    const url = supabase.storage.from("event-covers").getPublicUrl(path).data.publicUrl;
+    // Cache-bust so the new cover shows immediately
+    return `${url}?v=${Date.now()}`;
   };
 
   const computeSlug = (title: string): string => {
