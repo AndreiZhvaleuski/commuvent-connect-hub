@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
 
     if (data) {
       const isPast = new Date(data.end_at) < new Date();
-      const baseDescription = data.description ? truncate(stripMarkdown(data.description), 150) : "Community event on Commuvent.";
+      const baseDescription = data.description ? truncate(removeMd(data.description), 150) : "Community event on Commuvent.";
 
       title = `${data.title} · Commuvent`;
       description = isPast ? `Past event · ${baseDescription}` : baseDescription;
@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
 
     if (data) {
       title = `${data.name} · Commuvent`;
-      description = data.bio ? truncate(stripMarkdown(data.bio), 160) : description;
+      description = data.bio ? truncate(removeMd(data.bio), 160) : description;
       image = data.logo_url ?? "";
 
       jsonLd = JSON.stringify({
