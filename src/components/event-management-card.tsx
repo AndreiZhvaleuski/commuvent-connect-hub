@@ -43,6 +43,10 @@ function formatRange(startIso: string, endIso: string, tz: string): string {
 
 export function EventManagementCard({ event, stat, hostId }: { event: ManagedEvent; stat?: EventStat; hostId: string }) {
   const s = stat ?? { event_id: event.id, going_count: 0, waitlist_count: 0, checked_in_count: 0 };
+  const eventTz = event.time_zone || "UTC";
+  const userTz = browserTz();
+  const sameTz = eventTz === userTz;
+  const duration = formatDuration(event.start_at, event.end_at);
   return (
     <Card>
       <CardHeader className="flex-row items-start justify-between gap-4">
@@ -52,9 +56,26 @@ export function EventManagementCard({ event, stat, hostId }: { event: ManagedEve
             <Badge variant="outline" className="uppercase tracking-wide">{event.visibility}</Badge>
           </div>
           <CardTitle className="truncate">{event.title}</CardTitle>
-          <p className="text-xs text-muted-foreground mt-1 inline-flex items-center gap-1">
-            <Calendar className="h-3 w-3" /> {new Date(event.start_at).toLocaleString()}
-          </p>
+          <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+            <p className="inline-flex items-center gap-1.5">
+              <Calendar className="h-3 w-3 shrink-0" />
+              <span>{formatRange(event.start_at, event.end_at, eventTz)}</span>
+              <span className="opacity-70">({eventTz})</span>
+            </p>
+            {!sameTz && (
+              <p className="inline-flex items-center gap-1.5">
+                <Globe className="h-3 w-3 shrink-0" />
+                <span>{formatRange(event.start_at, event.end_at, userTz)}</span>
+                <span className="opacity-70">(your time · {userTz})</span>
+              </p>
+            )}
+            {duration && (
+              <p className="inline-flex items-center gap-1.5">
+                <Hourglass className="h-3 w-3 shrink-0" />
+                <span>Duration: {duration}</span>
+              </p>
+            )}
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button render={<Link to={`/dashboard/${hostId}/events/${event.id}/edit`} />} size="sm" variant="outline">Edit</Button>
