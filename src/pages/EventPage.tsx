@@ -102,18 +102,6 @@ export default function EventPage() {
   if (busy || !event) return <AppLayout><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></AppLayout>;
 
   const ended = new Date(event.end_at).getTime() < Date.now();
-  const tz = event.time_zone || "UTC";
-  const localTz = browserTz();
-  const sameTz = tz === localTz;
-
-  const fmt = (iso: string) => {
-    try { return formatInTimeZone(new Date(iso), tz, "EEE, MMM d · h:mm a"); }
-    catch { return new Date(iso).toLocaleString(); }
-  };
-  const fmtLocal = (iso: string) => {
-    try { return `${formatInTimeZone(new Date(iso), localTz, "EEE, MMM d · h:mm a")} (${localTz})`; }
-    catch { return new Date(iso).toLocaleString(); }
-  };
 
   const capacityPct = event.capacity > 0 ? Math.min(100, Math.round((going / event.capacity) * 100)) : 0;
   const isFull = event.capacity > 0 && going >= event.capacity;
