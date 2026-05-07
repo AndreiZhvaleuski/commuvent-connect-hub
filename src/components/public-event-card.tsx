@@ -3,6 +3,7 @@ import { MapPinIcon as MapPin } from "@phosphor-icons/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EventDateTime } from "@/components/event-datetime";
+import { browserTz } from "@/lib/timezones";
 import { cn } from "@/lib/utils";
 
 export type PublicEvent = {
