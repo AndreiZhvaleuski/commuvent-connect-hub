@@ -153,16 +153,19 @@ export default function Explore() {
                 placeholder="Pick a date"
               />
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:col-span-2 lg:col-span-4">
+            <div className="flex h-10 items-center gap-3 sm:col-span-2 lg:col-span-4">
               <div className="flex items-center gap-2">
                 <Switch id="past" checked={includePast} onCheckedChange={setIncludePast} />
                 <Label htmlFor="past" className="cursor-pointer">Include past events</Label>
               </div>
-              {(q || from || to || includePast || mode !== "any") && (
-                <Button variant="ghost" size="sm" className="sm:ml-auto lg:ml-0" onClick={clearAll}>
-                  Clear
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn("ml-auto", !(q || from || to || includePast || mode !== "any") && "invisible")}
+                onClick={clearAll}
+              >
+                Clear
+              </Button>
             </div>
           </CardContent>
         </Card>
