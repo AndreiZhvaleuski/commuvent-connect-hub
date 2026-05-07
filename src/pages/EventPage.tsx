@@ -43,6 +43,7 @@ export default function EventPage() {
   const [notFound, setNotFound] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
+  const [canManage, setCanManage] = useState(false);
   const load = async () => {
     if (!eventId) return;
     setBusy(true);
@@ -59,8 +60,11 @@ export default function EventPage() {
       const { data: r } = await supabase.from("rsvps").select("id,status,position,code,cancelled_at")
         .eq("event_id", eventId).eq("user_id", user.id).maybeSingle();
       setRsvp((r ?? null) as Rsvp | null);
+      const { data: hm } = await supabase.from("host_members").select("role").eq("host_id", ev.host_id).eq("user_id", user.id).maybeSingle();
+      setCanManage(!!hm);
     } else {
       setRsvp(null);
+      setCanManage(false);
     }
     setBusy(false);
   };
@@ -296,6 +300,14 @@ export default function EventPage() {
                 )}
 
                 <p className="text-xs text-muted-foreground text-center">Free event · No fees</p>
+
+                {canManage && (
+                  <div className="border-t pt-3 space-y-2">
+                    <p className="text-xs text-muted-foreground text-center">Host tools</p>
+                    <Button render={<Link to={`/dashboard/${event.host_id}/events/${event.id}/edit`} />} variant="outline" size="sm" className="w-full">Edit event</Button>
+                    <Button render={<Link to={`/dashboard/${event.host_id}/events/${event.id}/rsvps`} />} variant="outline" size="sm" className="w-full">Manage RSVPs</Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </aside>
