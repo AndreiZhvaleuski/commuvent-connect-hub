@@ -1,16 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { EnvelopeIcon as Mail, MapPinIcon as MapPin, ShareIcon, GearIcon } from "@phosphor-icons/react";
-import { EventDateTime } from "@/components/event-datetime";
+import { EnvelopeIcon as Mail, ShareIcon, GearIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import { PublicEventCard, type PublicEvent } from "@/components/public-event-card";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
