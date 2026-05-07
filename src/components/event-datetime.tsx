@@ -55,9 +55,9 @@ export function EventDateTime({ startIso, endIso, timeZone, variant = "compact",
     : `${info.rangeUser} (your time · ${info.userTz})`;
 
   const node = (
-    <span className={cn("inline-flex items-center gap-1.5", className)}>
-      <CalendarIcon className="h-4 w-4 shrink-0" />
-      <span className="truncate">{compactText}</span>
+    <span className={cn("inline-flex w-full min-w-0 items-start gap-1.5 whitespace-normal align-top", className)}>
+      <CalendarIcon className="mt-0.5 h-4 w-4 shrink-0" />
+      <span className="min-w-0 flex-1 whitespace-normal [overflow-wrap:anywhere]">{compactText}</span>
     </span>
   );
 
