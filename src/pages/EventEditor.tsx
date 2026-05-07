@@ -249,8 +249,9 @@ export default function EventEditor() {
 
   const onError = () => toast.error("Please fix the highlighted fields");
 
+  const onSave = form.handleSubmit(async (v) => { await save(v); }, onError);
   const onSaveDraft = form.handleSubmit(async (v) => {
-    const id = await save(v);
+    const id = await save(v, "draft");
     if (id && !isEdit) navigate(`/dashboard/${hostId}/events/${id}/edit`);
   }, onError);
   const onPublish = form.handleSubmit(async (v) => {
