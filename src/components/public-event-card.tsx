@@ -53,7 +53,7 @@ export function PublicEventCard({ event: e, showStatusBadge = false }: Props) {
             )}
           </div>
         )}
-        <CardHeader>
+        <CardHeader className="min-w-0">
           {showStatusBadge && !e.cover_image_url && (
             <Badge
               variant="secondary"
@@ -62,14 +62,16 @@ export function PublicEventCard({ event: e, showStatusBadge = false }: Props) {
               {ended ? "Ended" : "Upcoming"}
             </Badge>
           )}
-          <CardTitle className="line-clamp-2">{e.title}</CardTitle>
+          <CardTitle className="line-clamp-2 break-words">{e.title}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <EventDateTime startIso={e.start_at} endIso={e.end_at} timeZone={e.time_zone} variant="compact" />
+        <CardContent className="space-y-2 text-sm text-muted-foreground min-w-0">
+          <div className="break-words">
+            <EventDateTime startIso={e.start_at} endIso={e.end_at} timeZone={e.time_zone} variant="compact" />
+          </div>
           {(e.venue_address || e.online_url) && (
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              <span className="line-clamp-1">{e.venue_address ?? "Online"}</span>
+            <div className="flex items-start gap-2 min-w-0">
+              <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
+              <span className="break-words line-clamp-2 min-w-0">{e.venue_address ?? "Online"}</span>
             </div>
           )}
         </CardContent>
