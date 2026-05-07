@@ -1,24 +1,27 @@
-## Plan: Dedicated event-management page
+## Problem
 
-### Goal
-Give event hosts a single landing page per event that mirrors the per-event card from the host dashboard (status badges, title/date, Edit / RSVPs / Check-in actions, Going / Waitlist / Checked-in stats), so they can jump straight from the public event page into managing it without bouncing through the host dashboard.
+On the event edit page (`src/pages/EventEditor.tsx`), the action bar only offers status-changing buttons:
+- When draft: "Save draft" + "Publish"
+- When published: "Save draft" (which unpublishes) + "Unpublish"
 
-### Changes
+There is no way to save edits while preserving the current status. A host editing a published event is forced to either unpublish it or leave it untouched.
 
-**1. New route + page: `/dashboard/:hostId/events/:eventId`**
-- Create `src/pages/EventManage.tsx`.
-- On mount: require auth, verify caller is a `host_members` row for `hostId`, fetch the event, fetch live stats (`event_stats` RPC, then pick the row for this event).
-- Layout copied from `HostDashboard`:
-  - Header: host avatar + name on the left (clicking returns to `/dashboard/:hostId`), "View public page" link to `/e/:eventId` on the right.
-  - Below: the same card UI used in `EventList` from `HostDashboard` (status/visibility badges, title, start date, Edit / RSVPs / Check-in buttons, 3-stat grid).
-- Add the route to `src/App.tsx`.
+## Plan
 
-**2. Wire the public event page to it**
-- In `src/pages/EventPage.tsx` host-tools sidebar: replace the three separate Edit / Manage RSVPs / Check-in buttons with a single "Manage event" button that navigates to `/dashboard/:hostId/events/:eventId`. (Keeps the sidebar tidy and gives one obvious entry point.)
+Rework the action-bar buttons in `EventEditor.tsx` so saving and status changes are independent.
 
-**3. Reuse, don't duplicate**
-- Extract the per-event card (badges + title + actions + stats) from `HostDashboard.tsx` into a shared component, e.g. `src/components/event-management-card.tsx`, and use it from both `HostDashboard` and the new `EventManage` page. Keeps the two views visually identical and avoids drift.
+**New button set (edit mode):**
+1. **Save changes** — primary button. Saves all field edits; keeps `status` unchanged (no `nextStatus` passed to `save()`).
+2. **Publish** (shown only when `status !== "published"`) — secondary. Saves and sets status to `published`.
+3. **Unpublish** (shown only when `status === "published"`) — secondary. Saves and sets status to `draft`.
+4. **Duplicate** — unchanged.
+5. **Back to dashboard** — unchanged.
 
-### Out of scope
-- No DB or RLS changes (existing `host_members`, `events`, and `event_stats` RPC already cover this).
-- No edits to the actual edit / RSVPs / check-in pages — this is purely a new hub page plus an entry point from the public event page.
+**New event mode (no `eventId` yet):** keep current behavior — "Save draft" and "Publish" (since there is no existing status to preserve).
+
+**Implementation details:**
+- Add an `onSave` handler that calls `save(v)` with no `nextStatus` argument (the existing `save()` already handles this — it omits `status` from the update payload when `nextStatus` is undefined).
+- Rename existing `onSaveDraft` usage in edit mode to `onSave`; keep `onSaveDraft` only for the new-event flow.
+- Update the JSX in the action bar around lines 480–491 to render the conditional set above.
+
+No DB or schema changes. No changes outside `src/pages/EventEditor.tsx`.

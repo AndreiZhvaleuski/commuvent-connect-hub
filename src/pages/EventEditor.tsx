@@ -249,8 +249,9 @@ export default function EventEditor() {
 
   const onError = () => toast.error("Please fix the highlighted fields");
 
+  const onSave = form.handleSubmit(async (v) => { await save(v); }, onError);
   const onSaveDraft = form.handleSubmit(async (v) => {
-    const id = await save(v);
+    const id = await save(v, "draft");
     if (id && !isEdit) navigate(`/dashboard/${hostId}/events/${id}/edit`);
   }, onError);
   const onPublish = form.handleSubmit(async (v) => {
@@ -479,13 +480,22 @@ export default function EventEditor() {
 
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" onClick={onSaveDraft} disabled={busy}>Save draft</Button>
-              {status !== "published" ? (
-                <Button type="button" onClick={onPublish} disabled={busy}><Eye className="mr-1 h-4 w-4" />Publish</Button>
+              {isEdit ? (
+                <>
+                  <Button type="button" onClick={onSave} disabled={busy}>Save changes</Button>
+                  {status !== "published" ? (
+                    <Button type="button" variant="outline" onClick={onPublish} disabled={busy}><Eye className="mr-1 h-4 w-4" />Publish</Button>
+                  ) : (
+                    <Button type="button" variant="outline" onClick={onUnpublish} disabled={busy}><EyeOff className="mr-1 h-4 w-4" />Unpublish</Button>
+                  )}
+                  <Button type="button" variant="outline" onClick={onDuplicate} disabled={busy}><Copy className="mr-1 h-4 w-4" />Duplicate</Button>
+                </>
               ) : (
-                <Button type="button" variant="outline" onClick={onUnpublish} disabled={busy}><EyeOff className="mr-1 h-4 w-4" />Unpublish</Button>
+                <>
+                  <Button type="button" variant="outline" onClick={onSaveDraft} disabled={busy}>Save draft</Button>
+                  <Button type="button" onClick={onPublish} disabled={busy}><Eye className="mr-1 h-4 w-4" />Publish</Button>
+                </>
               )}
-              {isEdit && <Button type="button" variant="outline" onClick={onDuplicate} disabled={busy}><Copy className="mr-1 h-4 w-4" />Duplicate</Button>}
             </div>
             <Button type="button" variant="ghost" onClick={() => navigate(`/dashboard/${hostId}`)}>Back to dashboard</Button>
           </div>
