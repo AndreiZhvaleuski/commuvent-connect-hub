@@ -21,7 +21,7 @@ export default function Index() {
     (async () => {
       const { data } = await supabase
         .from("events")
-        .select("id,title,description,cover_image_url,start_at,end_at,venue_address,online_url")
+        .select("id,title,description,cover_image_url,start_at,end_at,time_zone,venue_address,online_url")
         .eq("status", "published").eq("visibility", "public")
         .gte("end_at", new Date().toISOString())
         .order("start_at", { ascending: true })
