@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
 
     if (data) {
       const isPast = new Date(data.end_at) < new Date();
-      const baseDescription = data.description?.slice(0, 150) ?? "Community event on Commuvent.";
+      const baseDescription = data.description ? truncate(stripMarkdown(data.description), 150) : "Community event on Commuvent.";
 
       title = `${data.title} · Commuvent`;
       description = isPast ? `Past event · ${baseDescription}` : baseDescription;
