@@ -66,6 +66,15 @@ export default function HostPublic() {
                   <Mail className="h-4 w-4" /> {host.contact_email}
                 </a>
               )}
+              <div className="mt-3">
+                <Button variant="outline" size="sm" onClick={async () => {
+                  const shareUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-preview?type=host&id=${host.id}`;
+                  await navigator.clipboard.writeText(shareUrl);
+                  toast.success("Link copied! Share it anywhere to show a preview.");
+                }}>
+                  <ShareIcon className="mr-1 h-4 w-4" />Share this page
+                </Button>
+              </div>
             </div>
           </div>
         </div>
