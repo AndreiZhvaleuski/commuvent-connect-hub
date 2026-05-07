@@ -55,7 +55,9 @@ export function EventManagementCard({ event, stat, hostId }: { event: ManagedEve
             <Badge variant={event.status === "published" ? "default" : "secondary"} className="uppercase tracking-wide">{event.status}</Badge>
             <Badge variant="outline" className="uppercase tracking-wide">{event.visibility}</Badge>
           </div>
-          <CardTitle className="truncate">{event.title}</CardTitle>
+          <CardTitle className="truncate">
+            <Link to={`/dashboard/${hostId}/events/${event.id}`} className="hover:underline">{event.title}</Link>
+          </CardTitle>
           <div className="mt-2 space-y-1 text-xs text-muted-foreground">
             <p className="inline-flex items-center gap-1.5">
               <Calendar className="h-3 w-3 shrink-0" />
