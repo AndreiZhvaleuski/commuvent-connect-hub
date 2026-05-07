@@ -1,52 +1,31 @@
-## Goal
+## Problem
 
-Unify how event start/end/timezone/duration are displayed across all event-related surfaces.
+`og-preview` currently splits behavior by User-Agent:
+- Bots → HTML with OG/JSON-LD tags
+- Everyone else → `302` redirect to the SPA
 
-## Format spec (from your answers)
+OG inspectors like `opengraph.xyz` now send a browser-like UA **and** follow redirects, so they land on the SPA instead of seeing our OG tags. The earlier version (HTML + `<meta http-equiv="refresh">`) had the same problem because they follow refresh too.
 
-- **Date/time style:** browser locale (`Intl.DateTimeFormat` with no explicit locale = user default), `dateStyle: 'medium'`, `timeStyle: 'short'`.
-- **Range + duration:** `"<start> – <end> · <duration>"`. When start/end fall on the same day in the chosen TZ, omit the date from the end side: `"Fri, May 15, 7:00 PM – 9:00 PM · 2h"`.
-- **Timezones:** always show two lines when event TZ ≠ viewer TZ:
-  - Line 1: range in **event TZ** with `(<event tz>)` suffix.
-  - Line 2: range in **user TZ** with `(your time · <user tz>)` suffix.
-  - When they match, just one line (no parenthetical).
-- **Duration:** `Xd Yh Zm` (omit zero parts), e.g. `2h`, `1d 4h`, `45m`.
+## Fix
 
-## Shared module
+Drop UA sniffing. Always return the same OG HTML, but redirect real browsers via JavaScript instead of meta-refresh / 302:
 
-Create `src/lib/event-time.ts` exporting:
+- Remove the `isBot` branch and the 302 response
+- Remove `<meta http-equiv="refresh" ...>` from the HTML
+- Add `<script>window.location.replace("…")</script>` at the end of `<head>`
+- Keep `<body>` with a visible "Redirecting to …" link as a no-JS fallback
 
-```ts
-formatEventRange(startIso, endIso, eventTz): { eventTz: string; userTz: string | null; sameTz: boolean; duration: string }
-```
+### Why this works
 
-Each `eventTz`/`userTz` is the formatted "range + duration" string described above. Built on `Intl.DateTimeFormat` (timeZone option) — no `date-fns-tz` dependency needed for the strings.
+| Client | Sees |
+|---|---|
+| Real browser | Runs the script → instant client-side redirect to `/e/:id` or `/h/:id` |
+| Crawlers (FB, Twitter, Slack, Google, …) | Don't run JS → parse OG/JSON-LD tags |
+| OG inspectors (opengraph.xyz, metatags.io, …) | Don't run JS during scrape → parse OG/JSON-LD tags |
+| No-JS browser | Sees the visible fallback link and can click through |
 
-Plus a small React helper `<EventDateTime startIso endIso timeZone variant="full" | "compact" />`:
-- `variant="full"`: stacked Calendar + Hourglass icons, two TZ lines + duration line. Used on EventPage and EventManagementCard.
-- `variant="compact"`: single line `"<event-tz range> · <duration>"`, with a tooltip showing the user-TZ range + duration when different. Used on Explore, Index, HostPublic, Tickets, dashboard list rows.
+No other files change. The redirect URL, OG tags, and JSON-LD payload stay identical.
 
-## Sites to migrate
+## File touched
 
-| File | Current | New |
-|---|---|---|
-| `src/pages/EventPage.tsx` | custom `fmt`/`fmtLocal`, no duration, tooltip | `<EventDateTime variant="full">` |
-| `src/components/event-management-card.tsx` | own formatRange + duration | `<EventDateTime variant="full">` (drop local helpers) |
-| `src/pages/Explore.tsx` | `new Date(start_at).toLocaleString()` | `<EventDateTime variant="compact" timeZone={e.time_zone}>` — also add `time_zone` to the select |
-| `src/pages/Index.tsx` | `toLocaleString()` | `<EventDateTime variant="compact">` — add `time_zone` to select |
-| `src/pages/HostPublic.tsx` | `toLocaleString()` | `<EventDateTime variant="compact">` — add `time_zone` to select |
-| `src/pages/Tickets.tsx` | `toLocaleString()` (line 164) | `<EventDateTime variant="compact">` — already selects `time_zone` |
-
-Selects that need `time_zone` added: Explore, Index, HostPublic.
-
-## Out of scope
-
-- `EventEditor.tsx` (input fields, not display).
-- `EventRsvps.tsx` `check_in_time` (per-row check-in timestamp, not event date).
-- `Moderation.tsx` report timestamps.
-- ICS generation in `Tickets.tsx` (already correct).
-
-## Cleanup
-
-- Remove `formatInTimeZone` calls and the local `formatRange`/`formatDuration` helpers in `EventPage.tsx` and `event-management-card.tsx` (move logic into `event-time.ts`).
-- Keep `date-fns-tz` for `EventEditor` validation if still used; otherwise leave as-is (no removal in this pass).
+- `supabase/functions/og-preview/index.ts` — replace the bot-vs-user branch with a single HTML response that uses a JS redirect.
