@@ -248,16 +248,22 @@ export default function HostMembers() {
                   {invites.map((inv) => {
                     const url = `${window.location.origin}/invite/${inv.token}`;
                     return (
-                      <div key={inv.id} className="flex flex-wrap items-center gap-2 rounded-md border p-3">
-                        <Badge variant={inv.role === "host" ? "default" : "secondary"} className="capitalize">{inv.role}</Badge>
-                        <code className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{url}</code>
-                        <span className="text-xs text-muted-foreground">expires {format(new Date(inv.expires_at), "MMM d")}</span>
-                        <Button size="sm" variant="outline" onClick={() => copyLink(inv.token)}>
-                          <CopyIcon className="mr-1 h-4 w-4" />Copy
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => revokeInvite(inv.id)} aria-label="Revoke invite">
-                          <TrashIcon className="h-4 w-4" />
-                        </Button>
+                      <div key={inv.id} className="rounded-md border p-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <Badge variant={inv.role === "host" ? "default" : "secondary"} className="capitalize">{inv.role}</Badge>
+                            <span className="text-xs text-muted-foreground">expires {format(new Date(inv.expires_at), "MMM d")}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button size="sm" variant="outline" onClick={() => copyLink(inv.token)}>
+                              <CopyIcon className="mr-1 h-4 w-4" />Copy
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => revokeInvite(inv.id)} aria-label="Revoke invite">
+                              <TrashIcon className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <code className="mt-2 block truncate text-xs text-muted-foreground">{url}</code>
                       </div>
                     );
                   })}
