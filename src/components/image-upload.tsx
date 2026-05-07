@@ -29,6 +29,8 @@ export function ImageUpload({
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(value);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [cropOpen, setCropOpen] = useState(false);
 
   useEffect(() => {
     if (file) {
@@ -39,18 +41,28 @@ export function ImageUpload({
     setPreview(value);
   }, [file, value]);
 
+  const validate = (f: File): boolean => {
+    if (!f.type.startsWith("image/")) { toast.error("Please choose an image file"); return false; }
+    if (f.size > maxSizeMB * 1024 * 1024) { toast.error(`Image must be smaller than ${maxSizeMB} MB`); return false; }
+    return true;
+  };
+
   const pick = (f: File | null) => {
     if (f) {
-      if (!f.type.startsWith("image/")) {
-        toast.error("Please choose an image file");
-        return;
-      }
-      if (f.size > maxSizeMB * 1024 * 1024) {
-        toast.error(`Image must be smaller than ${maxSizeMB} MB`);
+      if (!validate(f)) return;
+      if (aspect === "video") {
+        setPendingFile(f);
+        setCropOpen(true);
         return;
       }
     }
     onFileChange(f);
+  };
+
+  const reCrop = () => {
+    if (!file) return;
+    setPendingFile(file);
+    setCropOpen(true);
   };
 
   const initials = (fallbackText || "?").slice(0, 2).toUpperCase();
