@@ -185,16 +185,19 @@ export default function EventPage() {
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{event.title}</h1>
 
             {host && (
-              <Link to={`/h/${host.slug}`} className="mt-4 inline-flex items-center gap-3 rounded-lg border bg-card p-3 hover:bg-muted/50 transition-colors">
-                <Avatar className="h-10 w-10">
+              <Link to={`/h/${host.id}`} className="mt-4 flex w-full min-w-0 items-center gap-3 rounded-lg border bg-card p-3 hover:bg-muted/50 transition-colors">
+                <Avatar className="h-10 w-10 shrink-0">
                   {host.logo_url && <AvatarImage src={host.logo_url} alt={host.name} />}
                   <AvatarFallback>{host.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-xs text-muted-foreground">Hosted by</p>
-                  <p className="text-sm font-medium">{host.name}</p>
+                  <p className="truncate text-sm font-medium">{host.name}</p>
+                  {host.contact_email && (
+                    <p className="truncate text-xs text-muted-foreground">{host.contact_email}</p>
+                  )}
                 </div>
-                <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
+                <ExternalLink className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
               </Link>
             )}
 
