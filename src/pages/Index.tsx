@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRightIcon as ArrowRight, CalendarIcon as Calendar, MapPinIcon as MapPin, UsersIcon as Users } from "@phosphor-icons/react";
+import { ArrowRightIcon as ArrowRight, MapPinIcon as MapPin, UsersIcon as Users } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { EventDateTime } from "@/components/event-datetime";
 type Ev = {
   id: string; title: string; description: string | null;
-  cover_image_url: string | null; start_at: string; end_at: string;
+  cover_image_url: string | null; start_at: string; end_at: string; time_zone: string | null;
   venue_address: string | null; online_url: string | null;
 };
 
