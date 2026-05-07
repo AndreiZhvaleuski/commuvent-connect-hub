@@ -31,7 +31,7 @@ export default function HostDashboard() {
       const [{ data: h }, { data: ev }, { data: st }] = await Promise.all([
         supabase.from("hosts").select("id,name,logo_url,bio").eq("id", hostId).maybeSingle(),
         supabase.from("events")
-          .select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url")
+          .select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url,time_zone")
           .eq("host_id", hostId).order("start_at", { ascending: false }),
         supabase.rpc("event_stats", { p_host_id: hostId }),
       ]);

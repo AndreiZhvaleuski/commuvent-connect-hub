@@ -30,7 +30,7 @@ export default function EventManage() {
       if (!hm) { setDenied(true); setBusy(false); return; }
       const [{ data: h }, { data: ev }, { data: stats }] = await Promise.all([
         supabase.from("hosts").select("id,name,logo_url").eq("id", hostId).maybeSingle(),
-        supabase.from("events").select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url").eq("id", eventId).maybeSingle(),
+        supabase.from("events").select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url,time_zone").eq("id", eventId).maybeSingle(),
         supabase.rpc("event_stats", { p_host_id: hostId }),
       ]);
       setHost((h ?? null) as Host | null);
