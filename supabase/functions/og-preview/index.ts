@@ -129,6 +129,17 @@ Deno.serve(async (req) => {
   const safeImage = escape(image);
   const safeRedirect = escape(redirectUrl);
 
+  // Bots get HTML with OG tags; real users get a 302 redirect to the SPA.
+  const ua = (req.headers.get("user-agent") ?? "").toLowerCase();
+  const isBot = /bot|crawler|spider|facebookexternalhit|facebot|twitterbot|slackbot|linkedinbot|whatsapp|telegram|discordbot|embedly|pinterest|redditbot|skypeuripreview|vkshare|w3c_validator|preview|googlebot|bingbot|duckduckbot|yandex|baiduspider|applebot/i.test(ua);
+
+  if (!isBot) {
+    return new Response(null, {
+      status: 302,
+      headers: { ...corsHeaders, Location: redirectUrl },
+    });
+  }
+
   const html = `<!DOCTYPE html>
 <html>
 <head>
@@ -151,7 +162,7 @@ Deno.serve(async (req) => {
 
   ${jsonLd ? `<script type="application/ld+json">${jsonLd}</script>` : ""}
 </head>
-<body></body>
+<body><p>Redirecting to <a href="${safeRedirect}">${safeRedirect}</a>…</p></body>
 </html>`;
 
   return new Response(html, {
