@@ -169,51 +169,55 @@ export default function HostMembers() {
               const isMe = m.user_id === user?.id;
               const isLastHost = m.role === "host" && hostCount <= 1;
               return (
-                <div key={m.user_id} className="flex flex-wrap items-center gap-3 rounded-md border p-3">
-                  <Avatar className="h-9 w-9">
-                    {m.profile?.avatar_url && <AvatarImage src={m.profile.avatar_url} />}
-                    <AvatarFallback>{(m.profile?.display_name ?? "?").slice(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="truncate font-medium">{m.profile?.display_name ?? "Unnamed"}</span>
-                      {isMe && <Badge variant="outline">You</Badge>}
+                <div key={m.user_id} className="rounded-md border p-3">
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-9 w-9 shrink-0">
+                      {m.profile?.avatar_url && <AvatarImage src={m.profile.avatar_url} />}
+                      <AvatarFallback>{(m.profile?.display_name ?? "?").slice(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate font-medium">{m.profile?.display_name ?? "Unnamed"}</span>
+                        {isMe && <Badge variant="outline">You</Badge>}
+                      </div>
+                      <div className="truncate text-xs text-muted-foreground">{m.profile?.email ?? "—"}</div>
+                      <div className="text-xs text-muted-foreground">Joined {format(new Date(m.created_at), "MMM d, yyyy")}</div>
                     </div>
-                    <div className="truncate text-xs text-muted-foreground">{m.profile?.email ?? "—"}</div>
-                    <div className="text-xs text-muted-foreground">Joined {format(new Date(m.created_at), "MMM d, yyyy")}</div>
                   </div>
-                  {isHost ? (
-                    <Select value={m.role} onValueChange={(v) => changeRole(m.user_id, v as Role)} disabled={isLastHost && m.role === "host"}>
-                      <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="host">Host</SelectItem>
-                        <SelectItem value="checker">Checker</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge variant={m.role === "host" ? "default" : "secondary"} className="capitalize">{m.role}</Badge>
-                  )}
-                  {(isHost || isMe) && (
-                    <AlertDialog>
-                      <AlertDialogTrigger render={
-                        <Button variant="ghost" size="icon" disabled={isLastHost} aria-label="Remove member">
-                          <TrashIcon className="h-4 w-4" />
-                        </Button>
-                      } />
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>{isMe ? "Leave this host?" : "Remove member?"}</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {isMe ? "You will lose access to this host's management." : `${m.profile?.display_name ?? "This member"} will lose access to this host.`}
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => removeMember(m.user_id)}>{isMe ? "Leave" : "Remove"}</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  )}
+                  <div className="mt-3 flex items-center justify-end gap-2">
+                    {isHost ? (
+                      <Select value={m.role} onValueChange={(v) => changeRole(m.user_id, v as Role)} disabled={isLastHost && m.role === "host"}>
+                        <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="host">Host</SelectItem>
+                          <SelectItem value="checker">Checker</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Badge variant={m.role === "host" ? "default" : "secondary"} className="capitalize">{m.role}</Badge>
+                    )}
+                    {(isHost || isMe) && (
+                      <AlertDialog>
+                        <AlertDialogTrigger render={
+                          <Button variant="ghost" size="icon" disabled={isLastHost} aria-label="Remove member">
+                            <TrashIcon className="h-4 w-4" />
+                          </Button>
+                        } />
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>{isMe ? "Leave this host?" : "Remove member?"}</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {isMe ? "You will lose access to this host's management." : `${m.profile?.display_name ?? "This member"} will lose access to this host.`}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => removeMember(m.user_id)}>{isMe ? "Leave" : "Remove"}</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                  </div>
                 </div>
               );
             })}
