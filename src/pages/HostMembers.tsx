@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeftIcon, CopyIcon, TrashIcon, PlusIcon } from "@phosphor-icons/react";
+import { ArrowLeftIcon, CopyIcon, TrashIcon, PlusIcon, EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { AppLayout } from "@/components/app-layout";
