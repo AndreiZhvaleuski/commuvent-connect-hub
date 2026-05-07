@@ -80,6 +80,7 @@ export function EventManagementCard({ event, stat, hostId }: { event: ManagedEve
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button render={<Link to={`/dashboard/${hostId}/events/${event.id}`} />} size="sm">Manage</Button>
           <Button render={<Link to={`/dashboard/${hostId}/events/${event.id}/edit`} />} size="sm" variant="outline">Edit</Button>
           <Button render={<Link to={`/dashboard/${hostId}/events/${event.id}/rsvps`} />} size="sm" variant="outline">RSVPs</Button>
           <Button render={<Link to={`/checkin/${event.id}`} />} size="sm" variant="outline">Check-in</Button>
