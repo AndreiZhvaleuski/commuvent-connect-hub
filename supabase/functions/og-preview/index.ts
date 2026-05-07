@@ -54,7 +54,17 @@ Deno.serve(async (req) => {
       const isPast = new Date(data.end_at) < new Date();
       const baseDescription = data.description ? truncate(removeMd(data.description), 150) : "Community event on Commuvent.";
 
-      title = `${data.title} · Commuvent`;
+      const tzForTitle = data.time_zone ?? "UTC";
+      let dateLabel = "";
+      try {
+        dateLabel = new Intl.DateTimeFormat("en-US", {
+          timeZone: tzForTitle,
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }).format(new Date(data.start_at));
+      } catch { /* ignore */ }
+      title = `${data.title}${dateLabel ? ` · ${dateLabel}` : ""} · Commuvent`;
       description = isPast ? `Past event · ${baseDescription}` : baseDescription;
       image = data.cover_image_url ?? "";
       ogType = "event";
