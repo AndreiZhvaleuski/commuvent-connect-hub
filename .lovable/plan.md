@@ -1,59 +1,55 @@
-## Goal
+## Members page for a Host
 
-Bring host create / edit / management to parity with the event flow:
+Replace the placeholder at `/dashboard/:hostId/members` with a real management page, plus an invite-acceptance route at `/invite/:token`.
 
-1. **Square crop dialog** for host logos, mirroring the event 16:9 cover crop.
-2. **Bio editor** uses the same `MarkdownEditor` setup as event description (already does — keep, polish hint copy).
-3. **Dedicated host editor page** reusing one form for create + edit, the way `EventEditor` handles `new` + `edit`.
-4. **Cross-links** wiring the host into the rest of the UI.
+### Page: `/dashboard/:hostId/members` (new `src/pages/HostMembers.tsx`)
 
-## 1. Square crop support
+Access: only existing host members of this host can open it (redirect to dashboard otherwise). Only users with `role = 'host'` can invite or remove members.
 
-`ImageUpload` only triggers `CoverCropDialog` when `aspect="video"`. Make it work for `aspect="square"` too, and rename the dialog to be aspect-aware.
+Layout (consistent with HostDashboard):
 
-- Rename `CoverCropDialog` → `ImageCropDialog`. Accept an `aspect: number` prop and an `output: { width; height; quality? }` prop.
-- Cropper inside uses the passed aspect. Title becomes "Crop image".
-- `ImageUpload`: trigger crop for both `square` and `video`. Pass aspect (`1` or `16/9`) and output size (`512×512` for square logos, `1600×900` for covers). Show the "Re-crop" button for both.
-- Remove the existing `cover-crop-dialog.tsx` filename in favor of `image-crop-dialog.tsx` (one rename + import update).
+- Header with host avatar + name and a "Back to dashboard" link.
+- **Members section**
+  - List of current members: avatar, display name, email (when available from `profiles`), role badge (Host / Checker), joined date.
+  - Each row has a role dropdown (Host can promote a Checker to Host or demote a Host to Checker — disabled when it would remove the last Host) and a "Remove" button.
+  - A user can always remove themselves (leave the host); the last remaining Host cannot leave or be demoted.
+- **Invite links section** (visible to Hosts only)
+  - Two cards: "Invite a Host" and "Invite a Checker", each with a short description of what the role can do.
+  - "Generate link" button creates a row in `host_invites` with role + a random token + 7-day expiry, then shows the URL `https://<app>/invite/<token>` with a Copy button and the expiry date.
+  - List of currently active invites for this host below, each with role, expiry, copy button, and revoke (delete) button.
+  - Expired or used invites are filtered out of the list.
 
-Result: host logo uploads go through the same crop UX as event covers, constrained to 1:1.
+### Page: `/invite/:token` (new `src/pages/InviteAccept.tsx`, replaces the placeholder)
 
-## 2. Host editor page
+- Looks up the invite by token (RLS allows the host members to read; we need an edge function to look up by token for non-members — see Technical).
+- If user is not signed in → redirect to `/sign-in?redirect=/invite/<token>`.
+- Shows host name, the role being granted, and an "Accept invitation" button.
+- On accept: calls an edge function that validates token + expiry and inserts `host_members` row, then redirects to `/dashboard/<hostId>` (or `/checkin` listing for Checkers — for now just dashboard).
+- Handles error states: invalid, expired, already a member.
 
-New route + page, modeled on `EventEditor`'s create/edit dual-mode pattern.
+### Role behavior wiring
 
-- Route: `/dashboard/:hostId/edit` → `HostEditor` (new page).
-- Refactor `BecomeAHost.tsx` → extract the form into `HostEditor` and use the same component for both:
-  - `/become-a-host` (create, no `hostId` param) — keeps current behavior, redirects to dashboard on success.
-  - `/dashboard/:hostId/edit` (edit) — loads host, prefills, requires `has_host_role(hostId,'host')`, updates row + replaces logo via storage.
-- Same field set, same Zod schema, same MarkdownEditor for bio (with character counter), same `ImageUpload` (now square+cropped).
-- Header reads "Become a host" vs "Edit host" based on mode. Submit reads "Create host" vs "Save changes".
-- On unauthorized access to edit (not a host member), redirect to `/dashboard/:hostId` with a toast.
+- Role values stored in `host_members.role`: `'host'` and `'checker'`.
+- The existing `has_host_role(host_id, 'host')` already gates host-only management actions, so Checkers automatically lose access to event creation, gallery moderation, dashboards, etc.
+- `CheckIn.tsx` already checks `host_members.role`; update it to allow either `'host'` or `'checker'`.
 
-`BecomeAHost.tsx` becomes a thin wrapper that renders `<HostEditor mode="create" />`, or we delete it and point `/become-a-host` directly at `HostEditor`. Prefer the latter — single source of truth.
+### Routing changes (`src/App.tsx`)
 
-## 3. Cross-links
+- `/dashboard/:hostId/members` → `<HostMembers />`
+- `/invite/:token` → `<InviteAccept />`
 
-| Where | Link / button | Notes |
-|---|---|---|
-| `HostDashboard` header | New **Edit host** outline button next to "Members" / "New event" | Goes to `/dashboard/:hostId/edit` |
-| `HostDashboard` header | Existing "View public page" link — keep | unchanged |
-| `HostPublic` header | When viewer is a host member, show **Manage** outline button (next to Share) → `/dashboard/:host.id` | Detect membership the same way `EventPage` detects `canManage` (query `host_members` for `auth.uid()`) |
-| `EventManage` page (header) | Add a small breadcrumb / back link: `← {host.name}` → `/dashboard/:hostId` | Mirrors how event pages already link to the host context |
-| `EventPage` aside (already has "Manage event" when host) | Add a secondary link **Host dashboard** → `/dashboard/:host_id` underneath | Quick jump, only when `canManage` |
+### Technical details
 
-All links respect existing RLS — buttons only render for verified host members, but routes also self-protect (already do).
+- New edge function `accept-host-invite` (service-role): takes `{ token }`, validates JWT of caller, looks up invite, checks `expires_at > now()`, inserts `host_members(host_id, user_id, role)` (ON CONFLICT do nothing), deletes the invite row, returns `{ host_id }`. Needed because non-members can't read `host_invites` under current RLS.
+- Optional second edge function `lookup-host-invite` for the accept page to display host name + role before accepting (returns `{ host_id, host_name, role, expires_at }`). Alternatively expose a SECURITY DEFINER SQL function `public.get_invite_preview(token text)`; prefer the SQL function for simplicity.
+- Member email: read from `profiles.display_name`; email isn't in `profiles` today, so display name + avatar only (no schema change). Note this in UI copy.
+  - Add e-mail to profiles as well.
+- Token generation: `crypto.randomUUID()` client-side is fine since the row is inserted by an authenticated Host (RLS enforces `has_host_role`).
+  - Account for possible creation of the same token - retry in this case.
+- Use existing `Card`, `Button`, `Avatar`, `Badge`, `Select`, `AlertDialog`, `useToast` components — no new shadcn additions.
 
-## File touches
+### Out of scope
 
-- `src/components/cover-crop-dialog.tsx` → renamed to `src/components/image-crop-dialog.tsx`, generalized.
-- `src/components/image-upload.tsx` — wire crop for square aspect; pass aspect/output to dialog.
-- `src/pages/HostEditor.tsx` — **new**, dual-mode (create/edit), based on current `BecomeAHost`.
-- `src/pages/BecomeAHost.tsx` — delete; route `/become-a-host` now renders `<HostEditor />`.
-- `src/App.tsx` — add `/dashboard/:hostId/edit` route; update `/become-a-host` import.
-- `src/pages/HostDashboard.tsx` — add "Edit host" button.
-- `src/pages/HostPublic.tsx` — detect membership, conditionally show "Manage" button.
-- `src/pages/EventManage.tsx` — add host back-link.
-- `src/pages/EventPage.tsx` — add "Host dashboard" link in the manage block.
-
-No DB / RLS changes needed — `hosts` already has `hosts_update_members` and the storage bucket is public.
+- Email-sending invites (link sharing only, per requirements).
+  - Emails are not configured so far.
+- Per-event Checker scoping (Checker is host-wide).
