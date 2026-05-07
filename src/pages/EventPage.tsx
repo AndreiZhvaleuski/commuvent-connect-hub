@@ -207,7 +207,6 @@ export default function EventPage() {
                 variant="full"
                 className="text-sm"
               />
-            </div>
               {(event.venue_address || event.online_url) && (
                 <div className="flex items-start gap-3">
                   {event.online_url ? <Globe className="mt-0.5 h-4 w-4 text-muted-foreground" /> : <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />}
