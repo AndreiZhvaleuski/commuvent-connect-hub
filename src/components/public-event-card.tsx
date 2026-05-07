@@ -62,16 +62,16 @@ export function PublicEventCard({ event: e, showStatusBadge = false }: Props) {
               {ended ? "Ended" : "Upcoming"}
             </Badge>
           )}
-          <CardTitle className="line-clamp-2 break-words">{e.title}</CardTitle>
+          <CardTitle className="line-clamp-2 [overflow-wrap:anywhere]">{e.title}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground min-w-0">
-          <div className="break-words">
+          <div className="[overflow-wrap:anywhere]">
             <EventDateTime startIso={e.start_at} endIso={e.end_at} timeZone={e.time_zone} variant="compact" />
           </div>
           {(e.venue_address || e.online_url) && (
             <div className="flex items-start gap-2 min-w-0">
               <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
-              <span className="break-words line-clamp-2 min-w-0">{e.venue_address ?? "Online"}</span>
+              <span className="[overflow-wrap:anywhere] line-clamp-2 min-w-0">{e.venue_address ?? "Online"}</span>
             </div>
           )}
         </CardContent>
