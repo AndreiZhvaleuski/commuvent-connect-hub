@@ -59,21 +59,19 @@ export function EventManagementCard({ event, stat, hostId, showManage = true }: 
             <Link to={`/dashboard/${hostId}/events/${event.id}`} className="hover:underline">{event.title}</Link>
           </CardTitle>
           <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-            <p className="inline-flex items-center gap-1.5">
-              <Calendar className="h-3 w-3 shrink-0" />
-              <span>{formatRange(event.start_at, event.end_at, eventTz)}</span>
-              <span className="opacity-70">({eventTz})</span>
+            <p className="flex items-start gap-1.5">
+              <Calendar className="h-3 w-3 shrink-0 mt-0.5" />
+              <span>{formatRange(event.start_at, event.end_at, eventTz)} <span className="opacity-70">({eventTz})</span></span>
             </p>
             {!sameTz && (
-              <p className="inline-flex items-center gap-1.5">
-                <Globe className="h-3 w-3 shrink-0" />
-                <span>{formatRange(event.start_at, event.end_at, userTz)}</span>
-                <span className="opacity-70">(your time · {userTz})</span>
+              <p className="flex items-start gap-1.5">
+                <Globe className="h-3 w-3 shrink-0 mt-0.5" />
+                <span>{formatRange(event.start_at, event.end_at, userTz)} <span className="opacity-70">(your time · {userTz})</span></span>
               </p>
             )}
             {duration && (
-              <p className="inline-flex items-center gap-1.5">
-                <Hourglass className="h-3 w-3 shrink-0" />
+              <p className="flex items-start gap-1.5">
+                <Hourglass className="h-3 w-3 shrink-0 mt-0.5" />
                 <span>Duration: {duration}</span>
               </p>
             )}
