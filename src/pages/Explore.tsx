@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { MapPinIcon as MapPin, MagnifyingGlassIcon as Search, GlobeIcon, SparkleIcon } from "@phosphor-icons/react";
+import { useSearchParams } from "react-router-dom";
+import { MagnifyingGlassIcon as Search, GlobeIcon, SparkleIcon } from "@phosphor-icons/react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
@@ -8,12 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { DatePicker } from "@/components/date-picker";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
-import { EventDateTime } from "@/components/event-datetime";
+import { PublicEventCard } from "@/components/public-event-card";
 
 type LocationMode = "any" | "in_person" | "online";
 
