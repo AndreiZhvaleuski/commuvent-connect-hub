@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { UploadSimpleIcon as Upload, TrashIcon as Trash2, ImageIcon } from "@phosphor-icons/react";
+import { UploadSimpleIcon as Upload, TrashIcon as Trash2, ImageIcon, CropIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CoverCropDialog } from "@/components/cover-crop-dialog";
 
 type Props = {
   value: string | null;
@@ -28,6 +29,8 @@ export function ImageUpload({
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(value);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [cropOpen, setCropOpen] = useState(false);
 
   useEffect(() => {
     if (file) {
@@ -38,18 +41,28 @@ export function ImageUpload({
     setPreview(value);
   }, [file, value]);
 
+  const validate = (f: File): boolean => {
+    if (!f.type.startsWith("image/")) { toast.error("Please choose an image file"); return false; }
+    if (f.size > maxSizeMB * 1024 * 1024) { toast.error(`Image must be smaller than ${maxSizeMB} MB`); return false; }
+    return true;
+  };
+
   const pick = (f: File | null) => {
     if (f) {
-      if (!f.type.startsWith("image/")) {
-        toast.error("Please choose an image file");
-        return;
-      }
-      if (f.size > maxSizeMB * 1024 * 1024) {
-        toast.error(`Image must be smaller than ${maxSizeMB} MB`);
+      if (!validate(f)) return;
+      if (aspect === "video") {
+        setPendingFile(f);
+        setCropOpen(true);
         return;
       }
     }
     onFileChange(f);
+  };
+
+  const reCrop = () => {
+    if (!file) return;
+    setPendingFile(file);
+    setCropOpen(true);
   };
 
   const initials = (fallbackText || "?").slice(0, 2).toUpperCase();
@@ -85,6 +98,11 @@ export function ImageUpload({
             <Upload className="mr-1 h-4 w-4" />
             {file || preview ? "Replace" : "Choose file"}
           </Button>
+          {aspect === "video" && file && (
+            <Button type="button" variant="outline" size="sm" onClick={reCrop}>
+              <CropIcon className="mr-1 h-4 w-4" /> Re-crop
+            </Button>
+          )}
           {(file || preview) && (
             <Button type="button" variant="ghost" size="sm" onClick={() => { pick(null); setPreview(null); }}>
               <Trash2 className="mr-1 h-4 w-4" /> Remove
@@ -96,9 +114,15 @@ export function ImageUpload({
           type="file"
           accept="image/*"
           className="hidden"
-          onChange={(e) => pick(e.target.files?.[0] ?? null)}
+          onChange={(e) => { pick(e.target.files?.[0] ?? null); if (inputRef.current) inputRef.current.value = ""; }}
         />
       </div>
+      <CoverCropDialog
+        file={pendingFile}
+        open={cropOpen}
+        onOpenChange={(o) => { setCropOpen(o); if (!o) setPendingFile(null); }}
+        onConfirm={(f) => onFileChange(f)}
+      />
     </div>
   );
 }
