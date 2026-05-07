@@ -4,7 +4,6 @@ import { ArrowSquareOutIcon as ExternalLink, FlagIcon as Flag, GlobeIcon as Glob
 import { EventDateTime } from "@/components/event-datetime";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { browserTz } from "@/lib/timezones";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
