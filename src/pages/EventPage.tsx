@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { CalendarIcon as Calendar, ClockIcon as Clock, ArrowSquareOutIcon as ExternalLink, FlagIcon as Flag, GlobeIcon as Globe, MapPinIcon as MapPin, UsersIcon as Users } from "@phosphor-icons/react";
+import { CalendarIcon as Calendar, ClockIcon as Clock, ArrowSquareOutIcon as ExternalLink, FlagIcon as Flag, GlobeIcon as Globe, MapPinIcon as MapPin, ShareIcon, UsersIcon as Users } from "@phosphor-icons/react";
 import { formatInTimeZone } from "date-fns-tz";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { useSEO } from "@/hooks/use-seo";
 import { browserTz } from "@/lib/timezones";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
@@ -44,13 +43,6 @@ export default function EventPage() {
   const [notFound, setNotFound] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
-
-  useSEO({
-    title: event ? `${event.title} — Commuvent` : "Event — Commuvent",
-    description: event?.description?.slice(0, 160) ?? "Community event on Commuvent.",
-    image: event?.cover_image_url ?? null,
-  });
-
   const load = async () => {
     if (!eventId) return;
     setBusy(true);
@@ -260,6 +252,13 @@ export default function EventPage() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
+              <Button variant="outline" size="sm" className="ml-2" onClick={async () => {
+                const shareUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-preview?type=event&id=${event.id}`;
+                await navigator.clipboard.writeText(shareUrl);
+                toast.success("Link copied! Share it anywhere to show a preview.");
+              }}>
+                <ShareIcon className="mr-1 h-4 w-4" />Share this event
+              </Button>
             </div>
 
             <EventGallery eventId={event.id} />

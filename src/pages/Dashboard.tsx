@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { PlusIcon as Plus, UsersIcon as Users } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { useSEO } from "@/hooks/use-seo";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,7 +28,6 @@ function stripMarkdown(md: string): string {
 }
 
 export default function Dashboard() {
-  useSEO({ title: "Dashboard — Commuvent", description: "Manage your hosts and events on Commuvent." });
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [hosts, setHosts] = useState<Host[]>([]);

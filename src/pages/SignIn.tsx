@@ -8,13 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 import { toast } from "sonner";
-import { useSEO } from "@/hooks/use-seo";
-
 export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup" }) {
-  useSEO({
-    title: mode === "signin" ? "Sign in" : "Sign up",
-    description: "Access your Commuvent account.",
-  });
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const intent = params.get("intent");

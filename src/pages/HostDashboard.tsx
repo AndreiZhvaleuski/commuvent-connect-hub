@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { PlusIcon as Plus, CalendarIcon as Calendar, UsersIcon as Users, ClockIcon as Clock, CheckCircleIcon as CheckCircle2, ArrowSquareOutIcon as ExternalLink } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { useSEO } from "@/hooks/use-seo";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,9 +27,6 @@ export default function HostDashboard() {
   const [busy, setBusy] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = searchParams.get("tab") === "past" ? "past" : "upcoming";
-
-  useSEO({ title: host ? `${host.name} — Commuvent` : "Host dashboard — Commuvent", description: "Manage your community's events." });
-
   useEffect(() => {
     if (loading) return;
     if (!user) { navigate(`/sign-in?redirect=${encodeURIComponent(`/dashboard/${hostId}`)}`); return; }

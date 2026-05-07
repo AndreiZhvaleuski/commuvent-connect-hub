@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { CalendarIcon as Calendar, EnvelopeIcon as Mail, MapPinIcon as MapPin } from "@phosphor-icons/react";
+import { CalendarIcon as Calendar, EnvelopeIcon as Mail, MapPinIcon as MapPin, ShareIcon } from "@phosphor-icons/react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useSEO } from "@/hooks/use-seo";
 import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,12 +21,6 @@ export default function HostPublic() {
   const [events, setEvents] = useState<Ev[]>([]);
   const [busy, setBusy] = useState(true);
   const [notFound, setNotFound] = useState(false);
-
-  useSEO({
-    title: host ? `${host.name} — Commuvent` : "Host — Commuvent",
-    description: host?.bio ?? "Community host on Commuvent.",
-  });
-
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -71,6 +66,15 @@ export default function HostPublic() {
                   <Mail className="h-4 w-4" /> {host.contact_email}
                 </a>
               )}
+              <div className="mt-3">
+                <Button variant="outline" size="sm" onClick={async () => {
+                  const shareUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-preview?type=host&id=${host.id}`;
+                  await navigator.clipboard.writeText(shareUrl);
+                  toast.success("Link copied! Share it anywhere to show a preview.");
+                }}>
+                  <ShareIcon className="mr-1 h-4 w-4" />Share this page
+                </Button>
+              </div>
             </div>
           </div>
         </div>

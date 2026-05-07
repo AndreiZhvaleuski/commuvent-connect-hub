@@ -6,7 +6,6 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { useSEO } from "@/hooks/use-seo";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +32,6 @@ const Schema = z.object({
 type Form = z.infer<typeof Schema>;
 
 export default function BecomeAHost() {
-  useSEO({ title: "Become a host — Commuvent", description: "Create a host profile and start gathering your community on Commuvent." });
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [logoFile, setLogoFile] = useState<File | null>(null);

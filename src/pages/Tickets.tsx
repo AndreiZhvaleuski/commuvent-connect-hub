@@ -5,7 +5,6 @@ import { CalendarIcon as CalIcon, ClockIcon as Clock, DownloadSimpleIcon as Down
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { useSEO } from "@/hooks/use-seo";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,7 +27,6 @@ type Row = {
 };
 
 export default function Tickets() {
-  useSEO({ title: "My Tickets — Commuvent", description: "Your RSVPs, QR codes, and waitlist positions on Commuvent." });
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);

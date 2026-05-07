@@ -4,7 +4,6 @@ import { ArrowLeftIcon as ArrowLeft, CheckIcon as Check, EyeSlashIcon as EyeOff,
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { useSEO } from "@/hooks/use-seo";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,9 +22,6 @@ export default function Moderation() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [busy, setBusy] = useState(true);
-
-  useSEO({ title: "Moderation — Commuvent", description: "Approve gallery photos and resolve reports." });
-
   const load = async () => {
     setBusy(true);
     // Events for this host, then pending photos and open reports limited to those events
