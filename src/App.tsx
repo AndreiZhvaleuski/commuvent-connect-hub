@@ -8,7 +8,7 @@ import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import SignIn from "./pages/SignIn.tsx";
 import { Placeholder } from "./pages/Placeholder.tsx";
-import BecomeAHost from "./pages/BecomeAHost.tsx";
+import HostEditor from "./pages/HostEditor.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import HostDashboard from "./pages/HostDashboard.tsx";
 import EventEditor from "./pages/EventEditor.tsx";
