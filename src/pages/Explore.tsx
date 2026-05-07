@@ -60,11 +60,12 @@ export default function Explore() {
         .limit(60);
 
       if (!includePast) qb = qb.gte("end_at", new Date().toISOString());
-      if (from) qb = qb.gte("start_at", new Date(from).toISOString());
-      if (to) {
-        const end = new Date(to); end.setHours(23, 59, 59, 999);
-        qb = qb.lte("start_at", end.toISOString());
-      }
+      const parseLocal = (s: string, endOfDay = false) => {
+        const [y, m, d] = s.split("-").map(Number);
+        return new Date(y, (m ?? 1) - 1, d ?? 1, endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0, endOfDay ? 999 : 0);
+      };
+      if (from) qb = qb.gte("start_at", parseLocal(from).toISOString());
+      if (to) qb = qb.lte("start_at", parseLocal(to, true).toISOString());
       if (q.trim()) {
         const safe = q.trim().replace(/[%,()]/g, " ");
         qb = qb.or(`title.ilike.%${safe}%,venue_address.ilike.%${safe}%`);
