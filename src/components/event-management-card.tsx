@@ -41,7 +41,7 @@ function formatRange(startIso: string, endIso: string, tz: string): string {
   }
 }
 
-export function EventManagementCard({ event, stat, hostId }: { event: ManagedEvent; stat?: EventStat; hostId: string }) {
+export function EventManagementCard({ event, stat, hostId, showManage = true }: { event: ManagedEvent; stat?: EventStat; hostId: string; showManage?: boolean }) {
   const s = stat ?? { event_id: event.id, going_count: 0, waitlist_count: 0, checked_in_count: 0 };
   const eventTz = event.time_zone || "UTC";
   const userTz = browserTz();
@@ -80,7 +80,7 @@ export function EventManagementCard({ event, stat, hostId }: { event: ManagedEve
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button render={<Link to={`/dashboard/${hostId}/events/${event.id}`} />} size="sm">Manage</Button>
+          {showManage && <Button render={<Link to={`/dashboard/${hostId}/events/${event.id}`} />} size="sm">Manage</Button>}
           <Button render={<Link to={`/dashboard/${hostId}/events/${event.id}/edit`} />} size="sm" variant="outline">Edit</Button>
           <Button render={<Link to={`/dashboard/${hostId}/events/${event.id}/rsvps`} />} size="sm" variant="outline">RSVPs</Button>
           <Button render={<Link to={`/checkin/${event.id}`} />} size="sm" variant="outline">Check-in</Button>
