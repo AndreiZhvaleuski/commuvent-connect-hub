@@ -21,6 +21,7 @@ import EventRsvps from "./pages/EventRsvps.tsx";
 import About from "./pages/About.tsx";
 import Moderation from "./pages/Moderation.tsx";
 import EventManage from "./pages/EventManage.tsx";
+import ScrollToTop from "./components/scroll-to-top";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/explore" element={<Explore />} />
