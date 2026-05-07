@@ -1,24 +1,8 @@
 import { escape } from "jsr:@std/html";
+import removeMd from "npm:remove-markdown@0.5.5";
 import { admin, corsHeaders } from "../_shared/auth.ts";
 
 const APP_URL = Deno.env.get("APP_URL") ?? "https://commuvent-connect-hub.lovable.app";
-
-function stripMarkdown(md: string): string {
-  return md
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/`([^`]+)`/g, "$1")
-    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-    .replace(/^\s{0,3}>+\s?/gm, "")
-    .replace(/^\s{0,3}#{1,6}\s+/gm, "")
-    .replace(/^\s*[-*+]\s+/gm, "")
-    .replace(/^\s*\d+\.\s+/gm, "")
-    .replace(/(\*\*|__)(.*?)\1/g, "$2")
-    .replace(/(\*|_)(.*?)\1/g, "$2")
-    .replace(/~~(.*?)~~/g, "$1")
-    .replace(/\s+/g, " ")
-    .trim();
-}
 
 function truncate(s: string, n: number): string {
   return s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s;
@@ -68,7 +52,7 @@ Deno.serve(async (req) => {
 
     if (data) {
       const isPast = new Date(data.end_at) < new Date();
-      const baseDescription = data.description ? truncate(stripMarkdown(data.description), 150) : "Community event on Commuvent.";
+      const baseDescription = data.description ? truncate(removeMd(data.description), 150) : "Community event on Commuvent.";
 
       title = `${data.title} · Commuvent`;
       description = isPast ? `Past event · ${baseDescription}` : baseDescription;
@@ -114,7 +98,7 @@ Deno.serve(async (req) => {
 
     if (data) {
       title = `${data.name} · Commuvent`;
-      description = data.bio ? truncate(stripMarkdown(data.bio), 160) : description;
+      description = data.bio ? truncate(removeMd(data.bio), 160) : description;
       image = data.logo_url ?? "";
 
       jsonLd = JSON.stringify({
