@@ -249,16 +249,25 @@ export default function EventEditor() {
 
   const onError = () => toast.error("Please fix the highlighted fields");
 
-  const onSave = form.handleSubmit(async (v) => { await save(v); }, onError);
+  const goManage = (id: string) => navigate(`/dashboard/${hostId}/events/${id}`);
+  const onSave = form.handleSubmit(async (v) => {
+    const id = await save(v);
+    if (id && isEdit) goManage(id);
+  }, onError);
   const onSaveDraft = form.handleSubmit(async (v) => {
     const id = await save(v, "draft");
     if (id && !isEdit) navigate(`/dashboard/${hostId}/events/${id}/edit`);
   }, onError);
   const onPublish = form.handleSubmit(async (v) => {
     const id = await save(v, "published");
-    if (id && !isEdit) navigate(`/dashboard/${hostId}/events/${id}/edit`);
+    if (!id) return;
+    if (isEdit) goManage(id);
+    else navigate(`/dashboard/${hostId}/events/${id}/edit`);
   }, onError);
-  const onUnpublish = form.handleSubmit(async (v) => { await save(v, "draft"); }, onError);
+  const onUnpublish = form.handleSubmit(async (v) => {
+    const id = await save(v, "draft");
+    if (id && isEdit) goManage(id);
+  }, onError);
 
   const onDuplicate = async () => {
     if (!eventId || !hostId) return;
