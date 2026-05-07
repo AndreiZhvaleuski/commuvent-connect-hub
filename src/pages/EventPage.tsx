@@ -60,10 +60,6 @@ export default function EventPage() {
       const { data: r } = await supabase.from("rsvps").select("id,status,position,code,cancelled_at")
         .eq("event_id", eventId).eq("user_id", user.id).maybeSingle();
       setRsvp((r ?? null) as Rsvp | null);
-    if (user) {
-      const { data: r } = await supabase.from("rsvps").select("id,status,position,code,cancelled_at")
-        .eq("event_id", eventId).eq("user_id", user.id).maybeSingle();
-      setRsvp((r ?? null) as Rsvp | null);
       const { data: hm } = await supabase.from("host_members").select("role").eq("host_id", ev.host_id).eq("user_id", user.id).maybeSingle();
       setCanManage(!!hm);
     } else {
