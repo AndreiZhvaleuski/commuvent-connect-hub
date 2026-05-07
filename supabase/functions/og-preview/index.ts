@@ -124,6 +124,8 @@ Deno.serve(async (req) => {
   }
 
   const redirectUrl = `${APP_URL}${redirectPath}`;
+  const redirectAttr = escape(redirectUrl, { attribute: true });
+  const redirectScript = JSON.stringify(redirectUrl).replace(/</g, "\\u003c");
   const safeTitle = escape(title);
   const safeDesc = escape(description);
   const safeImage = escape(image);
@@ -149,12 +151,20 @@ Deno.serve(async (req) => {
   ${safeImage ? `<meta name="twitter:image" content="${safeImage}">` : ""}
 
   ${jsonLd ? `<script type="application/ld+json">${jsonLd}</script>` : ""}
-  <script>window.location.replace(${JSON.stringify(redirectUrl)});</script>
+  <script>window.location.replace(${redirectScript});</script>
 </head>
-<body><p>Redirecting to <a href="${safeRedirect}">${safeRedirect}</a>…</p></body>
+<body>
+  <p>Redirecting to <a href="${redirectAttr}">${safeRedirect}</a>…</p>
+  <form action="${redirectAttr}" method="get">
+    <button type="submit" autofocus>Continue to event</button>
+  </form>
+</body>
 </html>`;
 
-  return new Response(html, {
-    headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" },
-  });
+  const headers = new Headers(corsHeaders);
+  headers.set("content-type", "text/html; charset=utf-8");
+  headers.set("cache-control", "no-store");
+  headers.set("content-security-policy", "script-src 'unsafe-inline'; default-src 'self' https:; base-uri 'none'; form-action 'self' https:");
+
+  return new Response(html, { headers });
 });
