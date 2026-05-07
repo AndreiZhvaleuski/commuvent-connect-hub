@@ -19,10 +19,12 @@ type Ev = { id: string; title: string; cover_image_url: string | null; start_at:
 
 export default function HostPublic() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
   const [host, setHost] = useState<Host | null>(null);
   const [events, setEvents] = useState<Ev[]>([]);
   const [busy, setBusy] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [canManage, setCanManage] = useState(false);
   useEffect(() => {
     if (!id) return;
     (async () => {
