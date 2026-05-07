@@ -98,6 +98,11 @@ export function ImageUpload({
             <Upload className="mr-1 h-4 w-4" />
             {file || preview ? "Replace" : "Choose file"}
           </Button>
+          {aspect === "video" && file && (
+            <Button type="button" variant="outline" size="sm" onClick={reCrop}>
+              <CropIcon className="mr-1 h-4 w-4" /> Re-crop
+            </Button>
+          )}
           {(file || preview) && (
             <Button type="button" variant="ghost" size="sm" onClick={() => { pick(null); setPreview(null); }}>
               <Trash2 className="mr-1 h-4 w-4" /> Remove
@@ -109,9 +114,15 @@ export function ImageUpload({
           type="file"
           accept="image/*"
           className="hidden"
-          onChange={(e) => pick(e.target.files?.[0] ?? null)}
+          onChange={(e) => { pick(e.target.files?.[0] ?? null); if (inputRef.current) inputRef.current.value = ""; }}
         />
       </div>
+      <CoverCropDialog
+        file={pendingFile}
+        open={cropOpen}
+        onOpenChange={(o) => { setCropOpen(o); if (!o) setPendingFile(null); }}
+        onConfirm={(f) => onFileChange(f)}
+      />
     </div>
   );
 }
