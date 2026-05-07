@@ -41,7 +41,7 @@ function formatRange(startIso: string, endIso: string, tz: string): string {
   }
 }
 
-export function EventManagementCard({ event, stat, hostId }: { event: ManagedEvent; stat?: EventStat; hostId: string }) {
+export function EventManagementCard({ event, stat, hostId, showManage = true }: { event: ManagedEvent; stat?: EventStat; hostId: string; showManage?: boolean }) {
   const s = stat ?? { event_id: event.id, going_count: 0, waitlist_count: 0, checked_in_count: 0 };
   const eventTz = event.time_zone || "UTC";
   const userTz = browserTz();
