@@ -192,10 +192,27 @@ export default function Explore() {
                           alt={e.title}
                           className="relative z-10 mx-auto h-full w-auto max-w-full object-contain"
                         />
+                        {includePast && (
+                          <span
+                            className={cn(
+                              "absolute left-2 top-2 z-20 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow",
+                              ended ? "bg-red-600" : "bg-emerald-600"
+                            )}
+                          >
+                            {ended ? "Ended" : "Upcoming"}
+                          </span>
+                        )}
                       </div>
                     )}
                     <CardHeader>
-                      {ended && <Badge variant="secondary" className="w-fit mb-1">Ended</Badge>}
+                      {includePast && !e.cover_image_url && (
+                        <Badge
+                          variant="secondary"
+                          className={cn("w-fit mb-1 text-white", ended ? "bg-red-600" : "bg-emerald-600")}
+                        >
+                          {ended ? "Ended" : "Upcoming"}
+                        </Badge>
+                      )}
                       <CardTitle className="line-clamp-2">{e.title}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2 text-sm text-muted-foreground">
