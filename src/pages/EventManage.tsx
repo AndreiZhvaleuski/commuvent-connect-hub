@@ -68,7 +68,7 @@ export default function EventManage() {
           </Link>
         </div>
 
-        <EventManagementCard event={event} stat={stat} hostId={host.id} />
+        <EventManagementCard event={event} stat={stat} hostId={host.id} showManage={false} />
       </div>
     </AppLayout>
   );
