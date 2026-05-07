@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { CalendarIcon as Calendar, EnvelopeIcon as Mail, MapPinIcon as MapPin } from "@phosphor-icons/react";
+import { CalendarIcon as Calendar, EnvelopeIcon as Mail, MapPinIcon as MapPin, ShareIcon } from "@phosphor-icons/react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
