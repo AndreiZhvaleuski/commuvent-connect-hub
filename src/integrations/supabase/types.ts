@@ -435,7 +435,9 @@ export type Database = {
         Args: { p_token: string }
         Returns: {
           expires_at: string
+          host_bio: string
           host_id: string
+          host_logo_url: string
           host_name: string
           role: string
         }[]
