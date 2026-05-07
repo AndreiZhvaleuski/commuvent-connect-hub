@@ -67,7 +67,7 @@ export function PublicEventCard({ event: e, showStatusBadge = false }: Props) {
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground min-w-0">
           <div className="[overflow-wrap:anywhere]">
-            <EventDateTime startIso={e.start_at} endIso={e.end_at} timeZone={e.time_zone} variant="compact" />
+            <EventDateTime startIso={e.start_at} endIso={e.end_at} timeZone={browserTz()} variant="compact" />
           </div>
           {(e.venue_address || e.online_url) && (
             <div className="flex items-start gap-2 min-w-0">
