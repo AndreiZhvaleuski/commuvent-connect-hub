@@ -20,15 +20,22 @@ export function EventDateTime({ startIso, endIso, timeZone, variant = "compact",
         <p className="flex items-start gap-1.5">
           <CalendarIcon className="h-3 w-3 shrink-0 mt-0.5" />
           <span>
-            {info.rangeEvent}{" "}
-            {!info.sameTz && <span className="opacity-70">({info.eventTz})</span>}
+            {info.rangeEvent}
+            {!info.sameTz && (
+              <>
+                <span className="hidden sm:inline"> </span>
+                <span className="block opacity-70 sm:inline">({info.eventTz})</span>
+              </>
+            )}
           </span>
         </p>
         {!info.sameTz && (
           <p className="flex items-start gap-1.5">
             <GlobeIcon className="h-3 w-3 shrink-0 mt-0.5" />
             <span>
-              {info.rangeUser} <span className="opacity-70">(your time · {info.userTz})</span>
+              {info.rangeUser}
+              <span className="hidden sm:inline"> </span>
+              <span className="block opacity-70 sm:inline">(your time · {info.userTz})</span>
             </span>
           </p>
         )}
