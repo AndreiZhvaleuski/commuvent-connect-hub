@@ -1,9 +1,6 @@
 import { type ReactNode } from "react";
 import { AppLayout } from "@/components/app-layout";
-import { useSEO } from "@/hooks/use-seo";
-
 export function Placeholder({ title, children }: { title: string; children?: ReactNode }) {
-  useSEO({ title, description: `${title} on Commuvent.` });
   return (
     <AppLayout>
       <div className="container mx-auto px-4 py-20">

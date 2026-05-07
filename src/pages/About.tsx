@@ -2,15 +2,9 @@ import { DownloadSimpleIcon as Download } from "@phosphor-icons/react";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSEO } from "@/hooks/use-seo";
 import { buildCsv, downloadBlob, EXAMPLE_RSVP_ROWS } from "@/lib/csv";
 
 export default function About() {
-  useSEO({
-    title: "About — Commuvent",
-    description: "Commuvent is a lightweight community event hosting and attendance platform.",
-  });
-
   function downloadExample() {
     const blob = buildCsv(EXAMPLE_RSVP_ROWS);
     downloadBlob(blob, "commuvent-rsvps-example.csv");

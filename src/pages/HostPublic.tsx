@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { CalendarIcon as Calendar, EnvelopeIcon as Mail, MapPinIcon as MapPin } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
-import { useSEO } from "@/hooks/use-seo";
 import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,12 +19,6 @@ export default function HostPublic() {
   const [events, setEvents] = useState<Ev[]>([]);
   const [busy, setBusy] = useState(true);
   const [notFound, setNotFound] = useState(false);
-
-  useSEO({
-    title: host ? `${host.name} — Commuvent` : "Host — Commuvent",
-    description: host?.bio ?? "Community host on Commuvent.",
-  });
-
   useEffect(() => {
     if (!id) return;
     (async () => {

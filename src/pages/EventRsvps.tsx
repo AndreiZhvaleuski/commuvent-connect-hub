@@ -3,7 +3,6 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { ArrowLeftIcon as ArrowLeft, DownloadSimpleIcon as Download } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { useSEO } from "@/hooks/use-seo";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,9 +29,6 @@ export default function EventRsvps() {
   const [event, setEvent] = useState<{ id: string; title: string; time_zone: string; host_id: string } | null>(null);
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState(true);
-
-  useSEO({ title: event ? `RSVPs · ${event.title} — Commuvent` : "RSVPs — Commuvent", description: "Manage and export RSVPs." });
-
   useEffect(() => {
     if (loading) return;
     if (!user) { navigate(`/sign-in?redirect=/dashboard/${hostId}/events/${eventId}/rsvps`); return; }

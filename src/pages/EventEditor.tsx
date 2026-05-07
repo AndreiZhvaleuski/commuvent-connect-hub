@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { CopyIcon as Copy, EyeIcon as Eye, EyeSlashIcon as EyeOff, MapPinIcon, GlobeIcon } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { useSEO } from "@/hooks/use-seo";
 import { listTimezones, browserTz } from "@/lib/timezones";
 import { slugify } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -106,12 +105,6 @@ export default function EventEditor() {
   const [, forceTick] = useState(0);
 
   const tzs = useMemo(() => listTimezones(), []);
-
-  useSEO({
-    title: isEdit ? "Edit event — Commuvent" : "New event — Commuvent",
-    description: "Create or edit a community event on Commuvent.",
-  });
-
   const initialStart = nextHour();
   const initialEnd = new Date(initialStart.getTime() + 60 * 60 * 1000);
 

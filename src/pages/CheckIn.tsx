@@ -9,8 +9,6 @@ import { TopNav } from "@/components/top-nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSEO } from "@/hooks/use-seo";
-
 export default function CheckIn() {
   const { eventId } = useParams<{ eventId: string }>();
   const { user, loading } = useAuth();
@@ -18,9 +16,6 @@ export default function CheckIn() {
   const [submitting, setSubmitting] = useState(false);
   const [counters, setCounters] = useState({ going: 0, checkedIn: 0 });
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useSEO({ title: "Check-in · Commuvent", description: "Scan or enter ticket codes to check attendees in." });
-
   const { data: event, isLoading: evLoading } = useQuery({
     queryKey: ["checkin-event", eventId],
     enabled: !!eventId && !!user,

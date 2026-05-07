@@ -6,8 +6,6 @@ import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useSEO } from "@/hooks/use-seo";
-
 type Ev = {
   id: string; title: string; description: string | null;
   cover_image_url: string | null; start_at: string; end_at: string;
@@ -15,7 +13,6 @@ type Ev = {
 };
 
 export default function Index() {
-  useSEO({ title: "Commuvent — Where community meets event.", description: "Discover and host free community events." });
   const [events, setEvents] = useState<Ev[]>([]);
   const [loading, setLoading] = useState(true);
 
