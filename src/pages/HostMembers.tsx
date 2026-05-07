@@ -252,10 +252,7 @@ export default function HostMembers() {
                     return (
                       <div key={inv.id} className="rounded-md border p-3">
                         <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <Badge variant={inv.role === "host" ? "default" : "secondary"} className="capitalize">{inv.role}</Badge>
-                            <span className="text-xs text-muted-foreground">expires {format(new Date(inv.expires_at), "MMM d")}</span>
-                          </div>
+                          <Badge variant={inv.role === "host" ? "default" : "secondary"} className="capitalize">{inv.role}</Badge>
                           <div className="flex items-center gap-1">
                             <Button
                               size="sm"
@@ -276,6 +273,9 @@ export default function HostMembers() {
                         {isShown && (
                           <code className="mt-2 block truncate text-xs text-muted-foreground">{url}</code>
                         )}
+                        <div className="mt-2 text-xs text-muted-foreground">
+                          Expires {format(new Date(inv.expires_at), "MMM d, yyyy")}
+                        </div>
                       </div>
                     );
                   })}
