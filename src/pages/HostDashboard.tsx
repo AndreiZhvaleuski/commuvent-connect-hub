@@ -103,49 +103,9 @@ function EventList({ events, stats, hostId, emptyText }: { events: Ev[]; stats: 
   }
   return (
     <div className="grid gap-3">
-      {events.map((e) => {
-        const s = stats[e.id] ?? { going_count: 0, waitlist_count: 0, checked_in_count: 0 } as Stat;
-        return (
-          <Card key={e.id}>
-            <CardHeader className="flex-row items-start justify-between gap-4">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 mb-3 uppercase">
-                  <Badge variant={e.status === "published" ? "default" : "secondary"} className="uppercase tracking-wide">{e.status}</Badge>
-                  <Badge variant="outline" className="uppercase tracking-wide">{e.visibility}</Badge>
-                </div>
-                <CardTitle className="truncate">{e.title}</CardTitle>
-                <p className="text-xs text-muted-foreground mt-1 inline-flex items-center gap-1">
-                  <Calendar className="h-3 w-3" /> {new Date(e.start_at).toLocaleString()}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button render={<Link to={`/dashboard/${hostId}/events/${e.id}/edit`} />} size="sm" variant="outline">Edit</Button>
-                <Button render={<Link to={`/dashboard/${hostId}/events/${e.id}/rsvps`} />} size="sm" variant="outline">RSVPs</Button>
-                <Button render={<Link to={`/checkin/${e.id}`} />} size="sm" variant="outline">Check-in</Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <Stat label="Going" value={s.going_count} icon={<Users className="h-4 w-4" />} suffix={e.capacity ? `/ ${e.capacity}` : ""} />
-                <Stat label="Waitlist" value={s.waitlist_count} icon={<Clock className="h-4 w-4" />} />
-                <Stat label="Checked-in" value={s.checked_in_count} icon={<CheckCircle2 className="h-4 w-4" />} />
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
-    </div>
-  );
-}
-
-function Stat({ label, value, icon, suffix }: { label: string; value: number; icon: React.ReactNode; suffix?: string }) {
-  return (
-    <div className="rounded-lg border bg-card p-3">
-      <div className="text-xs text-muted-foreground flex items-center gap-1">
-        <span className="shrink-0">{icon}</span>
-        <span className="truncate">{label}</span>
-      </div>
-      <div className="mt-1 text-xl font-semibold tabular-nums">{value}{suffix && <span className="text-sm font-normal text-muted-foreground ml-1">{suffix}</span>}</div>
+      {events.map((e) => (
+        <EventManagementCard key={e.id} event={e} stat={stats[e.id]} hostId={hostId} />
+      ))}
     </div>
   );
 }
