@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeftIcon, CopyIcon, TrashIcon, PlusIcon } from "@phosphor-icons/react";
+import { ArrowLeftIcon, CopyIcon, TrashIcon, PlusIcon, EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { AppLayout } from "@/components/app-layout";
@@ -35,6 +35,7 @@ export default function HostMembers() {
   const [invites, setInvites] = useState<Invite[]>([]);
   const [busy, setBusy] = useState(true);
   const [generating, setGenerating] = useState<Role | null>(null);
+  const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
   const myRole = useMemo(() => members.find((m) => m.user_id === user?.id)?.role ?? null, [members, user?.id]);
   const isHost = myRole === "host";
@@ -247,6 +248,7 @@ export default function HostMembers() {
                   <h3 className="text-sm font-medium">Active invite links</h3>
                   {invites.map((inv) => {
                     const url = `${window.location.origin}/invite/${inv.token}`;
+                    const isShown = !!revealed[inv.id];
                     return (
                       <div key={inv.id} className="rounded-md border p-3">
                         <div className="flex items-center justify-between gap-2">
@@ -255,6 +257,14 @@ export default function HostMembers() {
                             <span className="text-xs text-muted-foreground">expires {format(new Date(inv.expires_at), "MMM d")}</span>
                           </div>
                           <div className="flex items-center gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setRevealed((r) => ({ ...r, [inv.id]: !r[inv.id] }))}
+                              aria-label={isShown ? "Hide link" : "Show link"}
+                            >
+                              {isShown ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                            </Button>
                             <Button size="sm" variant="outline" onClick={() => copyLink(inv.token)}>
                               <CopyIcon className="mr-1 h-4 w-4" />Copy
                             </Button>
@@ -263,7 +273,9 @@ export default function HostMembers() {
                             </Button>
                           </div>
                         </div>
-                        <code className="mt-2 block truncate text-xs text-muted-foreground">{url}</code>
+                        {isShown && (
+                          <code className="mt-2 block truncate text-xs text-muted-foreground">{url}</code>
+                        )}
                       </div>
                     );
                   })}
