@@ -143,6 +143,7 @@ export default function Explore() {
                 value={from ? new Date(from) : null}
                 onChange={(d) => setFrom(d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "")}
                 placeholder="Pick a date"
+                className="h-8 min-h-8 py-1"
               />
             </div>
             <div className="space-y-2">
@@ -151,16 +152,17 @@ export default function Explore() {
                 value={to ? new Date(to) : null}
                 onChange={(d) => setTo(d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "")}
                 placeholder="Pick a date"
+                className="h-8 min-h-8 py-1"
               />
             </div>
-            <div className="flex h-10 items-center gap-3 sm:col-span-2 lg:col-span-4">
+            <div className="flex h-8 items-center gap-3 sm:col-span-2 lg:col-span-4">
               <div className="flex items-center gap-2">
                 <Switch id="past" checked={includePast} onCheckedChange={setIncludePast} />
                 <Label htmlFor="past" className="cursor-pointer">Include past events</Label>
               </div>
               <Button
                 variant="ghost"
-                size="sm"
+                size="default"
                 className={cn("ml-auto", !(q || from || to || includePast || mode !== "any") && "invisible")}
                 onClick={clearAll}
               >
