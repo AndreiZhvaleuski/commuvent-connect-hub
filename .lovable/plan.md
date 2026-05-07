@@ -1,31 +1,33 @@
-## Problem
-
-`og-preview` currently splits behavior by User-Agent:
-- Bots → HTML with OG/JSON-LD tags
-- Everyone else → `302` redirect to the SPA
-
-OG inspectors like `opengraph.xyz` now send a browser-like UA **and** follow redirects, so they land on the SPA instead of seeing our OG tags. The earlier version (HTML + `<meta http-equiv="refresh">`) had the same problem because they follow refresh too.
-
 ## Fix
 
-Drop UA sniffing. Always return the same OG HTML, but redirect real browsers via JavaScript instead of meta-refresh / 302:
+Restore the OG/JSON-LD HTML response, but split scrapers vs. browsers using the **`Accept` request header** instead of User-Agent.
 
-- Remove the `isBot` branch and the 302 response
-- Remove `<meta http-equiv="refresh" ...>` from the HTML
-- Add `<script>window.location.replace("…")</script>` at the end of `<head>`
-- Keep `<body>` with a visible "Redirecting to …" link as a no-JS fallback
+### Why `Accept` (not UA)
 
-### Why this works
+Real browsers always send `Accept: text/html,...` on top-level navigation. Scrapers (Facebook, Twitter, Slack, LinkedIn, WhatsApp, Telegram, opengraph.xyz, metatags.io, curl) send `*/*` or omit it. UA sniffing broke because opengraph.xyz now sends a Chrome-like UA — but their fetch still uses `Accept: */*`.
 
-| Client | Sees |
-|---|---|
-| Real browser | Runs the script → instant client-side redirect to `/e/:id` or `/h/:id` |
-| Crawlers (FB, Twitter, Slack, Google, …) | Don't run JS → parse OG/JSON-LD tags |
-| OG inspectors (opengraph.xyz, metatags.io, …) | Don't run JS during scrape → parse OG/JSON-LD tags |
-| No-JS browser | Sees the visible fallback link and can click through |
+Note: the Supabase edge gateway forces `Content-Type: text/plain` and a sandbox CSP on every response. That's fine for scrapers (they grep the body for `<meta>` tags regardless of content-type) but means we cannot render an HTML preview page in a browser — so browsers must be redirected server-side.
 
-No other files change. The redirect URL, OG tags, and JSON-LD payload stay identical.
+### Behavior
 
-## File touched
+| Client | `Accept` starts with `text/html`? | Response |
+|---|---|---|
+| Browser navigation | yes | `302` → `/e/:id` or `/h/:id` |
+| Scrapers, OG inspectors, curl | no | `200` body with `<meta og:*>`, JSON-LD, and a visible `<a>` fallback link |
 
-- `supabase/functions/og-preview/index.ts` — replace the bot-vs-user branch with a single HTML response that uses a JS redirect.
+### File touched
+
+- `supabase/functions/og-preview/index.ts` — re-add the HTML branch (OG tags + JSON-LD + visible fallback link, no meta-refresh, no script). Branch on `Accept` header: `text/html` → existing 302; otherwise → HTML body.
+
+```text
+request → og-preview
+            │
+   Accept includes "text/html"?
+       │             │
+      yes            no
+       │             │
+   302 → /e/:id    200 body with full OG + JSON-LD
+                    + visible "Continue to event →" link
+```
+
+No other files change. Share-link URLs stay the same.

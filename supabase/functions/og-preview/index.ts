@@ -125,16 +125,56 @@ Deno.serve(async (req) => {
 
   const redirectUrl = `${APP_URL}${redirectPath}`;
 
-  // The Supabase edge gateway forces `Content-Type: text/plain` and a
-  // `Content-Security-Policy: default-src 'none'; sandbox` header on every
-  // response, so we cannot serve a working HTML preview page from this URL
-  // (scripts can't run, browsers render the source as text). Always 302 to
-  // the SPA so share links reliably land users on the event/host page.
-  // Suppress unused-variable warnings for values we no longer need.
-  void title; void description; void image; void jsonLd; void ogType;
+  // Real browser navigations send `Accept: text/html,...`. Scrapers
+  // (Facebook, Twitter, Slack, LinkedIn, WhatsApp, opengraph.xyz, curl, ...)
+  // send `*/*` or omit it. Browsers can't render an HTML preview here
+  // because the Supabase edge gateway forces `text/plain` + sandbox CSP,
+  // so they must be redirected server-side.
+  const accept = req.headers.get("accept") ?? "";
+  const wantsHtml = accept.includes("text/html");
 
-  return new Response(null, {
-    status: 302,
-    headers: { ...corsHeaders, Location: redirectUrl, "Cache-Control": "no-store" },
+  if (wantsHtml) {
+    return new Response(null, {
+      status: 302,
+      headers: { ...corsHeaders, Location: redirectUrl, "Cache-Control": "no-store" },
+    });
+  }
+
+  const ogImageTag = image
+    ? `<meta property="og:image" content="${escape(image, { attribute: true })}">
+  <meta name="twitter:image" content="${escape(image, { attribute: true })}">`
+    : "";
+  const jsonLdTag = jsonLd
+    ? `<script type="application/ld+json">${jsonLd.replace(/</g, "\\u003c")}</script>`
+    : "";
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${escape(title)}</title>
+  <meta name="description" content="${escape(description, { attribute: true })}">
+  <meta property="og:type" content="${escape(ogType, { attribute: true })}">
+  <meta property="og:title" content="${escape(title, { attribute: true })}">
+  <meta property="og:description" content="${escape(description, { attribute: true })}">
+  <meta property="og:url" content="${escape(redirectUrl, { attribute: true })}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${escape(title, { attribute: true })}">
+  <meta name="twitter:description" content="${escape(description, { attribute: true })}">
+  ${ogImageTag}
+  ${jsonLdTag}
+</head>
+<body>
+  <p>Continue to <a href="${escape(redirectUrl, { attribute: true })}">${escape(redirectUrl)}</a></p>
+</body>
+</html>`;
+
+  return new Response(html, {
+    status: 200,
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "public, max-age=300",
+    },
   });
 });
