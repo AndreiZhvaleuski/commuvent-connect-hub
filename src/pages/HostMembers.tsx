@@ -230,9 +230,8 @@ export default function HostMembers() {
               <div className="grid gap-4 sm:grid-cols-2">
                 {(["host", "checker"] as Role[]).map((role) => (
                   <div key={role} className="rounded-md border p-4">
-                    <div className="mb-1 flex items-center gap-2">
+                    <div className="mb-1">
                       <h3 className="font-medium capitalize">{role}</h3>
-                      <Badge variant={role === "host" ? "default" : "secondary"} className="capitalize">{role}</Badge>
                     </div>
                     <p className="mb-3 text-xs text-muted-foreground">{ROLE_DESC[role]}</p>
                     <Button size="sm" onClick={() => generateInvite(role)} disabled={generating === role}>
