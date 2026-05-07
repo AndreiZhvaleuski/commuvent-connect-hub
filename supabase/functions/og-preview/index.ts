@@ -124,47 +124,17 @@ Deno.serve(async (req) => {
   }
 
   const redirectUrl = `${APP_URL}${redirectPath}`;
-  const redirectAttr = escape(redirectUrl, { attribute: true });
-  const redirectScript = JSON.stringify(redirectUrl).replace(/</g, "\\u003c");
-  const safeTitle = escape(title);
-  const safeDesc = escape(description);
-  const safeImage = escape(image);
-  const safeRedirect = escape(redirectUrl);
 
-  const html = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>${safeTitle}</title>
-  <meta name="description" content="${safeDesc}">
+  // The Supabase edge gateway forces `Content-Type: text/plain` and a
+  // `Content-Security-Policy: default-src 'none'; sandbox` header on every
+  // response, so we cannot serve a working HTML preview page from this URL
+  // (scripts can't run, browsers render the source as text). Always 302 to
+  // the SPA so share links reliably land users on the event/host page.
+  // Suppress unused-variable warnings for values we no longer need.
+  void title; void description; void image; void jsonLd; void ogType;
 
-  <meta property="og:type" content="${ogType}">
-  <meta property="og:title" content="${safeTitle}">
-  <meta property="og:description" content="${safeDesc}">
-  <meta property="og:site_name" content="Commuvent">
-  <meta property="og:url" content="${safeRedirect}">
-  ${safeImage ? `<meta property="og:image" content="${safeImage}">` : ""}
-
-  <meta name="twitter:card" content="${safeImage ? "summary_large_image" : "summary"}">
-  <meta name="twitter:title" content="${safeTitle}">
-  <meta name="twitter:description" content="${safeDesc}">
-  ${safeImage ? `<meta name="twitter:image" content="${safeImage}">` : ""}
-
-  ${jsonLd ? `<script type="application/ld+json">${jsonLd}</script>` : ""}
-  <script>window.location.replace(${redirectScript});</script>
-</head>
-<body>
-  <p>Redirecting to <a href="${redirectAttr}">${safeRedirect}</a>…</p>
-  <form action="${redirectAttr}" method="get">
-    <button type="submit" autofocus>Continue to event</button>
-  </form>
-</body>
-</html>`;
-
-  const headers = new Headers(corsHeaders);
-  headers.set("content-type", "text/html; charset=utf-8");
-  headers.set("cache-control", "no-store");
-  headers.set("content-security-policy", "script-src 'unsafe-inline'; default-src 'self' https:; base-uri 'none'; form-action 'self' https:");
-
-  return new Response(html, { headers });
+  return new Response(null, {
+    status: 302,
+    headers: { ...corsHeaders, Location: redirectUrl, "Cache-Control": "no-store" },
+  });
 });
