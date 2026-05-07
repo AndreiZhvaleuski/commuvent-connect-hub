@@ -78,7 +78,7 @@ export default function Explore() {
     return () => { cancelled = true; clearTimeout(t); };
   }, [q, from, to, includePast, mode]);
 
-  const now = useMemo(() => Date.now(), [events]);
+  
 
   return (
     <AppLayout>
