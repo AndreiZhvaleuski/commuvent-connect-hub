@@ -61,7 +61,7 @@ export function CoverCropDialog({ file, open, onOpenChange, onConfirm }: Props) 
         </div>
         <div className="space-y-2">
           <label className="text-xs text-muted-foreground">Zoom</label>
-          <Slider min={1} max={4} step={0.01} value={[zoom]} onValueChange={(v) => setZoom(v[0])} />
+          <Slider min={1} max={4} step={0.01} value={[zoom]} onValueChange={(v) => setZoom(Array.isArray(v) ? v[0] : v)} />
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={busy}>Cancel</Button>
