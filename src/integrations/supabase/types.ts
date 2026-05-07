@@ -326,18 +326,21 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          email: string | null
           id: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id?: string
         }
         Relationships: []
@@ -418,6 +421,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_host_invite: { Args: { p_token: string }; Returns: string }
       event_stats: {
         Args: { p_host_id: string }
         Returns: {
@@ -425,6 +429,15 @@ export type Database = {
           event_id: string
           going_count: number
           waitlist_count: number
+        }[]
+      }
+      get_invite_preview: {
+        Args: { p_token: string }
+        Returns: {
+          expires_at: string
+          host_id: string
+          host_name: string
+          role: string
         }[]
       }
       has_host_role: {
