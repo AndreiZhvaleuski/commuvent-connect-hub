@@ -232,7 +232,7 @@ export default function EventPage() {
               </Card>
             )}
 
-            <div className="mt-6 flex items-center justify-between gap-2">
+            <div className="mt-8 flex items-center justify-between gap-2">
               <Button variant="outline" size="sm" onClick={async () => {
                 const shareUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-preview?type=event&id=${event.id}`;
                 await navigator.clipboard.writeText(shareUrl);
