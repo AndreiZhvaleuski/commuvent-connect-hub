@@ -172,7 +172,20 @@ export default function EventPage() {
       {event.cover_image_url && (
         <div className="border-b bg-muted">
           <div className="container mx-auto max-w-5xl px-4">
-            <img src={event.cover_image_url} alt={event.title} className="my-6 aspect-video w-full rounded-xl object-cover" />
+            <div className="relative my-6 aspect-video w-full overflow-hidden rounded-xl bg-muted">
+              <img
+                src={event.cover_image_url}
+                alt=""
+                aria-hidden
+                className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl"
+              />
+              <div className="absolute inset-0 bg-background/20" />
+              <img
+                src={event.cover_image_url}
+                alt={event.title}
+                className="relative z-10 mx-auto h-full w-auto max-w-full object-contain"
+              />
+            </div>
           </div>
         </div>
       )}
