@@ -120,10 +120,21 @@ function EventGrid({ events, empty, pastBadge }: { events: Ev[]; empty: string; 
     <div className="grid gap-4 sm:grid-cols-2">
       {events.map((e) => (
         <Link key={e.id} to={`/e/${e.id}`}>
-          <Card className="h-full transition hover:shadow-md hover:-translate-y-0.5">
+          <Card className={`h-full transition hover:shadow-md hover:-translate-y-0.5 ${e.cover_image_url ? "pt-0" : ""}`}>
             {e.cover_image_url && (
-              <div className="aspect-video bg-muted overflow-hidden rounded-t-xl">
-                <img src={e.cover_image_url} alt={e.title} className="h-full w-full object-cover" />
+              <div className="relative aspect-video overflow-hidden rounded-t-xl bg-muted">
+                <img
+                  src={e.cover_image_url}
+                  alt=""
+                  aria-hidden
+                  className="absolute inset-0 h-full w-full scale-125 object-cover blur-2xl"
+                />
+                <div className="absolute inset-0 bg-background/20" />
+                <img
+                  src={e.cover_image_url}
+                  alt={e.title}
+                  className="relative z-10 mx-auto h-full w-auto max-w-full object-contain"
+                />
               </div>
             )}
             <CardHeader>
