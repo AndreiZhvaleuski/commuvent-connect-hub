@@ -20,6 +20,7 @@ import CheckIn from "./pages/CheckIn.tsx";
 import EventRsvps from "./pages/EventRsvps.tsx";
 import About from "./pages/About.tsx";
 import Moderation from "./pages/Moderation.tsx";
+import EventManage from "./pages/EventManage.tsx";
 
 const queryClient = new QueryClient();
 
