@@ -24,7 +24,7 @@ type Ev = {
   start_at: string; end_at: string; time_zone: string; venue_address: string | null; online_url: string | null;
   capacity: number; visibility: string; status: string; host_id: string;
 };
-type Host = { id: string; name: string; slug: string; logo_url: string | null; bio: string | null };
+type Host = { id: string; name: string; logo_url: string | null; bio: string | null; contact_email: string | null };
 type Rsvp = { id: string; status: string; position: number | null; code: string; cancelled_at: string | null };
 
 export default function EventPage() {
