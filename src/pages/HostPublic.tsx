@@ -112,7 +112,7 @@ function EventGrid({ events, empty, pastBadge }: { events: Ev[]; empty: string; 
               <CardTitle className="line-clamp-2">{e.title}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2"><Calendar className="h-4 w-4" />{new Date(e.start_at).toLocaleString()}</div>
+              <EventDateTime startIso={e.start_at} endIso={e.end_at} timeZone={e.time_zone} variant="compact" />
               {(e.venue_address || e.online_url) && (
                 <div className="flex items-center gap-2"><MapPin className="h-4 w-4" /><span className="line-clamp-1">{e.venue_address ?? "Online"}</span></div>
               )}
