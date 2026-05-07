@@ -81,7 +81,7 @@ export default function HostPublic() {
                   <Mail className="h-4 w-4" /> {host.contact_email}
                 </a>
               )}
-              <div className="mt-3">
+              <div className="mt-3 flex flex-wrap gap-2">
                 <Button variant="outline" size="sm" onClick={async () => {
                   const shareUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-preview?type=host&id=${host.id}`;
                   await navigator.clipboard.writeText(shareUrl);
@@ -89,6 +89,11 @@ export default function HostPublic() {
                 }}>
                   <ShareIcon className="mr-1 h-4 w-4" />Share this page
                 </Button>
+                {canManage && (
+                  <Button render={<Link to={`/dashboard/${host.id}`} />} variant="outline" size="sm">
+                    <GearIcon className="mr-1 h-4 w-4" />Manage
+                  </Button>
+                )}
               </div>
             </div>
           </div>
