@@ -53,7 +53,7 @@ export default function Explore() {
     const t = setTimeout(async () => {
       setBusy(true);
       let qb = supabase.from("events")
-        .select("id,title,description,cover_image_url,start_at,end_at,venue_address,online_url")
+        .select("id,title,description,cover_image_url,start_at,end_at,time_zone,venue_address,online_url")
         .eq("status", "published").eq("visibility", "public")
         .order("start_at", { ascending: true })
         .limit(60);
