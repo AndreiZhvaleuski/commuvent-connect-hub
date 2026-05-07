@@ -24,7 +24,7 @@ type Ev = {
   start_at: string; end_at: string; time_zone: string; venue_address: string | null; online_url: string | null;
   capacity: number; visibility: string; status: string; host_id: string;
 };
-type Host = { id: string; name: string; slug: string; logo_url: string | null; bio: string | null };
+type Host = { id: string; name: string; logo_url: string | null; bio: string | null; contact_email: string | null };
 type Rsvp = { id: string; status: string; position: number | null; code: string; cancelled_at: string | null };
 
 export default function EventPage() {
@@ -50,7 +50,7 @@ export default function EventPage() {
     if (!ev) { setNotFound(true); setBusy(false); return; }
     setEvent(ev as Ev);
     const [{ data: h }, { count }] = await Promise.all([
-      supabase.from("hosts").select("id,name,slug,logo_url,bio").eq("id", ev.host_id).maybeSingle(),
+      supabase.from("hosts").select("id,name,logo_url,bio,contact_email").eq("id", ev.host_id).maybeSingle(),
       supabase.from("rsvps").select("id", { count: "exact", head: true }).eq("event_id", eventId).eq("status", "going"),
     ]);
     setHost((h ?? null) as Host | null);
@@ -185,16 +185,19 @@ export default function EventPage() {
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{event.title}</h1>
 
             {host && (
-              <Link to={`/h/${host.slug}`} className="mt-4 inline-flex items-center gap-3 rounded-lg border bg-card p-3 hover:bg-muted/50 transition-colors">
-                <Avatar className="h-10 w-10">
+              <Link to={`/h/${host.id}`} className="mt-4 flex w-full min-w-0 items-center gap-3 rounded-lg border bg-card p-3 hover:bg-muted/50 transition-colors">
+                <Avatar className="h-10 w-10 shrink-0">
                   {host.logo_url && <AvatarImage src={host.logo_url} alt={host.name} />}
                   <AvatarFallback>{host.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-xs text-muted-foreground">Hosted by</p>
-                  <p className="text-sm font-medium">{host.name}</p>
+                  <p className="truncate text-sm font-medium">{host.name}</p>
+                  {host.contact_email && (
+                    <p className="truncate text-xs text-muted-foreground">{host.contact_email}</p>
+                  )}
                 </div>
-                <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
+                <ExternalLink className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
               </Link>
             )}
 
