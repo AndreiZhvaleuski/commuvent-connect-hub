@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRightIcon as ArrowRight, MapPinIcon as MapPin, UsersIcon as Users } from "@phosphor-icons/react";
+import { ArrowRightIcon as ArrowRight, UsersIcon as Users } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { EventDateTime } from "@/components/event-datetime";
+import { PublicEventCard } from "@/components/public-event-card";
 type Ev = {
   id: string; title: string; description: string | null;
   cover_image_url: string | null; start_at: string; end_at: string; time_zone: string | null;
@@ -80,38 +80,7 @@ export default function Index() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((e) => (
-              <Link key={e.id} to={`/e/${e.id}`}>
-                <Card className={`h-full transition hover:shadow-md hover:-translate-y-0.5 ${e.cover_image_url ? "pt-0" : ""}`}>
-                  {e.cover_image_url && (
-                    <div className="relative aspect-video overflow-hidden rounded-t-xl bg-muted">
-                      <img
-                        src={e.cover_image_url}
-                        alt=""
-                        aria-hidden
-                        className="absolute inset-0 h-full w-full scale-125 object-cover blur-2xl"
-                      />
-                      <div className="absolute inset-0 bg-background/20" />
-                      <img
-                        src={e.cover_image_url}
-                        alt={e.title}
-                        className="relative z-10 mx-auto h-full w-auto max-w-full object-contain"
-                      />
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle className="line-clamp-2">{e.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2 text-sm text-muted-foreground">
-                    <EventDateTime startIso={e.start_at} endIso={e.end_at} timeZone={e.time_zone} variant="compact" />
-                    {(e.venue_address || e.online_url) && (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        <span className="line-clamp-1">{e.venue_address ?? "Online"}</span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </Link>
+              <PublicEventCard key={e.id} event={e} />
             ))}
           </div>
         )}

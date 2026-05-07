@@ -1,21 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { EnvelopeIcon as Mail, MapPinIcon as MapPin, ShareIcon, GearIcon } from "@phosphor-icons/react";
-import { EventDateTime } from "@/components/event-datetime";
+import { EnvelopeIcon as Mail, ShareIcon, GearIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import { PublicEventCard, type PublicEvent } from "@/components/public-event-card";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 type Host = { id: string; name: string; bio: string | null; logo_url: string | null; contact_email: string | null };
-type Ev = { id: string; title: string; cover_image_url: string | null; start_at: string; end_at: string; time_zone: string | null; venue_address: string | null; online_url: string | null };
+type Ev = PublicEvent;
 
 export default function HostPublic() {
   const { id } = useParams<{ id: string }>();
@@ -119,36 +118,7 @@ function EventGrid({ events, empty, pastBadge }: { events: Ev[]; empty: string; 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       {events.map((e) => (
-        <Link key={e.id} to={`/e/${e.id}`}>
-          <Card className={`h-full transition hover:shadow-md hover:-translate-y-0.5 ${e.cover_image_url ? "pt-0" : ""}`}>
-            {e.cover_image_url && (
-              <div className="relative aspect-video overflow-hidden rounded-t-xl bg-muted">
-                <img
-                  src={e.cover_image_url}
-                  alt=""
-                  aria-hidden
-                  className="absolute inset-0 h-full w-full scale-125 object-cover blur-2xl"
-                />
-                <div className="absolute inset-0 bg-background/20" />
-                <img
-                  src={e.cover_image_url}
-                  alt={e.title}
-                  className="relative z-10 mx-auto h-full w-auto max-w-full object-contain"
-                />
-              </div>
-            )}
-            <CardHeader>
-              {pastBadge && <Badge variant="secondary" className="w-fit mb-1">Ended</Badge>}
-              <CardTitle className="line-clamp-2">{e.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <EventDateTime startIso={e.start_at} endIso={e.end_at} timeZone={e.time_zone} variant="compact" />
-              {(e.venue_address || e.online_url) && (
-                <div className="flex items-center gap-2"><MapPin className="h-4 w-4" /><span className="line-clamp-1">{e.venue_address ?? "Online"}</span></div>
-              )}
-            </CardContent>
-          </Card>
-        </Link>
+        <PublicEventCard key={e.id} event={e} showStatusBadge={pastBadge} />
       ))}
     </div>
   );

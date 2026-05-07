@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { MapPinIcon as MapPin, MagnifyingGlassIcon as Search, GlobeIcon, SparkleIcon } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { MapPinIcon as MapPin } from "@phosphor-icons/react";
+import { MagnifyingGlassIcon as Search, GlobeIcon, SparkleIcon } from "@phosphor-icons/react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
@@ -8,12 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { DatePicker } from "@/components/date-picker";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
-import { EventDateTime } from "@/components/event-datetime";
+import { PublicEventCard } from "@/components/public-event-card";
 
 type LocationMode = "any" | "in_person" | "online";
 
@@ -78,7 +78,7 @@ export default function Explore() {
     return () => { cancelled = true; clearTimeout(t); };
   }, [q, from, to, includePast, mode]);
 
-  const now = useMemo(() => Date.now(), [events]);
+  
 
   return (
     <AppLayout>
@@ -174,58 +174,9 @@ export default function Explore() {
           <Card><CardContent className="py-16 text-center text-muted-foreground">No events match your filters.</CardContent></Card>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {events.map((e) => {
-              const ended = new Date(e.end_at).getTime() < now;
-              return (
-                <Link key={e.id} to={`/e/${e.id}`}>
-                  <Card className={`h-full transition hover:shadow-md hover:-translate-y-0.5 ${e.cover_image_url ? "pt-0" : ""}`}>
-                    {e.cover_image_url && (
-                      <div className="relative aspect-video overflow-hidden rounded-t-xl bg-muted">
-                        <img
-                          src={e.cover_image_url}
-                          alt=""
-                          aria-hidden
-                          className="absolute inset-0 h-full w-full scale-125 object-cover blur-2xl"
-                        />
-                        <div className="absolute inset-0 bg-background/20" />
-                        <img
-                          src={e.cover_image_url}
-                          alt={e.title}
-                          className="relative z-10 mx-auto h-full w-auto max-w-full object-contain"
-                        />
-                        {includePast && (
-                          <span
-                            className={cn(
-                              "absolute left-2 top-2 z-20 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow",
-                              ended ? "bg-red-600" : "bg-emerald-600"
-                            )}
-                          >
-                            {ended ? "Ended" : "Upcoming"}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    <CardHeader>
-                      {includePast && !e.cover_image_url && (
-                        <Badge
-                          variant="secondary"
-                          className={cn("w-fit mb-1 text-white", ended ? "bg-red-600" : "bg-emerald-600")}
-                        >
-                          {ended ? "Ended" : "Upcoming"}
-                        </Badge>
-                      )}
-                      <CardTitle className="line-clamp-2">{e.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2 text-sm text-muted-foreground">
-                      <EventDateTime startIso={e.start_at} endIso={e.end_at} timeZone={e.time_zone} variant="compact" />
-                      {(e.venue_address || e.online_url) && (
-                        <div className="flex items-center gap-2"><MapPin className="h-4 w-4" /><span className="line-clamp-1">{e.venue_address ?? "Online"}</span></div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </Link>
-              );
-            })}
+            {events.map((e) => (
+              <PublicEventCard key={e.id} event={e} showStatusBadge={includePast} />
+            ))}
           </div>
         )}
       </section>
