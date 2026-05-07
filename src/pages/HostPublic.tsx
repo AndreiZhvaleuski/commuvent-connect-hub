@@ -38,9 +38,20 @@ export default function HostPublic() {
         .eq("host_id", h.id).eq("status", "published").eq("visibility", "public")
         .order("start_at", { ascending: true });
       setEvents((ev ?? []) as Ev[]);
+      if (user) {
+        const { data: hm } = await supabase
+          .from("host_members")
+          .select("role")
+          .eq("host_id", h.id)
+          .eq("user_id", user.id)
+          .maybeSingle();
+        setCanManage(!!hm);
+      } else {
+        setCanManage(false);
+      }
       setBusy(false);
     })();
-  }, [id]);
+  }, [id, user]);
 
   const now = new Date().toISOString();
   const upcoming = useMemo(() => events.filter((e) => e.end_at >= now), [events, now]);
