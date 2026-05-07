@@ -1,71 +1,52 @@
 ## Goal
 
-When a host uploads an event cover image:
-1. Client-side: **interactive 16:9 crop** with zoom/drag, then downscale crop to 1600×900 JPEG (~85% quality).
-2. Storage bucket: enforce server-side file-size limit and image MIME types on `event-covers`.
-3. Each event has at most **one** cover image file in the bucket — replacing it deletes the previous file.
+Unify how event start/end/timezone/duration are displayed across all event-related surfaces.
 
-## Implementation
+## Format spec (from your answers)
 
-### 1. Interactive crop UI
+- **Date/time style:** browser locale (`Intl.DateTimeFormat` with no explicit locale = user default), `dateStyle: 'medium'`, `timeStyle: 'short'`.
+- **Range + duration:** `"<start> – <end> · <duration>"`. When start/end fall on the same day in the chosen TZ, omit the date from the end side: `"Fri, May 15, 7:00 PM – 9:00 PM · 2h"`.
+- **Timezones:** always show two lines when event TZ ≠ viewer TZ:
+  - Line 1: range in **event TZ** with `(<event tz>)` suffix.
+  - Line 2: range in **user TZ** with `(your time · <user tz>)` suffix.
+  - When they match, just one line (no parenthetical).
+- **Duration:** `Xd Yh Zm` (omit zero parts), e.g. `2h`, `1d 4h`, `45m`.
 
-Add `react-easy-crop` (small, well-maintained, no canvas wrapper needed). It provides a draggable image with a fixed aspect-ratio crop window and zoom slider.
+## Shared module
 
-New component `src/components/cover-crop-dialog.tsx`:
-- Props: `file: File`, `open`, `onOpenChange`, `onConfirm(croppedFile: File)`.
-- Renders a shadcn `Dialog` containing `<Cropper image={url} aspect={16/9} crop zoom onCropComplete={...}>` plus a zoom `Slider` and Cancel/Save buttons.
-- On Save: uses returned `croppedAreaPixels` to draw onto a 1600×900 `<canvas>`, exports via `canvas.toBlob('image/jpeg', 0.85)`, wraps as `File('cover.jpg')`, calls `onConfirm`.
+Create `src/lib/event-time.ts` exporting:
 
-Helper `src/lib/image.ts` exports `cropToFile(imageUrl, croppedAreaPixels, { width: 1600, height: 900, quality: 0.85 }): Promise<File>`.
-
-### 2. Wire into ImageUpload
-
-In `src/components/image-upload.tsx`, when `aspect === "video"` and the user picks a file, instead of calling `onFileChange(f)` directly:
-- Open `CoverCropDialog` with the picked file.
-- On confirm → `onFileChange(croppedFile)`; on cancel → no change.
-- Add a "Re-crop" button next to "Replace" when a `file` is already chosen, which reopens the dialog with that file.
-
-`aspect === "square"` keeps current behavior (no crop dialog).
-
-### 3. Storage upload (`src/pages/EventEditor.tsx`)
-
-In `uploadCoverIfAny`:
-- Force `path = '${id}/cover.jpg'`, `contentType = 'image/jpeg'`, `upsert: true`.
-- Before upload, list `${id}/` and delete any other files (cleans up legacy `.png`/`.webp`).
-
-### 4. Bucket constraints (DB migration)
-
-```sql
-UPDATE storage.buckets
-SET file_size_limit = 3145728,  -- 3 MB
-    allowed_mime_types = ARRAY['image/jpeg','image/png','image/webp']
-WHERE id = 'event-covers';
+```ts
+formatEventRange(startIso, endIso, eventTz): { eventTz: string; userTz: string | null; sameTz: boolean; duration: string }
 ```
 
-### 5. One-cover-per-event safety net (DB trigger)
+Each `eventTz`/`userTz` is the formatted "range + duration" string described above. Built on `Intl.DateTimeFormat` (timeZone option) — no `date-fns-tz` dependency needed for the strings.
 
-Function in `public` schema (per project rules), trigger on `storage.objects`:
+Plus a small React helper `<EventDateTime startIso endIso timeZone variant="full" | "compact" />`:
+- `variant="full"`: stacked Calendar + Hourglass icons, two TZ lines + duration line. Used on EventPage and EventManagementCard.
+- `variant="compact"`: single line `"<event-tz range> · <duration>"`, with a tooltip showing the user-TZ range + duration when different. Used on Explore, Index, HostPublic, Tickets, dashboard list rows.
 
-```sql
-CREATE OR REPLACE FUNCTION public.event_covers_enforce_single()
-RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, storage AS $$
-BEGIN
-  IF NEW.bucket_id = 'event-covers' THEN
-    DELETE FROM storage.objects
-    WHERE bucket_id = 'event-covers'
-      AND split_part(name, '/', 1) = split_part(NEW.name, '/', 1)
-      AND id <> NEW.id;
-  END IF;
-  RETURN NEW;
-END $$;
+## Sites to migrate
 
-CREATE TRIGGER event_covers_single_file
-AFTER INSERT ON storage.objects
-FOR EACH ROW EXECUTE FUNCTION public.event_covers_enforce_single();
-```
+| File | Current | New |
+|---|---|---|
+| `src/pages/EventPage.tsx` | custom `fmt`/`fmtLocal`, no duration, tooltip | `<EventDateTime variant="full">` |
+| `src/components/event-management-card.tsx` | own formatRange + duration | `<EventDateTime variant="full">` (drop local helpers) |
+| `src/pages/Explore.tsx` | `new Date(start_at).toLocaleString()` | `<EventDateTime variant="compact" timeZone={e.time_zone}>` — also add `time_zone` to the select |
+| `src/pages/Index.tsx` | `toLocaleString()` | `<EventDateTime variant="compact">` — add `time_zone` to select |
+| `src/pages/HostPublic.tsx` | `toLocaleString()` | `<EventDateTime variant="compact">` — add `time_zone` to select |
+| `src/pages/Tickets.tsx` | `toLocaleString()` (line 164) | `<EventDateTime variant="compact">` — already selects `time_zone` |
+
+Selects that need `time_zone` added: Explore, Index, HostPublic.
 
 ## Out of scope
 
-- No changes to `host-logos` (square avatar) or `gallery` buckets.
-- No edge function — cropping/resizing happens in the browser.
-- No rotation UI (zoom + drag only).
+- `EventEditor.tsx` (input fields, not display).
+- `EventRsvps.tsx` `check_in_time` (per-row check-in timestamp, not event date).
+- `Moderation.tsx` report timestamps.
+- ICS generation in `Tickets.tsx` (already correct).
+
+## Cleanup
+
+- Remove `formatInTimeZone` calls and the local `formatRange`/`formatDuration` helpers in `EventPage.tsx` and `event-management-card.tsx` (move logic into `event-time.ts`).
+- Keep `date-fns-tz` for `EventEditor` validation if still used; otherwise leave as-is (no removal in this pass).

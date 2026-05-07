@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRightIcon as ArrowRight, CalendarIcon as Calendar, MapPinIcon as MapPin, UsersIcon as Users } from "@phosphor-icons/react";
+import { ArrowRightIcon as ArrowRight, MapPinIcon as MapPin, UsersIcon as Users } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { EventDateTime } from "@/components/event-datetime";
 type Ev = {
   id: string; title: string; description: string | null;
-  cover_image_url: string | null; start_at: string; end_at: string;
+  cover_image_url: string | null; start_at: string; end_at: string; time_zone: string | null;
   venue_address: string | null; online_url: string | null;
 };
 
@@ -20,7 +21,7 @@ export default function Index() {
     (async () => {
       const { data } = await supabase
         .from("events")
-        .select("id,title,description,cover_image_url,start_at,end_at,venue_address,online_url")
+        .select("id,title,description,cover_image_url,start_at,end_at,time_zone,venue_address,online_url")
         .eq("status", "published").eq("visibility", "public")
         .gte("end_at", new Date().toISOString())
         .order("start_at", { ascending: true })
@@ -90,10 +91,7 @@ export default function Index() {
                     <CardTitle className="line-clamp-2">{e.title}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      {new Date(e.start_at).toLocaleString()}
-                    </div>
+                    <EventDateTime startIso={e.start_at} endIso={e.end_at} timeZone={e.time_zone} variant="compact" />
                     {(e.venue_address || e.online_url) && (
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4" />

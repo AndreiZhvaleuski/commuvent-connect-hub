@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { CalendarIcon as Calendar, ClockIcon as Clock, ArrowSquareOutIcon as ExternalLink, FlagIcon as Flag, GlobeIcon as Globe, MapPinIcon as MapPin, ShareIcon, UsersIcon as Users } from "@phosphor-icons/react";
-import { formatInTimeZone } from "date-fns-tz";
+import { ArrowSquareOutIcon as ExternalLink, FlagIcon as Flag, GlobeIcon as Globe, MapPinIcon as MapPin, ShareIcon, UsersIcon as Users } from "@phosphor-icons/react";
+import { EventDateTime } from "@/components/event-datetime";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { browserTz } from "@/lib/timezones";
 import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -102,18 +101,6 @@ export default function EventPage() {
   if (busy || !event) return <AppLayout><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></AppLayout>;
 
   const ended = new Date(event.end_at).getTime() < Date.now();
-  const tz = event.time_zone || "UTC";
-  const localTz = browserTz();
-  const sameTz = tz === localTz;
-
-  const fmt = (iso: string) => {
-    try { return formatInTimeZone(new Date(iso), tz, "EEE, MMM d · h:mm a"); }
-    catch { return new Date(iso).toLocaleString(); }
-  };
-  const fmtLocal = (iso: string) => {
-    try { return `${formatInTimeZone(new Date(iso), localTz, "EEE, MMM d · h:mm a")} (${localTz})`; }
-    catch { return new Date(iso).toLocaleString(); }
-  };
 
   const capacityPct = event.capacity > 0 ? Math.min(100, Math.round((going / event.capacity) * 100)) : 0;
   const isFull = event.capacity > 0 && going >= event.capacity;
@@ -212,19 +199,13 @@ export default function EventPage() {
             )}
 
             <div className="mt-6 space-y-3 text-sm">
-              <div className="flex items-start gap-3">
-                <Calendar className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                <div className="space-y-0.5">
-                  <Tooltip>
-                    <TooltipTrigger render={<p className="font-medium cursor-help" />}>
-                      {fmt(event.start_at)}
-                    </TooltipTrigger>
-                    <TooltipContent>{sameTz ? "Same as your local time" : `Your local: ${fmtLocal(event.start_at)}`}</TooltipContent>
-                  </Tooltip>
-                  <p className="text-muted-foreground inline-flex items-center gap-1"><Clock className="h-3 w-3" />Until {fmt(event.end_at)}</p>
-                  <p className="text-xs text-muted-foreground">{tz}</p>
-                </div>
-              </div>
+              <EventDateTime
+                startIso={event.start_at}
+                endIso={event.end_at}
+                timeZone={event.time_zone}
+                variant="full"
+                className="text-sm"
+              />
               {(event.venue_address || event.online_url) && (
                 <div className="flex items-start gap-3">
                   {event.online_url ? <Globe className="mt-0.5 h-4 w-4 text-muted-foreground" /> : <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />}

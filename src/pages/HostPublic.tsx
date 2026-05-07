@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { CalendarIcon as Calendar, EnvelopeIcon as Mail, MapPinIcon as MapPin, ShareIcon } from "@phosphor-icons/react";
+import { EnvelopeIcon as Mail, MapPinIcon as MapPin, ShareIcon } from "@phosphor-icons/react";
+import { EventDateTime } from "@/components/event-datetime";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +14,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 type Host = { id: string; name: string; bio: string | null; logo_url: string | null; contact_email: string | null };
-type Ev = { id: string; title: string; cover_image_url: string | null; start_at: string; end_at: string; venue_address: string | null; online_url: string | null };
+type Ev = { id: string; title: string; cover_image_url: string | null; start_at: string; end_at: string; time_zone: string | null; venue_address: string | null; online_url: string | null };
 
 export default function HostPublic() {
   const { id } = useParams<{ id: string }>();
@@ -30,7 +31,7 @@ export default function HostPublic() {
       setHost(h as Host);
       const { data: ev } = await supabase
         .from("events")
-        .select("id,title,cover_image_url,start_at,end_at,venue_address,online_url")
+        .select("id,title,cover_image_url,start_at,end_at,time_zone,venue_address,online_url")
         .eq("host_id", h.id).eq("status", "published").eq("visibility", "public")
         .order("start_at", { ascending: true });
       setEvents((ev ?? []) as Ev[]);
@@ -111,7 +112,7 @@ function EventGrid({ events, empty, pastBadge }: { events: Ev[]; empty: string; 
               <CardTitle className="line-clamp-2">{e.title}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2"><Calendar className="h-4 w-4" />{new Date(e.start_at).toLocaleString()}</div>
+              <EventDateTime startIso={e.start_at} endIso={e.end_at} timeZone={e.time_zone} variant="compact" />
               {(e.venue_address || e.online_url) && (
                 <div className="flex items-center gap-2"><MapPin className="h-4 w-4" /><span className="line-clamp-1">{e.venue_address ?? "Online"}</span></div>
               )}

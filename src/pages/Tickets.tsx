@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
 import { CalendarIcon as CalIcon, ClockIcon as Clock, DownloadSimpleIcon as Download, ArrowSquareOutIcon as ExternalLink, MapPinIcon as MapPin, TicketIcon as Ticket } from "@phosphor-icons/react";
+import { EventDateTime } from "@/components/event-datetime";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -161,7 +162,7 @@ function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; on
               {e.title} <ExternalLink className="h-3 w-3 opacity-60" />
             </Link>
           </CardTitle>
-          <p className="text-xs text-muted-foreground mt-1 inline-flex items-center gap-1"><CalIcon className="h-3 w-3" />{new Date(e.start_at).toLocaleString()}</p>
+          <div className="text-xs text-muted-foreground mt-1"><EventDateTime startIso={e.start_at} endIso={e.end_at} timeZone={e.time_zone} variant="compact" /></div>
           {(e.venue_address || e.online_url) && (
             <p className="text-xs text-muted-foreground mt-0.5 inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{e.venue_address ?? "Online"}</p>
           )}
