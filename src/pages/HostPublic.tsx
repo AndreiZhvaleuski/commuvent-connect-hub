@@ -14,7 +14,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 type Host = { id: string; name: string; bio: string | null; logo_url: string | null; contact_email: string | null };
-type Ev = { id: string; title: string; cover_image_url: string | null; start_at: string; end_at: string; venue_address: string | null; online_url: string | null };
+type Ev = { id: string; title: string; cover_image_url: string | null; start_at: string; end_at: string; time_zone: string | null; venue_address: string | null; online_url: string | null };
 
 export default function HostPublic() {
   const { id } = useParams<{ id: string }>();
