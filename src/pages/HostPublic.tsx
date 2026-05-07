@@ -31,7 +31,7 @@ export default function HostPublic() {
       setHost(h as Host);
       const { data: ev } = await supabase
         .from("events")
-        .select("id,title,cover_image_url,start_at,end_at,venue_address,online_url")
+        .select("id,title,cover_image_url,start_at,end_at,time_zone,venue_address,online_url")
         .eq("host_id", h.id).eq("status", "published").eq("visibility", "public")
         .order("start_at", { ascending: true });
       setEvents((ev ?? []) as Ev[]);
