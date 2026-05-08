@@ -44,7 +44,7 @@ export default function HostPublic() {
           .eq("host_id", h.id)
           .eq("user_id", user.id)
           .maybeSingle();
-        setCanManage(!!hm);
+        setCanManage(hm?.role === "host");
       } else {
         setCanManage(false);
       }
