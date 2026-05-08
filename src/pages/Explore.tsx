@@ -68,7 +68,7 @@ export default function Explore() {
       let qb = supabase.from("events")
         .select("id,title,description,cover_image_url,start_at,end_at,time_zone,venue_address,online_url", { count: "exact" })
         .eq("status", "published").eq("visibility", "public")
-        .order("start_at", { ascending: true })
+        .order("start_at", { ascending: sortDir === "asc" })
         .range(fromIdx, toIdx);
 
       if (!includePast) qb = qb.gte("end_at", new Date().toISOString());
