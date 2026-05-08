@@ -8,7 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { buildCsv, downloadBlob, toUtcIso, type RsvpExportRow } from "@/lib/csv";
+
+const CSV_HELP_HIDE_KEY = "commuvent.rsvp-csv-help.hide";
 
 function formatLocal(iso: string | null): string {
   if (!iso) return "";
@@ -39,6 +43,7 @@ export default function EventRsvps() {
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState(true);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
   useEffect(() => {
     if (loading) return;
     if (!user) { navigate(`/sign-in?redirect=/dashboard/${hostId}/events/${eventId}/rsvps`); return; }
@@ -121,7 +126,17 @@ export default function EventRsvps() {
     const safeTitle = event.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase().slice(0, 40);
     downloadBlob(blob, `rsvps-${safeTitle}.csv`);
     toast.success(`Exported ${data.length} RSVPs`);
-    setInfoOpen(true);
+    if (typeof window !== "undefined" && localStorage.getItem(CSV_HELP_HIDE_KEY) !== "1") {
+      setDontShowAgain(false);
+      setInfoOpen(true);
+    }
+  }
+
+  function closeInfo() {
+    if (dontShowAgain && typeof window !== "undefined") {
+      localStorage.setItem(CSV_HELP_HIDE_KEY, "1");
+    }
+    setInfoOpen(false);
   }
 
   const csvNotes = (
@@ -153,7 +168,7 @@ export default function EventRsvps() {
             <Button onClick={exportCsv} disabled={!event || rows.length === 0} className="flex-1 sm:flex-initial">
               <Download className="w-4 h-4 mr-2" /> Export CSV
             </Button>
-            <Dialog open={infoOpen} onOpenChange={setInfoOpen}>
+            <Dialog open={infoOpen} onOpenChange={(o) => (o ? setInfoOpen(true) : closeInfo())}>
               <DialogTrigger
                 render={
                   <Button variant="outline" size="icon" aria-label="CSV format details">
@@ -167,8 +182,15 @@ export default function EventRsvps() {
                   <DialogDescription>How to import this file into Google Sheets and Excel.</DialogDescription>
                 </DialogHeader>
                 {csvNotes}
-                <DialogFooter>
-                  <Button onClick={() => setInfoOpen(false)}>Got it</Button>
+                <DialogFooter className="sm:items-center sm:justify-between">
+                  <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Checkbox
+                      checked={dontShowAgain}
+                      onCheckedChange={(v) => setDontShowAgain(v === true)}
+                    />
+                    <span>Don&apos;t show this again</span>
+                  </label>
+                  <Button onClick={closeInfo}>Got it</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
