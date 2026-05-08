@@ -43,6 +43,7 @@ export default function EventPage() {
   const [reportReason, setReportReason] = useState("");
   const [canManage, setCanManage] = useState(false);
   const [canCheckIn, setCanCheckIn] = useState(false);
+  const [checkedIn, setCheckedIn] = useState(false);
   const load = async () => {
     if (!eventId) return;
     setBusy(true);
@@ -59,6 +60,12 @@ export default function EventPage() {
       const { data: r } = await supabase.from("rsvps").select("id,status,position,code,cancelled_at")
         .eq("event_id", eventId).eq("user_id", user.id).maybeSingle();
       setRsvp((r ?? null) as Rsvp | null);
+      if (r?.id) {
+        const { data: ci } = await supabase.from("check_ins").select("id").eq("rsvp_id", r.id).eq("undone", false).maybeSingle();
+        setCheckedIn(!!ci);
+      } else {
+        setCheckedIn(false);
+      }
       const { data: hm } = await supabase.from("host_members").select("role").eq("host_id", ev.host_id).eq("user_id", user.id).maybeSingle();
       setCanManage(hm?.role === "host");
       setCanCheckIn(!!hm);
@@ -66,6 +73,7 @@ export default function EventPage() {
       setRsvp(null);
       setCanManage(false);
       setCanCheckIn(false);
+      setCheckedIn(false);
     }
     setBusy(false);
   };
@@ -117,13 +125,21 @@ export default function EventPage() {
     return true;
   };
 
+  const mapRsvpError = (code: string) => {
+    if (code === "event_ended") return "This event has ended.";
+    if (code === "already_checked_in") return "You've already checked in — RSVP can't be cancelled.";
+    if (code === "event_not_published") return "Event is not open for RSVPs yet.";
+    if (code === "host_members_cannot_rsvp") return "Hosts and checkers can't RSVP to their own event.";
+    return code;
+  };
+
   const onRsvp = async () => {
     if (!requireAuth("rsvp")) return;
     setActing(true);
     try {
       const { data, error } = await supabase.functions.invoke("rsvp_create", { body: { event_id: event.id } });
       if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (data?.error) throw new Error(mapRsvpError(data.error));
       toast.success(data?.rsvp?.status === "waitlist" ? "Added to waitlist" : "You're going!");
       await load();
     } catch (e: unknown) {
@@ -137,7 +153,7 @@ export default function EventPage() {
     try {
       const { data, error } = await supabase.functions.invoke("rsvp_cancel", { body: { event_id: event.id } });
       if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (data?.error) throw new Error(mapRsvpError(data.error));
       toast.success("RSVP cancelled");
       await load();
     } catch (e: unknown) {
@@ -291,7 +307,11 @@ export default function EventPage() {
                       <p className="font-mono text-xs text-muted-foreground mt-1">Code: {activeRsvp.code}</p>
                     </div>
                     <Button render={<Link to="/tickets" />} variant="outline" className="w-full">View ticket</Button>
-                    <Button onClick={onCancel} disabled={acting} variant="ghost" className="w-full">Cancel RSVP</Button>
+                    {checkedIn ? (
+                      <p className="text-xs text-muted-foreground text-center">Checked in — RSVP can't be cancelled.</p>
+                    ) : (
+                      <Button onClick={onCancel} disabled={acting} variant="ghost" className="w-full">Cancel RSVP</Button>
+                    )}
                   </div>
                 ) : isFull ? (
                   <Button onClick={() => (user ? setConfirmOpen(true) : requireAuth("rsvp"))} disabled={acting} className="w-full" variant="secondary">Join waitlist</Button>

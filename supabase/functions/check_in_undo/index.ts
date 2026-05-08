@@ -9,10 +9,13 @@ Deno.serve(async (req) => {
     if (!event_id) return json({ error: "bad_input" }, 400);
 
     const db = admin();
-    const { data: ev } = await db.from("events").select("host_id").eq("id", event_id).maybeSingle();
+    const { data: ev } = await db.from("events").select("host_id, end_at").eq("id", event_id).maybeSingle();
     if (!ev) return json({ error: "not_found" }, 404);
     const { data: m } = await db.from("host_members").select("role").eq("host_id", ev.host_id).eq("user_id", user.id).maybeSingle();
     if (!m) return json({ error: "forbidden" }, 403);
+
+    const ended = new Date(ev.end_at).getTime() < Date.now();
+    if (ended && m.role !== "host") return json({ ok: false, error: "event_ended" });
 
     const { data: last } = await db.from("check_ins").select("*").eq("event_id", event_id).eq("undone", false).order("checked_in_at", { ascending: false }).limit(1).maybeSingle();
     if (!last) return json({ ok: false, error: "nothing_to_undo" });

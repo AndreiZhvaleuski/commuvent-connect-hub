@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function CheckIn() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -125,6 +126,9 @@ export default function CheckIn() {
 
   const capacitySuffix = event.capacity ? `/ ${event.capacity}` : "";
 
+  const ended = event ? new Date(event.end_at).getTime() < now : false;
+  const checkInDisabled = ended && !isHost;
+
   async function submit(e?: React.FormEvent) {
     e?.preventDefault();
     const trimmed = code.trim().toUpperCase();
@@ -142,6 +146,7 @@ export default function CheckIn() {
       else if (status === "not_found") toast.error("Code not found");
       else if (status === "cancelled") toast.error("RSVP was cancelled");
       else if (status === "not_going") toast.error("Ticket is on the waitlist — not allowed");
+      else if (status === "event_ended") toast.error("Event has ended — check-in is closed");
       else toast.error("Check-in failed");
       setCode("");
       inputRef.current?.focus();
@@ -157,7 +162,9 @@ export default function CheckIn() {
     try {
       const { data, error } = await supabase.functions.invoke("check_in_undo", { body: { event_id: eventId } });
       if (error) throw error;
-      if ((data as any)?.ok) toast.success("Last check-in undone");
+      const d = data as any;
+      if (d?.ok) toast.success("Last check-in undone");
+      else if (d?.error === "event_ended") toast.error("Event has ended — check-in is closed");
       else toast.message("Nothing to undo");
       refreshCounters();
     } catch (err: any) {
@@ -208,6 +215,19 @@ export default function CheckIn() {
           <StatBox label="Checked-in" value={counters.checkedIn} icon={<CheckCircle2 className="h-4 w-4" />} highlight />
         </div>
 
+        {ended && !isHost && (
+          <Alert variant="destructive">
+            <AlertTitle>Check-in is closed</AlertTitle>
+            <AlertDescription>This event has ended. New check-ins and undos are no longer allowed.</AlertDescription>
+          </Alert>
+        )}
+        {ended && isHost && (
+          <Alert>
+            <AlertTitle>Event has ended — host override</AlertTitle>
+            <AlertDescription>Late check-ins will still be recorded.</AlertDescription>
+          </Alert>
+        )}
+
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">Scan QR</CardTitle>
@@ -247,12 +267,13 @@ export default function CheckIn() {
                 autoCapitalize="characters"
                 autoCorrect="off"
                 spellCheck={false}
+                disabled={checkInDisabled}
               />
-              <Button type="submit" size="lg" className="w-full h-14 text-lg" disabled={!code.trim() || submitting}>
+              <Button type="submit" size="lg" className="w-full h-14 text-lg" disabled={!code.trim() || submitting || checkInDisabled}>
                 {submitting ? "Checking in…" : "Check in"}
               </Button>
             </form>
-            <Button variant="outline" className="w-full mt-3 h-12" onClick={undo}>
+            <Button variant="outline" className="w-full mt-3 h-12" onClick={undo} disabled={checkInDisabled}>
               <Undo2 className="w-4 h-4 mr-2" /> Undo last scan
             </Button>
           </CardContent>

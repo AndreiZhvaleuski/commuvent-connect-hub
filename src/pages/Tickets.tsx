@@ -19,6 +19,7 @@ type Row = {
   code: string;
   cancelled_at: string | null;
   event_id: string;
+  check_ins: { id: string; undone: boolean }[] | null;
   events: {
     id: string; title: string; start_at: string; end_at: string; time_zone: string;
     venue_address: string | null; online_url: string | null; description: string | null;
@@ -37,7 +38,7 @@ export default function Tickets() {
     if (!user) return;
     const { data } = await supabase
       .from("rsvps")
-      .select("id,status,position,code,cancelled_at,event_id, events(id,title,start_at,end_at,time_zone,venue_address,online_url,description,cover_image_url)")
+      .select("id,status,position,code,cancelled_at,event_id, events(id,title,start_at,end_at,time_zone,venue_address,online_url,description,cover_image_url), check_ins(id,undone)")
       .eq("user_id", user.id)
       .neq("status", "cancelled")
       .order("created_at", { ascending: false });
@@ -87,7 +88,15 @@ export default function Tickets() {
   const doCancel = async (eventId: string) => {
     if (!confirm("Cancel this RSVP?")) return;
     const { data, error } = await supabase.functions.invoke("rsvp_cancel", { body: { event_id: eventId } });
-    if (error || data?.error) { toast.error(error?.message ?? data?.error); return; }
+    const code = (data?.error as string | undefined) ?? error?.message;
+    if (code) {
+      const msg =
+        code === "event_ended" ? "This event has ended."
+        : code === "already_checked_in" ? "You've already checked in — RSVP can't be cancelled."
+        : code;
+      toast.error(msg);
+      return;
+    }
     toast.success("RSVP cancelled");
     load();
   };
@@ -134,6 +143,7 @@ export default function Tickets() {
 function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; onCancel: () => void; pastView?: boolean }) {
   const e = row.events;
   if (!e) return null;
+  const checkedIn = (row.check_ins ?? []).some((c) => !c.undone);
   const eventUrl = `${window.location.origin}/e/${e.id}`;
   const calEvent = {
     title: e.title,
@@ -153,6 +163,7 @@ function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; on
         <div className="min-w-0">
           <div className="mb-1 flex flex-wrap items-center gap-2">
             {row.status === "going" ? <Badge>Going</Badge> : <Badge variant="secondary">Waitlist · #{row.position ?? "?"}</Badge>}
+            {checkedIn && <Badge variant="outline">Checked in</Badge>}
             {pastView && <Badge variant="outline">Ended</Badge>}
           </div>
           <CardTitle className="truncate">
@@ -192,7 +203,11 @@ function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; on
                   <CalIcon className="mr-1 h-4 w-4" />Google Calendar
                 </Button>
                 <Button size="sm" variant="outline" onClick={ics}><Download className="mr-1 h-4 w-4" />.ics</Button>
-                <Button size="sm" variant="ghost" onClick={onCancel}>Cancel RSVP</Button>
+                {checkedIn ? (
+                  <span className="text-xs text-muted-foreground self-center">Checked in — can't cancel</span>
+                ) : (
+                  <Button size="sm" variant="ghost" onClick={onCancel}>Cancel RSVP</Button>
+                )}
               </div>
             )}
           </div>
