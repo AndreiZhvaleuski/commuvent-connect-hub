@@ -18,7 +18,7 @@ import { format } from "date-fns";
 
 type Role = "host" | "checker";
 type Host = { id: string; name: string; logo_url: string | null };
-type Member = { user_id: string; role: Role; created_at: string; profile: { display_name: string | null; avatar_url: string | null; email: string | null } | null };
+type Member = { user_id: string; role: Role; created_at: string; profile: { display_name: string | null; avatar_url: string | null } | null };
 type Invite = { id: string; role: Role; token: string; expires_at: string; created_at: string };
 
 const ROLE_DESC: Record<Role, string> = {
