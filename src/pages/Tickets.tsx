@@ -291,9 +291,14 @@ function TicketCard({ row, qr, onCancel, pastView, hidden, onToggleHidden }: { r
               <div className="flex items-center justify-between gap-2">
                 <p className="text-xs text-muted-foreground">Ticket code</p>
                 {onToggleHidden && row.status === "going" && (
-                  <Button size="sm" variant="ghost" className="h-7 px-2" onClick={onToggleHidden} aria-label={hidden ? "Show ticket details" : "Hide ticket details"}>
-                    {hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="sm" variant="ghost" className="h-7 px-2" onClick={onToggleHidden} aria-label={hidden ? "Show ticket details" : "Hide ticket details"}>
+                        {hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{hidden ? "Show ticket code & QR" : "Hide ticket code & QR"}</TooltipContent>
+                  </Tooltip>
                 )}
               </div>
               <p className={`font-mono text-lg tracking-wider transition ${hidden ? "select-none blur-sm" : ""}`}>
