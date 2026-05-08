@@ -66,7 +66,7 @@ export default function HostDashboard() {
 
       let eventsQuery = supabase.from("events")
         .select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url,time_zone")
-        .eq("host_id", hostId!).order("start_at", { ascending: sortDir === "asc" });
+        .eq("host_id", hostId!).order("start_at", { ascending: true });
       if (isChecker) eventsQuery = eventsQuery.eq("status", "published");
 
       const [hostRes, evRes, statsRes] = await Promise.all([
@@ -88,7 +88,7 @@ export default function HostDashboard() {
         role,
       };
     },
-    [ready, hostId, user?.id, sortDir]
+    [ready, hostId, user?.id]
   );
 
   const role = data?.role ?? null;
@@ -108,8 +108,13 @@ export default function HostDashboard() {
   }, [hostId, role, refetch]);
 
   const now = new Date().toISOString();
-  const upcoming = useMemo(() => events.filter((e) => e.end_at >= now), [events, now]);
-  const past = useMemo(() => events.filter((e) => e.end_at < now), [events, now]);
+  const sorted = useMemo(() => {
+    const copy = [...events];
+    copy.sort((a, b) => sortDir === "asc" ? a.start_at.localeCompare(b.start_at) : b.start_at.localeCompare(a.start_at));
+    return copy;
+  }, [events, sortDir]);
+  const upcoming = useMemo(() => sorted.filter((e) => e.end_at >= now), [sorted, now]);
+  const past = useMemo(() => sorted.filter((e) => e.end_at < now), [sorted, now]);
 
   if (busy) {
     return (
