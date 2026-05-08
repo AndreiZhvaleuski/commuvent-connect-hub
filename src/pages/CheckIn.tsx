@@ -122,7 +122,7 @@ export default function CheckIn() {
     );
   }
 
-  const remaining = Math.max(0, (event.capacity || 0) - counters.checkedIn);
+  const capacitySuffix = event.capacity ? `/ ${event.capacity}` : "";
 
   async function submit(e?: React.FormEvent) {
     e?.preventDefault();
