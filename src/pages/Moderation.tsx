@@ -148,7 +148,7 @@ export default function Moderation() {
                             <Button size="sm" className="flex-1" onClick={() => setPhotoStatus(p.id, "approved")}>
                               <Check className="w-4 h-4 mr-1" /> Approve
                             </Button>
-                            <Button size="sm" variant="outline" className="flex-1" onClick={() => setPhotoStatus(p.id, "rejected")}>
+                            <Button size="sm" variant="outline" className="flex-1" onClick={() => setRejectFor(p)}>
                               <X className="w-4 h-4 mr-1" /> Reject
                             </Button>
                           </CardContent>
