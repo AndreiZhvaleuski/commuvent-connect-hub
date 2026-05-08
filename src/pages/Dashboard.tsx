@@ -60,7 +60,7 @@ export default function Dashboard() {
             <h1 className="text-3xl font-semibold tracking-tight">Your hosts</h1>
             <p className="text-muted-foreground mt-1">Pick a host to manage its events.</p>
           </div>
-          <Button render={<Link to="/become-a-host" />}><Plus className="mr-1 h-4 w-4" />New host</Button>
+          <Button render={<Link to="/become-a-host" />} size="sm" variant="outline"><Plus className="mr-1 h-4 w-4" />Create host</Button>
         </div>
 
         {busy ? (
