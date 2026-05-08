@@ -25,6 +25,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/empty-state";
 
@@ -277,16 +278,41 @@ export default function EventGalleryPage() {
       </div>
 
       {user && (
-        <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)} className="mb-4">
-          <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <TabsList className="inline-flex w-max">
-              <TabsTrigger value="published">Published</TabsTrigger>
-              <TabsTrigger value="mine">Uploaded by me</TabsTrigger>
-              <TabsTrigger value="pending">My pending</TabsTrigger>
-              {isHost && <TabsTrigger value="review">Pending review</TabsTrigger>}
-            </TabsList>
-          </div>
-        </Tabs>
+        <div className="mb-4">
+          {(() => {
+            const options: { value: Filter; label: string }[] = [
+              { value: "published", label: "Published" },
+              { value: "mine", label: "Uploaded by me" },
+              { value: "pending", label: "My pending" },
+              ...(isHost ? [{ value: "review" as Filter, label: "Pending review" }] : []),
+            ];
+            return (
+              <>
+                {/* Mobile: dropdown */}
+                <div className="sm:hidden">
+                  <Select value={filter} onValueChange={(v) => setFilter(v as Filter)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {options.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {/* Desktop: tabs */}
+                <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)} className="hidden sm:block">
+                  <TabsList>
+                    {options.map((o) => (
+                      <TabsTrigger key={o.value} value={o.value}>{o.label}</TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
+              </>
+            );
+          })()}
+        </div>
       )}
 
       {user && filter === "pending" && (
