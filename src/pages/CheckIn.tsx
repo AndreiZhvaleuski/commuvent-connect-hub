@@ -2,13 +2,21 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, Navigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeftIcon as ArrowLeft, ArrowCounterClockwiseIcon as Undo2 } from "@phosphor-icons/react";
+import {
+  ArrowLeftIcon as ArrowLeft,
+  ArrowCounterClockwiseIcon as Undo2,
+  QrCodeIcon as QrCode,
+  ArrowSquareOutIcon as ExternalLink,
+  GearIcon as Settings,
+} from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { TopNav } from "@/components/top-nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
 export default function CheckIn() {
   const { eventId } = useParams<{ eventId: string }>();
   const { user, loading } = useAuth();
@@ -16,6 +24,7 @@ export default function CheckIn() {
   const [submitting, setSubmitting] = useState(false);
   const [counters, setCounters] = useState({ going: 0, checkedIn: 0 });
   const inputRef = useRef<HTMLInputElement>(null);
+
   const { data: event, isLoading: evLoading } = useQuery({
     queryKey: ["checkin-event", eventId],
     enabled: !!eventId && !!user,
@@ -43,6 +52,8 @@ export default function CheckIn() {
       return data;
     },
   });
+
+  const isHost = access?.role === "host";
 
   const refreshCounters = useMemo(
     () => async () => {
@@ -121,6 +132,7 @@ export default function CheckIn() {
       else toast.error("Check-in failed");
       setCode("");
       inputRef.current?.focus();
+      refreshCounters();
     } catch (err: any) {
       toast.error(err.message ?? "Check-in failed");
     } finally {
@@ -134,6 +146,7 @@ export default function CheckIn() {
       if (error) throw error;
       if ((data as any)?.ok) toast.success("Last check-in undone");
       else toast.message("Nothing to undo");
+      refreshCounters();
     } catch (err: any) {
       toast.error(err.message ?? "Undo failed");
     }
@@ -142,28 +155,73 @@ export default function CheckIn() {
   return (
     <div className="min-h-screen bg-background">
       <TopNav />
-      <main className="container max-w-2xl py-8 space-y-6">
-        <Link to={`/dashboard/${event.host_id}`} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+      <main className="container max-w-md sm:max-w-2xl py-4 sm:py-8 px-4 space-y-5">
+        <Link
+          to={`/dashboard/${event.host_id}`}
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground min-h-11"
+        >
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to dashboard
         </Link>
 
         <div>
-          <h1 className="text-3xl font-bold">{event.title}</h1>
-          <p className="text-muted-foreground">Check-in</p>
+          <h1 className="text-2xl sm:text-3xl font-bold leading-tight">{event.title}</h1>
+          <p className="text-sm text-muted-foreground">Check-in</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3" aria-live="polite">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="min-h-11"
+            render={<a href={`/e/${event.id}`} target="_blank" rel="noopener noreferrer" />}
+          >
+            <ExternalLink className="w-4 h-4 mr-2" /> Public page
+          </Button>
+          {isHost && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="min-h-11"
+              render={<Link to={`/dashboard/${event.host_id}/events/${event.id}`} />}
+            >
+              <Settings className="w-4 h-4 mr-2" /> Manage event
+            </Button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 sm:gap-3" aria-live="polite">
           <Counter label="Going" value={counters.going} />
           <Counter label="Checked-in" value={counters.checkedIn} highlight />
           <Counter label="Remaining" value={remaining} />
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Enter ticket code</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Scan QR</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={submit} className="space-y-4">
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              disabled
+              className="w-full h-14 text-base"
+            >
+              <QrCode className="w-5 h-5 mr-2" /> Scan QR code
+              <Badge variant="secondary" className="ml-2">Coming soon</Badge>
+            </Button>
+            <p className="mt-2 text-xs text-muted-foreground text-center">
+              QR scanning will be available soon. Enter the code manually below.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Enter ticket code</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={submit} className="space-y-3">
               <Input
                 ref={inputRef}
                 autoFocus
@@ -172,12 +230,16 @@ export default function CheckIn() {
                 placeholder="e.g. AB12CD"
                 className="h-16 text-2xl tracking-widest text-center font-mono uppercase"
                 aria-label="Ticket code"
+                inputMode="text"
+                autoCapitalize="characters"
+                autoCorrect="off"
+                spellCheck={false}
               />
               <Button type="submit" size="lg" className="w-full h-14 text-lg" disabled={!code.trim() || submitting}>
                 {submitting ? "Checking in…" : "Check in"}
               </Button>
             </form>
-            <Button variant="outline" className="w-full mt-3" onClick={undo}>
+            <Button variant="outline" className="w-full mt-3 h-12" onClick={undo}>
               <Undo2 className="w-4 h-4 mr-2" /> Undo last scan
             </Button>
           </CardContent>
@@ -190,9 +252,9 @@ export default function CheckIn() {
 function Counter({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
   return (
     <Card className={highlight ? "border-primary" : undefined}>
-      <CardContent className="p-4 text-center">
-        <div className="text-xs uppercase tracking-wide text-muted-foreground">{label}</div>
-        <div className={`text-3xl font-bold ${highlight ? "text-primary" : ""}`}>{value}</div>
+      <CardContent className="p-3 sm:p-4 text-center">
+        <div className="text-[10px] sm:text-xs uppercase tracking-wide text-muted-foreground">{label}</div>
+        <div className={`text-2xl sm:text-3xl font-bold ${highlight ? "text-primary" : ""}`}>{value}</div>
       </CardContent>
     </Card>
   );
