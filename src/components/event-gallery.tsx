@@ -215,8 +215,8 @@ export function EventGallery({ eventId }: { eventId: string }) {
         onOpenChange={(o) => !o && setDeleteFor(null)}
         title="Delete this pending upload?"
         description="This frees up one of your 5 pending slots for this event."
-        confirmText="Delete"
-        variant="destructive"
+        confirmLabel="Delete"
+        destructive
         onConfirm={confirmDelete}
       />
 
