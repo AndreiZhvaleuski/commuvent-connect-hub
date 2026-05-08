@@ -43,6 +43,7 @@ export default function EventPage() {
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [canManage, setCanManage] = useState(false);
+  const [canCheckIn, setCanCheckIn] = useState(false);
   const load = async () => {
     if (!eventId) return;
     setBusy(true);
