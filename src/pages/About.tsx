@@ -89,7 +89,7 @@ export default function About() {
             const Icon = s.icon;
             return (
               <Card key={s.label}>
-                <CardContent className="pt-6">
+                <CardContent className="py-6">
                   <Icon className="h-6 w-6 text-primary" />
                   <div className="mt-3 text-3xl font-semibold tracking-tight">{s.value}</div>
                   <div className="text-sm text-muted-foreground">{s.label}</div>
@@ -110,7 +110,7 @@ export default function About() {
             const Icon = v.icon;
             return (
               <Card key={v.title}>
-                <CardContent className="pt-6">
+                <CardContent className="py-6">
                   <div className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
                     <Icon className="h-5 w-5" />
                   </div>
