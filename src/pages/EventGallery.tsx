@@ -19,7 +19,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -31,7 +30,6 @@ import { SkeletonGrid } from "@/components/skeleton-grid";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { PageSpinner } from "@/components/page-spinner";
 import { ErrorState } from "@/components/error-state";
-import { EventDateTime } from "@/components/event-datetime";
 
 type Photo = { id: string; storage_path: string; user_id: string; status: string; created_at: string };
 type EventInfo = {
