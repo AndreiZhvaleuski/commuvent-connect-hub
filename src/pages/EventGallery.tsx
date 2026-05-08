@@ -290,13 +290,6 @@ export default function EventGalleryPage() {
           Photos awaiting your approval. Approved photos appear in the Published tab.
         </p>
       )}
-
-      {user && filter === "pending" && (
-        <p className="mb-4 text-xs text-muted-foreground">
-          Up to 5 pending uploads per event · max 5 MB · JPG, PNG, WebP, GIF, HEIC
-        </p>
-      )}
-
       {error ? (
         <ErrorState title="Couldn't load photos" description={error.message} onRetry={refetch} />
       ) : loading && photos.length === 0 ? (
