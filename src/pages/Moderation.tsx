@@ -34,12 +34,16 @@ type ReportRow = {
 
 type Reporter = { id: string; display_name: string | null; avatar_url: string | null; email: string | null };
 type EventInfo = { id: string; title: string; start_at: string; description: string | null };
+type PhotoInfo = { id: string; storage_path: string; event_id: string; status: string };
 
 type Data = {
   reports: ReportRow[];
   reporters: Record<string, Reporter>;
   events: Record<string, EventInfo>;
+  photos: Record<string, PhotoInfo>;
 };
+
+const PUBLIC_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/gallery/`;
 
 export default function Moderation() {
   const { hostId } = useParams<{ hostId: string }>();
