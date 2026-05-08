@@ -265,13 +265,7 @@ function EventsSection({
   emptyText: string;
 }) {
   if (loading) {
-    return (
-      <div className="grid gap-3">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="h-24 animate-pulse rounded-lg bg-muted" />
-        ))}
-      </div>
-    );
+    return <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>;
   }
   if (error) {
     return <ErrorState title="Couldn't load events" description={error.message} onRetry={onRetry} />;
