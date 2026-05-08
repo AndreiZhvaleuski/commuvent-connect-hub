@@ -24,6 +24,7 @@ import EventManage from "./pages/EventManage.tsx";
 import HostMembers from "./pages/HostMembers.tsx";
 import InviteAccept from "./pages/InviteAccept.tsx";
 import ScrollToTop from "./components/scroll-to-top";
+import MyEvents from "./pages/MyEvents.tsx";
 
 const queryClient = new QueryClient();
 
