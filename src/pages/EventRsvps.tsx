@@ -138,6 +138,7 @@ export default function EventRsvps() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Check-in</TableHead>
                   </TableRow>
@@ -146,6 +147,7 @@ export default function EventRsvps() {
                   {rows.map((r) => (
                     <TableRow key={r.id}>
                       <TableCell>{r.display_name || <span className="text-muted-foreground">—</span>}</TableCell>
+                      <TableCell>{r.email || <span className="text-muted-foreground">—</span>}</TableCell>
                       <TableCell>
                         <Badge variant={r.status === "going" ? "default" : "secondary"}>
                           {r.status}{r.position ? ` · #${r.position}` : ""}
