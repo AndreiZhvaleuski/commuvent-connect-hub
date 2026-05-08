@@ -1,73 +1,78 @@
-# Single-request EventPage load
+## Goal
 
-Yes — the 5 conditional reads on mount (event, host, going count, my RSVP, my check-in, my host role) can collapse into **one** Supabase RPC that returns a single JSON payload. Realtime stays separate (it only refetches the going count) and mutations stay separate.
+Refactor `src/pages/HostDashboard.tsx` so the host header doesn't flicker when events refetch, events use a proper paginated `useAsyncResource` with all states covered, and tab/sort/page are reflected in the URL.
 
-## New DB function
+## Changes
 
-```sql
-create or replace function public.event_page_load(p_event_id uuid)
-returns jsonb
-language sql stable security definer
-set search_path = public
-as $$
-  with ev as (
-    select * from public.events where id = p_event_id
-  ),
-  h as (
-    select id, name, logo_url, bio, contact_email
-    from public.hosts where id = (select host_id from ev)
-  ),
-  my_rsvp as (
-    select id, status, position, code, cancelled_at
-    from public.rsvps
-    where event_id = p_event_id and user_id = auth.uid()
-    limit 1
-  ),
-  my_ci as (
-    select 1 as checked_in
-    from public.check_ins
-    where rsvp_id = (select id from my_rsvp) and undone = false
-    limit 1
-  ),
-  my_role as (
-    select role from public.host_members
-    where host_id = (select host_id from ev) and user_id = auth.uid()
-    limit 1
-  )
-  select jsonb_build_object(
-    'event',        (select to_jsonb(ev)  from ev),
-    'host',         (select to_jsonb(h)   from h),
-    'going_count',  public.event_going_count(p_event_id),
-    'my_rsvp',      (select to_jsonb(my_rsvp) from my_rsvp),
-    'checked_in',   exists(select 1 from my_ci),
-    'my_host_role', (select role from my_role)
-  );
-$$;
+### 1. Split into two independent resources
+
+Two `useAsyncResource` calls in `HostDashboard`:
+
+- `**headerResource**` — fetches host (`hosts`) + current user's `role` from `host_members`. Deps: `[ready, hostId, user?.id]`. Drives the header (avatar, name, action buttons, "checker" badge). Once loaded, it stays mounted and is unaffected by event filter/sort/page changes.
+- `**eventsResource**` — fetches a single page of events plus their stats. Deps: `[ready, hostId, user?.id, role, tab, sortDir, page]`. The list should show loader indicator.
+
+### 2. Server-side filtering, sorting, pagination
+
+In the events fetcher:
+
+- Apply tab filter on the server: `upcoming` → `.gte("end_at", now)`, `past` → `.lt("end_at", now)`.
+- Apply sort on the server: `.order("start_at", { ascending: sortDir === "asc" })`.
+- Page with `.range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)` and `select(..., { count: "exact" })` to get `total`.
+- Keep checker restriction (`status = 'published'`).
+- Fetch `event_stats` once per page (same RPC) and build the `statsMap` for the returned event ids only.
+- Return `{ events, total }`.
+
+`PAGE_SIZE` constant (e.g. 10).
+
+### 3. URL persistence
+
+Reads/writes via `useSearchParams`:
+
+- `tab` — `upcoming` (default, omitted) | `past`
+- `sort` — `asc` (default, omitted) | `desc`
+- `page` — `1`-based, omitted when 1
+
+Changing any control resets `page` to 1 (except page changes themselves). All updates use `replace: true` to avoid polluting history.
+
+### 4. All states covered for the events section
+
+Inside the events panel (header always renders independently as long as `headerResource` succeeded):
+
+- **Loading (initial)** — skeleton list (a few placeholder cards). Only when `eventsResource.loading && !data`.
+- **Refetching** — show a `Spinner` using existing component.
+- **Error** — `ErrorState` with `onRetry={refetch}`.
+- **Empty** — existing `EmptyState` with tab-appropriate copy.
+- **Success** — list of `EventManagementCard` + pagination footer.
+
+Header section gets its own loading skeleton + error state, separate from events.
+
+### 5. Tab counts
+
+`EventListControls` currently shows `(upcoming.length)` / `(past.length)`. With server-side pagination we no longer have both lists in memory. Two options handled in plan:
+
+- Add two small `head: true, count: "exact"` count queries inside `headerResource` (one for upcoming, one for past) so counts load with the header and stay stable across page navigation. This keeps the existing `EventListControls` API intact.
+
+### 6. Pagination UI
+
+A simple footer below the list:
+
+```text
+[ Prev ]   Page X of Y   [ Next ]   (N total)
 ```
 
-RLS still applies via the underlying tables / `event_going_count`. Anonymous callers just get `my_rsvp = null`, `checked_in = false`, `my_host_role = null`.
+Buttons disabled at bounds; hidden entirely when `total <= PAGE_SIZE`. Use existing pagination approach on all other pages.
 
-## Client changes (`src/pages/EventPage.tsx`)
+### 7. Realtime
 
-- Replace the entire mount-time fetch block with one `useAsyncResource` call:
-  ```ts
-  const { data, loading, error, refetch } = useAsyncResource(
-    (signal) => supabase.rpc('event_page_load', { p_event_id: eventId }).abortSignal(signal),
-    [eventId]
-  );
-  ```
-- Derive `event`, `host`, `goingCount`, `myRsvp`, `checkedIn`, `isHost` from `data`.
-- Keep the realtime channel, but instead of a second RPC, just call `refetch()` (or, to avoid refetching everything, keep the lightweight `event_going_count` RPC for that one update — recommended, since RSVP changes shouldn't reload host/role/etc.).
-- Render `Spinner` / `ErrorState` / `EmptyState` (event not found) consistently.
-- Mutations (RSVP create/cancel/report) stay as today, wrapped in `useAsyncAction`, calling `refetch()` on success.
+Keep the existing realtime channel, but only call `eventsResource.refetch()` (stats live there now). Header counts also benefit, so also call `headerResource.refetch()` on `rsvps` / `check_ins` changes (cheap, just two count queries + host row from cache).
 
-## Net effect
+## Files touched
 
-- Mount: 5 round-trips → **1**.
-- Realtime: unchanged (1 lightweight RPC on RSVP change).
-- Mutations: unchanged in count, gain consistent loading/disabled/toast behavior via `useAsyncAction`.
+- `src/pages/HostDashboard.tsx` — main refactor.
+- `src/components/event-list-controls.tsx` — no API change needed; counts still passed in from header resource.
+- (new) small inline `Pagination` controls inside `HostDashboard.tsx`, or a tiny `src/components/pagination-controls.tsx` if it stays clean.
 
 ## Out of scope
 
-- No changes to other pages in this step.
-- No change to RSVP / report / check-in mutation endpoints.
+- No DB schema or RPC changes.
+- No changes to `EventManagementCard` or other pages.
