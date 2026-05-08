@@ -165,28 +165,6 @@ export default function About() {
         </div>
       </section>
 
-      <section className="container mx-auto max-w-6xl px-4 pb-20">
-        <Card className="overflow-hidden">
-          <CardContent className="pt-8 pb-8 text-center">
-            <ConfettiIcon className="mx-auto h-8 w-8 text-primary" />
-            <h2 className="mt-3 text-2xl sm:text-3xl font-semibold tracking-tight">
-              Throw something worth showing up to.
-            </h2>
-            <p className="mt-2 text-muted-foreground max-w-xl mx-auto">
-              Set up a host page in under two minutes. We'll handle the RSVPs,
-              the door, and the gallery.
-            </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <Button render={<Link to="/become-a-host" />} size="lg">
-                Become a host <ArrowRightIcon className="ml-2 h-4 w-4" />
-              </Button>
-              <Button render={<Link to="/explore" />} size="lg" variant="outline">
-                Browse events
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
     </>
   );
 }
