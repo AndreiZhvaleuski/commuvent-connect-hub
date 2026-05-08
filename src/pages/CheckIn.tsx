@@ -215,6 +215,19 @@ export default function CheckIn() {
           <StatBox label="Checked-in" value={counters.checkedIn} icon={<CheckCircle2 className="h-4 w-4" />} highlight />
         </div>
 
+        {ended && !isHost && (
+          <Alert variant="destructive">
+            <AlertTitle>Check-in is closed</AlertTitle>
+            <AlertDescription>This event has ended. New check-ins and undos are no longer allowed.</AlertDescription>
+          </Alert>
+        )}
+        {ended && isHost && (
+          <Alert>
+            <AlertTitle>Event has ended — host override</AlertTitle>
+            <AlertDescription>Late check-ins will still be recorded.</AlertDescription>
+          </Alert>
+        )}
+
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">Scan QR</CardTitle>
@@ -233,6 +246,36 @@ export default function CheckIn() {
             <p className="mt-2 text-xs text-muted-foreground text-center">
               QR scanning will be available soon. Enter the code manually below.
             </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Enter ticket code</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={submit} className="space-y-3">
+              <Input
+                ref={inputRef}
+                autoFocus
+                value={code}
+                onChange={(e) => setCode(e.target.value.toUpperCase())}
+                placeholder="e.g. AB12CD"
+                className="h-16 text-2xl tracking-widest text-center font-mono uppercase"
+                aria-label="Ticket code"
+                inputMode="text"
+                autoCapitalize="characters"
+                autoCorrect="off"
+                spellCheck={false}
+                disabled={checkInDisabled}
+              />
+              <Button type="submit" size="lg" className="w-full h-14 text-lg" disabled={!code.trim() || submitting || checkInDisabled}>
+                {submitting ? "Checking in…" : "Check in"}
+              </Button>
+            </form>
+            <Button variant="outline" className="w-full mt-3 h-12" onClick={undo} disabled={checkInDisabled}>
+              <Undo2 className="w-4 h-4 mr-2" /> Undo last scan
+            </Button>
           </CardContent>
         </Card>
 
