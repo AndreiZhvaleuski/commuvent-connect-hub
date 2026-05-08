@@ -24,13 +24,15 @@ const MAX = 4;
 const STEP = 0.5;
 
 export function PhotoLightbox({ images, index, open, onOpenChange, onIndexChange }: Props) {
-  const [scale, setScale] = useState(1);
-  const [tx, setTx] = useState(0);
-  const [ty, setTy] = useState(0);
+  const viewKey = `${open ? "open" : "closed"}-${index}`;
+  const [view, setView] = useState({ key: "", scale: 1, tx: 0, ty: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const scale = view.key === viewKey ? view.scale : 1;
+  const tx = view.key === viewKey ? view.tx : 0;
+  const ty = view.key === viewKey ? view.ty : 0;
   const dragging = useRef<{ x: number; y: number } | null>(null);
 
-  const reset = useCallback(() => { setScale(1); setTx(0); setTy(0); }, []);
-  useEffect(() => { reset(); }, [index, open, reset]);
+  const reset = useCallback(() => { setView({ key: viewKey, scale: 1, tx: 0, ty: 0 }); }, [viewKey]);
 
   const current = images[index];
   const hasPrev = index > 0;
@@ -44,30 +46,30 @@ export function PhotoLightbox({ images, index, open, onOpenChange, onIndexChange
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") prev();
       else if (e.key === "ArrowRight") next();
-      else if (e.key === "+" || e.key === "=") setScale((s) => Math.min(MAX, s + STEP));
-      else if (e.key === "-" || e.key === "_") setScale((s) => Math.max(MIN, s - STEP));
+      else if (e.key === "+" || e.key === "=") setView((v) => ({ key: viewKey, scale: Math.min(MAX, (v.key === viewKey ? v.scale : 1) + STEP), tx, ty }));
+      else if (e.key === "-" || e.key === "_") setView((v) => ({ key: viewKey, scale: Math.max(MIN, (v.key === viewKey ? v.scale : 1) - STEP), tx, ty }));
       else if (e.key === "0") reset();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, prev, next, reset]);
+  }, [open, prev, next, reset, tx, ty, viewKey]);
 
   const onWheel = (e: React.WheelEvent) => {
     e.preventDefault();
-    setScale((s) => Math.max(MIN, Math.min(MAX, s + (e.deltaY < 0 ? STEP : -STEP))));
+    setView((v) => ({ key: viewKey, scale: Math.max(MIN, Math.min(MAX, (v.key === viewKey ? v.scale : 1) + (e.deltaY < 0 ? STEP : -STEP))), tx, ty }));
   };
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (scale <= 1) return;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     dragging.current = { x: e.clientX - tx, y: e.clientY - ty };
+    setIsDragging(true);
   };
   const onPointerMove = (e: React.PointerEvent) => {
     if (!dragging.current) return;
-    setTx(e.clientX - dragging.current.x);
-    setTy(e.clientY - dragging.current.y);
+    setView({ key: viewKey, scale, tx: e.clientX - dragging.current.x, ty: e.clientY - dragging.current.y });
   };
-  const onPointerUp = () => { dragging.current = null; };
+  const onPointerUp = () => { dragging.current = null; setIsDragging(false); };
 
   if (!current) return null;
 
@@ -80,20 +82,20 @@ export function PhotoLightbox({ images, index, open, onOpenChange, onIndexChange
         <VisuallyHidden><DialogTitle>Photo viewer</DialogTitle></VisuallyHidden>
 
         <div
-          className="relative h-full w-full overflow-hidden touch-none select-none"
+          className="relative flex h-full w-full items-center justify-center overflow-hidden touch-none select-none"
           onWheel={onWheel}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
-          style={{ cursor: scale > 1 ? (dragging.current ? "grabbing" : "grab") : "default" }}
+          style={{ cursor: scale > 1 ? (isDragging ? "grabbing" : "grab") : "default" }}
         >
           <img
             src={current.src}
             alt={current.alt ?? "Photo"}
             draggable={false}
-            className="absolute left-1/2 top-1/2 max-h-full max-w-full -translate-x-1/2 -translate-y-1/2 object-contain transition-transform duration-100"
-            style={{ transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(${scale})` }}
+            className="max-h-full max-w-full object-contain transition-transform duration-100"
+            style={{ transform: `translate(${tx}px, ${ty}px) scale(${scale})`, transformOrigin: "center" }}
           />
 
           {hasPrev && (
@@ -120,11 +122,11 @@ export function PhotoLightbox({ images, index, open, onOpenChange, onIndexChange
           )}
 
           <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full border bg-background/90 px-1.5 py-1 shadow">
-            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setScale((s) => Math.max(MIN, s - STEP))} aria-label="Zoom out">
+            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setView((v) => ({ key: viewKey, scale: Math.max(MIN, (v.key === viewKey ? v.scale : 1) - STEP), tx, ty }))} aria-label="Zoom out">
               <MagnifyingGlassMinusIcon className="h-4 w-4" />
             </Button>
             <span className="min-w-12 text-center text-xs tabular-nums">{Math.round(scale * 100)}%</span>
-            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setScale((s) => Math.min(MAX, s + STEP))} aria-label="Zoom in">
+            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setView((v) => ({ key: viewKey, scale: Math.min(MAX, (v.key === viewKey ? v.scale : 1) + STEP), tx, ty }))} aria-label="Zoom in">
               <MagnifyingGlassPlusIcon className="h-4 w-4" />
             </Button>
             <Button size="icon" variant="ghost" className="h-8 w-8" onClick={reset} aria-label="Reset">
