@@ -243,9 +243,7 @@ export default function Tickets() {
               {busy ? (
                 <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>
               ) : rows.length === 0 ? (
-                <Card><CardContent className="py-12 text-center text-muted-foreground">
-                  {view === "upcoming" ? "No upcoming tickets." : "No past tickets."}
-                </CardContent></Card>
+                <EmptyState title={view === "upcoming" ? "No upcoming tickets." : "No past tickets."} />
               ) : (
                 rows.map((r) => (
                   <TicketCard
