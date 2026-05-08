@@ -226,7 +226,7 @@ export default function EventGalleryPage() {
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : photos.length === 0 ? (
         <EmptyState
-          title={filter === "pending" ? "No pending photos" : filter === "mine" ? "You haven't uploaded yet" : "No photos yet"}
+          title="No photos yet"
           description={user ? "Be the first to share!" : "Sign in to upload one."}
         />
       ) : (
@@ -235,8 +235,15 @@ export default function EventGalleryPage() {
             {photos.map((p, i) => {
               const isOwner = user?.id === p.user_id;
               const canDelete = isOwner && p.status === "pending";
+              const matches =
+                filter === "all" ||
+                (filter === "mine" && isOwner) ||
+                (filter === "pending" && isOwner && p.status === "pending");
               return (
-                <div key={p.id} className="group relative overflow-hidden rounded-lg border bg-muted">
+                <div
+                  key={p.id}
+                  className={`group relative overflow-hidden rounded-lg border bg-muted transition ${matches ? "" : "opacity-30 hover:opacity-100"}`}
+                >
                   <button
                     type="button"
                     onClick={() => setLightboxIndex(i)}
