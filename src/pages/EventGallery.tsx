@@ -182,6 +182,13 @@ export default function EventGalleryPage() {
     refetch();
   };
 
+  const setPhotoStatus = async (id: string, status: "approved" | "rejected") => {
+    const { error } = await supabase.from("gallery_photos").update({ status }).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success(status === "approved" ? "Photo approved" : "Photo rejected");
+    refetch();
+  };
+
   const lightboxImages = photos.map((p) => ({ src: PUBLIC_BASE + p.storage_path, alt: "Event photo" }));
 
   if (evError) return (
