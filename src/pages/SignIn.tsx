@@ -142,7 +142,7 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
                       onChange={(e) => setSeedSecret(e.target.value)}
                     />
                     <Button onClick={reseed} disabled={seeding} className="w-full">
-                      {seeding ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Re-seeding…</> : "Re-seed demo data"}
+                      {seeding ? <><SpinnerIcon className="mr-2 h-4 w-4 animate-spin" />Re-seeding…</> : "Re-seed demo data"}
                     </Button>
                   </div>
                 </div>
