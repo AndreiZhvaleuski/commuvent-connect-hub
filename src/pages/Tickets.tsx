@@ -26,7 +26,7 @@ import { buildICS, downloadICS, googleCalendarUrl } from "@/lib/calendar";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ErrorState } from "@/components/error-state";
-import { SkeletonGrid } from "@/components/skeleton-grid";
+import { Spinner } from "@/components/ui/spinner";
 
 type Row = {
   id: string;
