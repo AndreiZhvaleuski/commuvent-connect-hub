@@ -270,14 +270,10 @@ export default function EventGalleryPage() {
             {photos.map((p, i) => {
               const isOwner = user?.id === p.user_id;
               const canDelete = isOwner && p.status === "pending";
-              const matches =
-                filter === "all" ||
-                (filter === "mine" && isOwner) ||
-                (filter === "pending" && isOwner && p.status === "pending");
               return (
                 <div
                   key={p.id}
-                  className={`group relative overflow-hidden rounded-lg border bg-muted transition ${matches ? "" : "opacity-30 hover:opacity-100"}`}
+                  className="group relative overflow-hidden rounded-lg border bg-muted transition"
                 >
                   <button
                     type="button"
@@ -295,6 +291,11 @@ export default function EventGalleryPage() {
                   {p.status !== "approved" && (
                     <Badge variant="secondary" className="absolute left-1 top-1 px-1.5 py-0 text-[10px] uppercase">
                       {p.status}
+                    </Badge>
+                  )}
+                  {filter === "published" && isOwner && (
+                    <Badge className="absolute left-1 top-1 px-1.5 py-0 text-[10px] uppercase">
+                      By you
                     </Badge>
                   )}
                   {canDelete ? (
