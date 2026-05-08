@@ -35,6 +35,7 @@ export default function Index() {
   const list = events ?? [];
 
   return (
+    <>
       <section className="relative overflow-hidden border-b bg-gradient-to-b from-primary/5 to-transparent">
         <div className="container mx-auto max-w-6xl px-4 py-16 sm:py-24 text-center">
           <Badge variant="secondary" className="mb-5">
