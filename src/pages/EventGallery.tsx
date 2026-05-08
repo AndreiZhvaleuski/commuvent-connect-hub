@@ -76,21 +76,17 @@ export default function EventGalleryPage() {
     async (signal) => {
       const from = (page - 1) * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
-      let q = supabase
+      const { data: rows, count, error } = await supabase
         .from("gallery_photos")
         .select("id,storage_path,user_id,status,created_at", { count: "exact" })
-        .eq("event_id", eventId);
-      if (filter === "all") q = q.eq("status", "approved");
-      if (filter === "mine" && user) q = q.eq("user_id", user.id);
-      if (filter === "pending" && user) q = q.eq("user_id", user.id).eq("status", "pending");
-      const { data: rows, count, error } = await q
+        .eq("event_id", eventId)
         .order("created_at", { ascending: false })
         .abortSignal(signal)
         .range(from, to);
       if (error) throw new Error(error.message);
       return { photos: (rows ?? []) as Photo[], total: count ?? 0 };
     },
-    [eventId, user?.id, page, filter],
+    [eventId, user?.id, page],
     { keepPreviousData: true }
   );
 
