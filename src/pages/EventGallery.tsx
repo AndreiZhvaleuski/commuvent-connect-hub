@@ -5,6 +5,7 @@ import {
   CalendarIcon,
   FlagIcon as Flag,
   ImageSquareIcon as ImagePlus,
+  ShieldCheckIcon,
   SpinnerIcon as Loader2,
   TrashIcon,
 } from "@phosphor-icons/react";
