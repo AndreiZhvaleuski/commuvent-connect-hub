@@ -4,7 +4,7 @@ import { PlusIcon as Plus, ArrowSquareOutIcon as ExternalLink } from "@phosphor-
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/empty-state";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EventManagementCard, type ManagedEvent as Ev, type EventStat as Stat } from "@/components/event-management-card";
@@ -170,7 +170,7 @@ export default function HostDashboard() {
 
 function EventList({ events, stats, hostId, role, emptyText }: { events: Ev[]; stats: Record<string, Stat>; hostId: string; role: "host" | "checker"; emptyText: string }) {
   if (events.length === 0) {
-    return <Card><CardContent className="py-12 text-center text-muted-foreground">{emptyText}</CardContent></Card>;
+    return <EmptyState title={emptyText} />;
   }
   return (
     <div className="grid gap-3">

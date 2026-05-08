@@ -22,6 +22,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 import { EventListControls, type EventView, type EventSortDir } from "@/components/event-list-controls";
 import { ListPagination } from "@/components/list-pagination";
+import { EmptyState } from "@/components/empty-state";
 
 type Row = {
   id: string;
@@ -221,14 +222,12 @@ export default function Tickets() {
         ) : busy && hasAny === null ? (
           <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
         ) : hasAny === false ? (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <Ticket className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
-              <p className="text-lg font-medium">No tickets yet</p>
-              <p className="text-muted-foreground mt-1">RSVP to an event to see it here.</p>
-              <Button render={<Link to="/explore" />} className="mt-6">Explore events</Button>
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={<Ticket className="h-10 w-10" />}
+            title="No tickets yet"
+            description="RSVP to an event to see it here."
+            action={<Button render={<Link to="/explore" />}>Explore events</Button>}
+          />
         ) : (
           <>
             <EventListControls
@@ -244,9 +243,7 @@ export default function Tickets() {
               {busy ? (
                 <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>
               ) : rows.length === 0 ? (
-                <Card><CardContent className="py-12 text-center text-muted-foreground">
-                  {view === "upcoming" ? "No upcoming tickets." : "No past tickets."}
-                </CardContent></Card>
+                <EmptyState title={view === "upcoming" ? "No upcoming tickets." : "No past tickets."} />
               ) : (
                 rows.map((r) => (
                   <TicketCard

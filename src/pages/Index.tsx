@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PublicEventCard } from "@/components/public-event-card";
+import { EmptyState } from "@/components/empty-state";
 type Ev = {
   id: string; title: string; description: string | null;
   cover_image_url: string | null; start_at: string; end_at: string; time_zone: string | null;
@@ -67,14 +68,12 @@ export default function Index() {
             ))}
           </div>
         ) : events.length === 0 ? (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <Users className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
-              <p className="text-lg font-medium">No upcoming events yet</p>
-              <p className="text-muted-foreground mt-1">Be the first — host one for your community.</p>
-              <Button render={<Link to="/become-a-host" />} className="mt-6">Become a host</Button>
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={<Users className="h-10 w-10" />}
+            title="No upcoming events yet"
+            description="Be the first — host one for your community."
+            action={<Button render={<Link to="/become-a-host" />}>Become a host</Button>}
+          />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((e) => (

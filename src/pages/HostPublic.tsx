@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/empty-state";
 import { PublicEventCard, type PublicEvent } from "@/components/public-event-card";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -185,11 +185,7 @@ export default function HostPublic() {
           {busy ? (
             <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>
           ) : events.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
-                {view === "upcoming" ? "No upcoming events." : "No past events."}
-              </CardContent>
-            </Card>
+            <EmptyState title={view === "upcoming" ? "No upcoming events." : "No past events."} />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {events.map((e) => (

@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EmptyState } from "@/components/empty-state";
 
 type Host = { id: string; name: string; logo_url: string | null; bio: string | null; role: "host" | "checker" };
 
@@ -67,14 +68,12 @@ export default function Dashboard() {
             {Array.from({ length: 2 }).map((_, i) => <Card key={i} className="animate-pulse"><CardContent className="h-24" /></Card>)}
           </div>
         ) : hosts.length === 0 ? (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <Users className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
-              <p className="text-lg font-medium">No hosts yet</p>
-              <p className="text-muted-foreground mt-1">Create one to start publishing events.</p>
-              <Button render={<Link to="/become-a-host" />} className="mt-6">Become a host</Button>
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={<Users className="h-10 w-10" />}
+            title="No hosts yet"
+            description="Create one to start publishing events."
+            action={<Button render={<Link to="/become-a-host" />}>Become a host</Button>}
+          />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {hosts.map((h) => (
