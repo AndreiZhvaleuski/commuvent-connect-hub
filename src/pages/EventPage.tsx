@@ -50,12 +50,12 @@ export default function EventPage() {
     const { data: ev } = await supabase.from("events").select("*").eq("id", eventId).maybeSingle();
     if (!ev) { setNotFound(true); setBusy(false); return; }
     setEvent(ev as Ev);
-    const [{ data: h }, { count }] = await Promise.all([
+    const [{ data: h }, { data: goingCount }] = await Promise.all([
       supabase.from("hosts").select("id,name,logo_url,bio,contact_email").eq("id", ev.host_id).maybeSingle(),
-      supabase.from("rsvps").select("id", { count: "exact", head: true }).eq("event_id", eventId).eq("status", "going"),
+      supabase.rpc("event_going_count", { p_event_id: eventId }),
     ]);
     setHost((h ?? null) as Host | null);
-    setGoing(count ?? 0);
+    setGoing(Number(goingCount ?? 0));
     if (user) {
       const { data: r } = await supabase.from("rsvps").select("id,status,position,code,cancelled_at")
         .eq("event_id", eventId).eq("user_id", user.id).maybeSingle();
