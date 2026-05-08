@@ -41,6 +41,16 @@ export default function EventRsvps() {
         .eq("id", eventId)
         .maybeSingle();
       if (!ev) { setBusy(false); return; }
+      const { data: hm } = await supabase
+        .from("host_members")
+        .select("role")
+        .eq("host_id", ev.host_id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!hm || hm.role !== "host") {
+        navigate(`/dashboard/${ev.host_id}`);
+        return;
+      }
       setEvent(ev);
 
       const { data: rs } = await supabase
