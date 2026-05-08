@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { userAvatarUrl } from "@/lib/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -170,7 +171,7 @@ export default function HostMembers() {
                 <div key={m.user_id} className="flex flex-col gap-3 rounded-md border p-3 sm:flex-row sm:items-center">
                   <div className="flex min-w-0 flex-1 items-start gap-3">
                     <Avatar className="h-9 w-9 shrink-0">
-                      {m.profile?.avatar_url && <AvatarImage src={m.profile.avatar_url} />}
+                      <AvatarImage src={userAvatarUrl({ id: m.user_id, avatar_url: m.profile?.avatar_url })} />
                       <AvatarFallback>{(m.profile?.display_name ?? "?").slice(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 flex-1">
