@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
-import { CalendarIcon as CalIcon, ClockIcon as Clock, DownloadSimpleIcon as Download, ArrowSquareOutIcon as ExternalLink, MapPinIcon as MapPin, MagnifyingGlassPlusIcon as ZoomIn, TicketIcon as Ticket } from "@phosphor-icons/react";
+import { CalendarIcon as CalIcon, ClockIcon as Clock, DownloadSimpleIcon as Download, EyeIcon as Eye, EyeSlashIcon as EyeOff, ArrowSquareOutIcon as ExternalLink, MapPinIcon as MapPin, MagnifyingGlassPlusIcon as ZoomIn, TicketIcon as Ticket } from "@phosphor-icons/react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EventDateTime } from "@/components/event-datetime";
 import { toast } from "sonner";
@@ -10,6 +10,8 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { buildICS, downloadICS, googleCalendarUrl } from "@/lib/calendar";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -35,6 +37,16 @@ export default function Tickets() {
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState(true);
   const [qrs, setQrs] = useState<Record<string, string>>({});
+  const [hideAll, setHideAll] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("tickets:hideSensitive") === "1";
+  });
+  const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    localStorage.setItem("tickets:hideSensitive", hideAll ? "1" : "0");
+    if (hideAll) setRevealed({});
+  }, [hideAll]);
 
   const load = async () => {
     if (!user) return;
@@ -117,9 +129,20 @@ export default function Tickets() {
 
   return (
     <><div className="container mx-auto max-w-4xl px-4 py-12">
-        <div className="mb-6">
-          <h1 className="text-3xl font-semibold tracking-tight">My Tickets</h1>
-          <p className="text-muted-foreground mt-1">Your RSVPs and waitlist positions.</p>
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight">My Tickets</h1>
+            <p className="text-muted-foreground mt-1">Your RSVPs and waitlist positions.</p>
+          </div>
+          {rows.length > 0 && (
+            <div className="flex items-center gap-2 rounded-md border bg-card px-3 py-2">
+              <Switch id="hide-sensitive" checked={hideAll} onCheckedChange={setHideAll} />
+              <Label htmlFor="hide-sensitive" className="cursor-pointer text-sm inline-flex items-center gap-1.5">
+                {hideAll ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                Hide ticket codes
+              </Label>
+            </div>
+          )}
         </div>
 
         {rows.length === 0 ? (
@@ -139,11 +162,30 @@ export default function Tickets() {
             </TabsList>
             <TabsContent value="upcoming" className="pt-4 space-y-4">
               {upcoming.length === 0 && <Card><CardContent className="py-12 text-center text-muted-foreground">No upcoming tickets.</CardContent></Card>}
-              {upcoming.map((r) => <TicketCard key={r.id} row={r} qr={qrs[r.id]} onCancel={() => setConfirmCancelEventId(r.event_id)} />)}
+              {upcoming.map((r) => (
+                <TicketCard
+                  key={r.id}
+                  row={r}
+                  qr={qrs[r.id]}
+                  onCancel={() => setConfirmCancelEventId(r.event_id)}
+                  hidden={hideAll && !revealed[r.id]}
+                  onToggleHidden={() => setRevealed((p) => ({ ...p, [r.id]: !p[r.id] }))}
+                />
+              ))}
             </TabsContent>
             <TabsContent value="past" className="pt-4 space-y-4">
               {past.length === 0 && <Card><CardContent className="py-12 text-center text-muted-foreground">No past tickets.</CardContent></Card>}
-              {past.map((r) => <TicketCard key={r.id} row={r} qr={qrs[r.id]} onCancel={() => setConfirmCancelEventId(r.event_id)} pastView />)}
+              {past.map((r) => (
+                <TicketCard
+                  key={r.id}
+                  row={r}
+                  qr={qrs[r.id]}
+                  onCancel={() => setConfirmCancelEventId(r.event_id)}
+                  hidden={hideAll && !revealed[r.id]}
+                  onToggleHidden={() => setRevealed((p) => ({ ...p, [r.id]: !p[r.id] }))}
+                  pastView
+                />
+              ))}
             </TabsContent>
           </Tabs>
         )}
@@ -163,7 +205,7 @@ export default function Tickets() {
   );
 }
 
-function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; onCancel: () => void; pastView?: boolean }) {
+function TicketCard({ row, qr, onCancel, pastView, hidden, onToggleHidden }: { row: Row; qr?: string; onCancel: () => void; pastView?: boolean; hidden?: boolean; onToggleHidden?: () => void }) {
   const e = row.events;
   if (!e) return null;
   const checkedIn = (row.check_ins ?? []).some((c) => !c.undone);
@@ -214,19 +256,29 @@ function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; on
         <div className="grid gap-4 sm:grid-cols-[160px_1fr] items-center">
           {row.status === "going" ? (
             qr ? (
-              <button
-                type="button"
-                onClick={() => setZoomed(true)}
-                aria-label="Enlarge QR code"
-                className="group flex flex-col items-center gap-1 focus:outline-none"
-              >
-                <div className="relative h-40 w-40 rounded-md border bg-card p-2 transition group-hover:border-primary group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
-                  <img src={qr} alt={`QR code ${row.code}`} className="h-full w-full" />
-                </div>
-                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground group-hover:text-foreground">
-                  <ZoomIn className="h-3 w-3" /> Tap to enlarge
-                </span>
-              </button>
+              <div className="flex flex-col items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => !hidden && setZoomed(true)}
+                  aria-label={hidden ? "Hidden QR code" : "Enlarge QR code"}
+                  disabled={hidden}
+                  className="group relative flex focus:outline-none"
+                >
+                  <div className="relative h-40 w-40 rounded-md border bg-card p-2 transition group-hover:border-primary group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
+                    <img src={qr} alt={`QR code ${row.code}`} className={`h-full w-full transition ${hidden ? "blur-md" : ""}`} />
+                    {hidden && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <EyeOff className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                </button>
+                {!hidden && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                    <ZoomIn className="h-3 w-3" /> Tap to enlarge
+                  </span>
+                )}
+              </div>
             ) : (
               <div className="h-40 w-40 animate-pulse rounded-md bg-muted" />
             )
@@ -239,8 +291,17 @@ function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; on
           )}
           <div className="space-y-3">
             <div>
-              <p className="text-xs text-muted-foreground">Ticket code</p>
-              <p className="font-mono text-lg tracking-wider">{row.code}</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs text-muted-foreground">Ticket code</p>
+                {onToggleHidden && row.status === "going" && (
+                  <Button size="sm" variant="ghost" className="h-7 px-2" onClick={onToggleHidden} aria-label={hidden ? "Show ticket details" : "Hide ticket details"}>
+                    {hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  </Button>
+                )}
+              </div>
+              <p className={`font-mono text-lg tracking-wider transition ${hidden ? "select-none blur-sm" : ""}`}>
+                {hidden ? "••••••••" : row.code}
+              </p>
             </div>
             {!pastView && (
               <div className="flex flex-wrap gap-2">
