@@ -81,7 +81,7 @@ export default function Moderation() {
   };
 
   return (
-    <><main className="container max-w-5xl py-8 space-y-6">
+    <main className="container mx-auto max-w-5xl px-4 py-8 space-y-6">
         <Link to={`/dashboard/${hostId}`} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to dashboard
         </Link>
@@ -154,7 +154,6 @@ export default function Moderation() {
             )}
           </TabsContent>
         </Tabs>
-      </main>
-    </>
+    </main>
   );
 }
