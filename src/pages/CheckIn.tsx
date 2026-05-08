@@ -205,9 +205,9 @@ export default function CheckIn() {
         </div>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3" aria-live="polite">
-          <Counter label="Going" value={counters.going} icon={<Users className="h-4 w-4" />} suffix={capacitySuffix} />
-          <Counter label="Waitlist" value={counters.waitlist} icon={<Clock className="h-4 w-4" />} />
-          <Counter label="Checked-in" value={counters.checkedIn} icon={<CheckCircle2 className="h-4 w-4" />} highlight />
+          <StatBox label="Going" value={counters.going} icon={<Users className="h-4 w-4" />} suffix={capacitySuffix} />
+          <StatBox label="Waitlist" value={counters.waitlist} icon={<Clock className="h-4 w-4" />} />
+          <StatBox label="Checked-in" value={counters.checkedIn} icon={<CheckCircle2 className="h-4 w-4" />} highlight />
         </div>
 
         <Card>
