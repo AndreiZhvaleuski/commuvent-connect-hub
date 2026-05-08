@@ -75,7 +75,7 @@ export default function Index() {
             onRetry={refetch}
           />
         ) : loading ? (
-          <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
+          <PageSpinner py={16} />
         ) : list.length === 0 ? (
           <EmptyState
             icon={<Users className="h-10 w-10" />}
