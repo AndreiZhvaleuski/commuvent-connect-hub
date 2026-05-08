@@ -59,7 +59,7 @@ export default function Explore() {
 
   const [page, setPage] = useState(1);
   // Reset to page 1 whenever filters change
-  useEffect(() => { setPage(1); }, [q, from, to, includePast, mode]);
+  useEffect(() => { setPage(1); }, [q, from, to, includePast, mode, sortDir]);
 
   const { data, loading: busy, error, refetch } = useAsyncResource<{ rows: Ev[]; total: number }>(
     async (signal) => {
