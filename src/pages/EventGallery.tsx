@@ -42,17 +42,17 @@ const PAGE_SIZE = 24;
 const ACCEPT = "image/jpeg,image/png,image/webp,image/gif,image/heic";
 const MAX_BYTES = 5 * 1024 * 1024;
 
-type Filter = "all" | "mine" | "pending";
+type Filter = "published" | "mine" | "pending";
 
 export default function EventGalleryPage() {
   const { eventId = "" } = useParams<{ eventId: string }>();
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const filterParam = searchParams.get("filter");
-  const filter: Filter = filterParam === "mine" || filterParam === "pending" ? filterParam : "all";
+  const filter: Filter = filterParam === "mine" || filterParam === "pending" ? filterParam : "published";
   const setFilter = (next: Filter) => {
     const sp = new URLSearchParams(searchParams);
-    if (next === "all") sp.delete("filter");
+    if (next === "published") sp.delete("filter");
     else sp.set("filter", next);
     sp.delete("page");
     setSearchParams(sp, { replace: true });
@@ -91,17 +91,21 @@ export default function EventGalleryPage() {
     async (signal) => {
       const from = (page - 1) * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
-      const { data: rows, count, error } = await supabase
+      let q = supabase
         .from("gallery_photos")
         .select("id,storage_path,user_id,status,created_at", { count: "exact" })
-        .eq("event_id", eventId)
+        .eq("event_id", eventId);
+      if (filter === "published") q = q.eq("status", "approved");
+      if (filter === "mine" && user) q = q.eq("user_id", user.id);
+      if (filter === "pending" && user) q = q.eq("user_id", user.id).eq("status", "pending");
+      const { data: rows, count, error } = await q
         .order("created_at", { ascending: true })
         .abortSignal(signal)
         .range(from, to);
       if (error) throw new Error(error.message);
       return { photos: (rows ?? []) as Photo[], total: count ?? 0 };
     },
-    [eventId, user?.id, page],
+    [eventId, user?.id, page, filter],
     { keepPreviousData: true }
   );
 
@@ -234,7 +238,7 @@ export default function EventGalleryPage() {
       {user && (
         <Tabs value={filter} onValueChange={(v) => { setFilter(v as Filter); setPage(1); }} className="mb-4">
           <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="published">Published</TabsTrigger>
             <TabsTrigger value="mine">Uploaded by me</TabsTrigger>
             <TabsTrigger value="pending">My pending</TabsTrigger>
           </TabsList>
@@ -266,14 +270,10 @@ export default function EventGalleryPage() {
             {photos.map((p, i) => {
               const isOwner = user?.id === p.user_id;
               const canDelete = isOwner && p.status === "pending";
-              const matches =
-                filter === "all" ||
-                (filter === "mine" && isOwner) ||
-                (filter === "pending" && isOwner && p.status === "pending");
               return (
                 <div
                   key={p.id}
-                  className={`group relative overflow-hidden rounded-lg border bg-muted transition ${matches ? "" : "opacity-30 hover:opacity-100"}`}
+                  className="group relative overflow-hidden rounded-lg border bg-muted transition"
                 >
                   <button
                     type="button"
@@ -291,6 +291,11 @@ export default function EventGalleryPage() {
                   {p.status !== "approved" && (
                     <Badge variant="secondary" className="absolute left-1 top-1 px-1.5 py-0 text-[10px] uppercase">
                       {p.status}
+                    </Badge>
+                  )}
+                  {filter === "published" && isOwner && (
+                    <Badge className="absolute left-1 top-1 px-1.5 py-0 text-[10px] uppercase">
+                      By you
                     </Badge>
                   )}
                   {canDelete ? (
