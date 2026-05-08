@@ -27,6 +27,7 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ErrorState } from "@/components/error-state";
 import { Spinner } from "@/components/ui/spinner";
+import { useAsyncResource } from "@/hooks/use-async-resource";
 
 type Row = {
   id: string;
