@@ -15,6 +15,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { AppLayout } from "@/components/app-layout";
+import { StatBox } from "@/components/stat-box";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -204,9 +205,9 @@ export default function CheckIn() {
         </div>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3" aria-live="polite">
-          <Counter label="Going" value={counters.going} icon={<Users className="h-4 w-4" />} suffix={capacitySuffix} />
-          <Counter label="Waitlist" value={counters.waitlist} icon={<Clock className="h-4 w-4" />} />
-          <Counter label="Checked-in" value={counters.checkedIn} icon={<CheckCircle2 className="h-4 w-4" />} highlight />
+          <StatBox label="Going" value={counters.going} icon={<Users className="h-4 w-4" />} suffix={capacitySuffix} />
+          <StatBox label="Waitlist" value={counters.waitlist} icon={<Clock className="h-4 w-4" />} />
+          <StatBox label="Checked-in" value={counters.checkedIn} icon={<CheckCircle2 className="h-4 w-4" />} highlight />
         </div>
 
         <Card>
@@ -260,20 +261,6 @@ export default function CheckIn() {
         </Card>
       </div>
     </AppLayout>
-  );
-}
-
-function Counter({ label, value, icon, suffix, highlight }: { label: string; value: number; icon: React.ReactNode; suffix?: string; highlight?: boolean }) {
-  return (
-    <div className={`rounded-lg border bg-card p-3 ${highlight ? "border-primary" : ""}`}>
-      <div className="text-xs text-muted-foreground flex items-center gap-1">
-        <span className="shrink-0">{icon}</span>
-        <span className="truncate">{label}</span>
-      </div>
-      <div className={`mt-1 text-xl font-semibold tabular-nums ${highlight ? "text-primary" : ""}`}>
-        {value}{suffix && <span className="text-sm font-normal text-muted-foreground ml-1">{suffix}</span>}
-      </div>
-    </div>
   );
 }
 
