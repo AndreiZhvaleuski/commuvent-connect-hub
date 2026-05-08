@@ -140,6 +140,15 @@ export default function EventRsvps() {
           </div>
         </div>
 
+        <div className="flex gap-2 rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
+          <InfoIcon className="mt-0.5 h-4 w-4 shrink-0" />
+          <div className="space-y-1">
+            <p><strong className="text-foreground">About the CSV:</strong> UTF-8, comma-separated, check-in times in UTC.</p>
+            <p><strong className="text-foreground">Google Sheets:</strong> File → Import → Upload, leave the separator as <em>Detect automatically</em>. Names with accents and non-Latin characters render correctly.</p>
+            <p><strong className="text-foreground">Excel:</strong> in regions where the default list separator is <code>;</code> (most of Europe), double-clicking may put everything in column A. Open Excel first, then Data → From Text/CSV and pick comma as the delimiter.</p>
+          </div>
+        </div>
+
         <Card>
           <CardHeader>
             <CardTitle>Attendees</CardTitle>
