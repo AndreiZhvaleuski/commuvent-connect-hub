@@ -96,6 +96,12 @@ export default function EventRsvps() {
           check_in_time: ciMap.get(r.id) ?? null,
         };
       });
+      enriched.sort((a, b) => {
+        if (a.check_in_time && b.check_in_time) return a.check_in_time.localeCompare(b.check_in_time);
+        if (a.check_in_time) return -1;
+        if (b.check_in_time) return 1;
+        return a.created_at.localeCompare(b.created_at);
+      });
       setRows(enriched);
       setBusy(false);
     })();
