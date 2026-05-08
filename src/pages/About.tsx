@@ -58,7 +58,7 @@ export default function About() {
   return (
     <>
       <section className="border-b bg-gradient-to-b from-primary/5 to-transparent">
-        <div className="container mx-auto max-w-6xl px-4 py-16 sm:py-24">
+        <div className="container mx-auto max-w-6xl px-4 py-12 sm:py-16">
           <Badge variant="secondary" className="mb-5">
             <SparkleIcon className="mr-1 h-3.5 w-3.5" />
             Our story
@@ -83,7 +83,7 @@ export default function About() {
         </div>
       </section>
 
-      <section className="container mx-auto max-w-6xl px-4 py-12">
+      <section className="container mx-auto max-w-6xl px-4 py-6">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => {
             const Icon = s.icon;
@@ -100,7 +100,7 @@ export default function About() {
         </div>
       </section>
 
-      <section className="container mx-auto max-w-6xl px-4 py-12">
+      <section className="container mx-auto max-w-6xl px-4 py-6">
         <div className="mb-8">
           <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">What we believe</h2>
           <p className="text-muted-foreground mt-1">Three rules we won't break.</p>
@@ -123,7 +123,7 @@ export default function About() {
         </div>
       </section>
 
-      <section className="container mx-auto max-w-6xl px-4 py-12">
+      <section className="container mx-auto max-w-6xl px-4 py-6">
         <div className="mb-8">
           <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">A short timeline</h2>
           <p className="text-muted-foreground mt-1">From spreadsheet to door scanner.</p>
@@ -140,7 +140,7 @@ export default function About() {
         </ol>
       </section>
 
-      <section className="container mx-auto max-w-6xl px-4 py-12">
+      <section className="container mx-auto max-w-6xl px-4 py-6">
         <div className="mb-8">
           <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">The tiny team</h2>
           <p className="text-muted-foreground mt-1">Four people, way too much coffee.</p>
