@@ -71,9 +71,24 @@ export default function EventManage() {
               <p className="text-sm text-muted-foreground">Manage event</p>
             </div>
           </Link>
-          <Link to={`/e/${event.id}`} className="text-sm text-muted-foreground inline-flex items-center gap-1 hover:text-foreground">
-            View public page <ExternalLink className="h-3 w-3" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Button
+              render={<Link to={`/dashboard/${host.id}/moderation`} />}
+              variant={openReports > 0 ? "default" : "outline"}
+              size="sm"
+            >
+              <FlagIcon className="mr-1 h-4 w-4" />
+              Reports
+              {openReports > 0 && (
+                <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-medium text-destructive-foreground">
+                  {openReports}
+                </span>
+              )}
+            </Button>
+            <Link to={`/e/${event.id}`} className="text-sm text-muted-foreground inline-flex items-center gap-1 hover:text-foreground">
+              View public page <ExternalLink className="h-3 w-3" />
+            </Link>
+          </div>
         </div>
 
         <EventManagementCard event={event} stat={stat} hostId={host.id} showManage={false} />
