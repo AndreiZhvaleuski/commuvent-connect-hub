@@ -206,7 +206,7 @@ export default function Explore() {
             onRetry={refetch}
           />
         ) : busy ? (
-          <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
+          <PageSpinner py={16} />
         ) : list.length === 0 ? (
           <EmptyState
             icon={<CalendarBlankIcon className="h-8 w-8" />}
