@@ -75,7 +75,7 @@ export default function Explore() {
       return (data ?? []) as Ev[];
     },
     [q, from, to, includePast, mode],
-    { debounceMs: 250 }
+    { debounceMs: 250, keepPreviousData: true }
   );
 
   const list = events ?? [];
@@ -171,14 +171,14 @@ export default function Explore() {
           </CardContent>
         </Card>
 
-        {busy ? (
-          <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
-        ) : error ? (
+        {error ? (
           <ErrorState
             title="Couldn't load events"
             description={error.message}
             onRetry={refetch}
           />
+        ) : events === null ? (
+          <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
         ) : list.length === 0 ? (
           <EmptyState
             icon={<CalendarBlankIcon className="h-8 w-8" />}
@@ -187,7 +187,7 @@ export default function Explore() {
             action={hasFilter ? <Button variant="outline" size="sm" onClick={clearAll}>Clear filters</Button> : undefined}
           />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={`grid gap-4 sm:grid-cols-2 lg:grid-cols-3 transition-opacity ${busy ? "opacity-60" : ""}`}>
             {list.map((e) => (
               <PublicEventCard key={e.id} event={e} showStatusBadge={includePast} />
             ))}
