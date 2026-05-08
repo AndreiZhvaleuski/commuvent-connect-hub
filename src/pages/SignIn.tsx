@@ -30,7 +30,7 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
           return toast.error("Please enter your first and last name");
         }
         const display_name = `${firstName.trim()} ${lastName.trim()}`;
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email, password,
           options: {
             emailRedirectTo: `${window.location.origin}${redirect}`,
@@ -42,7 +42,19 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
           },
         });
         if (error) throw error;
-        toast.success("Check your email to confirm.");
+        if (data.session) {
+          toast.success("Welcome to Commuvent!");
+          navigate(redirect);
+        } else {
+          // Fallback if email confirmation is still required
+          const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+          if (signInError) {
+            toast.success("Check your email to confirm.");
+          } else {
+            toast.success("Welcome to Commuvent!");
+            navigate(redirect);
+          }
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
