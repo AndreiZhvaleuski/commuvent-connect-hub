@@ -412,6 +412,20 @@ export default function EventGalleryPage() {
         onConfirm={confirmDelete}
       />
 
+      <ConfirmDialog
+        open={!!rejectFor}
+        onOpenChange={(o) => !o && setRejectFor(null)}
+        title="Reject this photo?"
+        description="The photo will be hidden from the gallery."
+        confirmLabel="Reject"
+        destructive
+        onConfirm={async () => {
+          if (!rejectFor) return;
+          await setPhotoStatus(rejectFor.id, "rejected");
+          setRejectFor(null);
+        }}
+      />
+
       <Lightbox
         open={lightboxIndex !== null}
         index={lightboxIndex ?? 0}
