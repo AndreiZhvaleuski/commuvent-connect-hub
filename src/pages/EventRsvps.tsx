@@ -63,7 +63,7 @@ export default function EventRsvps() {
       const userIds = (rs ?? []).map((r) => r.user_id);
       const [{ data: profiles }, { data: checkIns }] = await Promise.all([
         userIds.length
-          ? supabase.from("profiles").select("id,display_name").in("id", userIds)
+          ? supabase.from("profiles").select("id,display_name,email").in("id", userIds)
           : Promise.resolve({ data: [] as any[] }),
         supabase
           .from("check_ins")
@@ -72,20 +72,22 @@ export default function EventRsvps() {
           .eq("undone", false),
       ]);
 
-      const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p.display_name]));
+      const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
       const ciMap = new Map((checkIns ?? []).map((c: any) => [c.rsvp_id, c.checked_in_at]));
 
-      // Email isn't queryable client-side via auth.users; placeholder until we add to profiles.
-      const enriched: Row[] = (rs ?? []).map((r) => ({
-        id: r.id,
-        status: r.status,
-        position: r.position,
-        created_at: r.created_at,
-        user_id: r.user_id,
-        display_name: profileMap.get(r.user_id) ?? null,
-        email: "",
-        check_in_time: ciMap.get(r.id) ?? null,
-      }));
+      const enriched: Row[] = (rs ?? []).map((r) => {
+        const p = profileMap.get(r.user_id) as { display_name: string | null; email: string | null } | undefined;
+        return {
+          id: r.id,
+          status: r.status,
+          position: r.position,
+          created_at: r.created_at,
+          user_id: r.user_id,
+          display_name: p?.display_name ?? null,
+          email: p?.email ?? "",
+          check_in_time: ciMap.get(r.id) ?? null,
+        };
+      });
       setRows(enriched);
       setBusy(false);
     })();
