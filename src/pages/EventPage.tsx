@@ -17,6 +17,9 @@ import { toast } from "sonner";
 import { EventGallery } from "@/components/event-gallery";
 import { MarkdownView } from "@/components/markdown-view";
 import { EventFeedback } from "@/components/event-feedback";
+import { Spinner } from "@/components/ui/spinner";
+import { ErrorState } from "@/components/error-state";
+import { useAsyncResource } from "@/hooks/use-async-resource";
 
 type Ev = {
   id: string; title: string; description: string | null; cover_image_url: string | null;
@@ -25,6 +28,14 @@ type Ev = {
 };
 type Host = { id: string; name: string; logo_url: string | null; bio: string | null; contact_email: string | null };
 type Rsvp = { id: string; status: string; position: number | null; code: string; cancelled_at: string | null };
+type LoadResult = {
+  event: Ev | null;
+  host: Host | null;
+  going_count: number;
+  my_rsvp: Rsvp | null;
+  checked_in: boolean;
+  my_host_role: string | null;
+};
 
 export default function EventPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -32,53 +43,36 @@ export default function EventPage() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [event, setEvent] = useState<Ev | null>(null);
-  const [host, setHost] = useState<Host | null>(null);
-  const [going, setGoing] = useState(0);
-  const [rsvp, setRsvp] = useState<Rsvp | null>(null);
-  const [busy, setBusy] = useState(true);
   const [acting, setActing] = useState(false);
-  const [notFound, setNotFound] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
-  const [canManage, setCanManage] = useState(false);
-  const [canCheckIn, setCanCheckIn] = useState(false);
-  const [checkedIn, setCheckedIn] = useState(false);
-  const load = async () => {
-    if (!eventId) return;
-    setBusy(true);
-    const { data: ev } = await supabase.from("events").select("*").eq("id", eventId).maybeSingle();
-    if (!ev) { setNotFound(true); setBusy(false); return; }
-    setEvent(ev as Ev);
-    const [{ data: h }, { data: goingCount }] = await Promise.all([
-      supabase.from("hosts").select("id,name,logo_url,bio,contact_email").eq("id", ev.host_id).maybeSingle(),
-      supabase.rpc("event_going_count", { p_event_id: eventId }),
-    ]);
-    setHost((h ?? null) as Host | null);
-    setGoing(Number(goingCount ?? 0));
-    if (user) {
-      const { data: r } = await supabase.from("rsvps").select("id,status,position,code,cancelled_at")
-        .eq("event_id", eventId).eq("user_id", user.id).maybeSingle();
-      setRsvp((r ?? null) as Rsvp | null);
-      if (r?.id) {
-        const { data: ci } = await supabase.from("check_ins").select("id").eq("rsvp_id", r.id).eq("undone", false).maybeSingle();
-        setCheckedIn(!!ci);
-      } else {
-        setCheckedIn(false);
-      }
-      const { data: hm } = await supabase.from("host_members").select("role").eq("host_id", ev.host_id).eq("user_id", user.id).maybeSingle();
-      setCanManage(hm?.role === "host");
-      setCanCheckIn(!!hm);
-    } else {
-      setRsvp(null);
-      setCanManage(false);
-      setCanCheckIn(false);
-      setCheckedIn(false);
-    }
-    setBusy(false);
-  };
+  const [liveGoing, setLiveGoing] = useState<number | null>(null);
 
-  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [eventId, user?.id]);
+  const userId = user?.id ?? null;
+  const { data, loading: busy, error, refetch } = useAsyncResource<LoadResult>(
+    async (signal) => {
+      if (!eventId) return { event: null, host: null, going_count: 0, my_rsvp: null, checked_in: false, my_host_role: null };
+      const { data: payload, error: rpcErr } = await supabase
+        .rpc("event_page_load", { p_event_id: eventId })
+        .abortSignal(signal);
+      if (rpcErr) throw new Error(rpcErr.message);
+      return (payload ?? { event: null, host: null, going_count: 0, my_rsvp: null, checked_in: false, my_host_role: null }) as LoadResult;
+    },
+    [eventId, userId],
+    { keepPreviousData: true }
+  );
+
+  const event = data?.event ?? null;
+  const host = data?.host ?? null;
+  const rsvp = data?.my_rsvp ?? null;
+  const checkedIn = !!data?.checked_in;
+  const canManage = data?.my_host_role === "host";
+  const canCheckIn = !!data?.my_host_role;
+  const going = liveGoing ?? data?.going_count ?? 0;
+  const notFound = !busy && !error && data !== null && data.event === null;
+
+  // Reset live override when the underlying data refreshes
+  useEffect(() => { setLiveGoing(null); }, [data]);
 
   // Realtime: refresh going count when RSVPs change for this event
   useEffect(() => {
@@ -86,10 +80,12 @@ export default function EventPage() {
     const ch = supabase.channel(`ev-${eventId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "rsvps", filter: `event_id=eq.${eventId}` }, () => {
         supabase.rpc("event_going_count", { p_event_id: eventId })
-          .then(({ data }) => setGoing(Number(data ?? 0)));
+          .then(({ data }) => setLiveGoing(Number(data ?? 0)));
       }).subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [eventId]);
+
+  const load = refetch;
 
   // Auto-open RSVP confirm after sign-in redirect with intent=rsvp
   useEffect(() => {
