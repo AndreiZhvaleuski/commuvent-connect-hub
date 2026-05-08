@@ -162,11 +162,30 @@ export default function Tickets() {
             </TabsList>
             <TabsContent value="upcoming" className="pt-4 space-y-4">
               {upcoming.length === 0 && <Card><CardContent className="py-12 text-center text-muted-foreground">No upcoming tickets.</CardContent></Card>}
-              {upcoming.map((r) => <TicketCard key={r.id} row={r} qr={qrs[r.id]} onCancel={() => setConfirmCancelEventId(r.event_id)} />)}
+              {upcoming.map((r) => (
+                <TicketCard
+                  key={r.id}
+                  row={r}
+                  qr={qrs[r.id]}
+                  onCancel={() => setConfirmCancelEventId(r.event_id)}
+                  hidden={hideAll && !revealed[r.id]}
+                  onToggleHidden={() => setRevealed((p) => ({ ...p, [r.id]: !p[r.id] }))}
+                />
+              ))}
             </TabsContent>
             <TabsContent value="past" className="pt-4 space-y-4">
               {past.length === 0 && <Card><CardContent className="py-12 text-center text-muted-foreground">No past tickets.</CardContent></Card>}
-              {past.map((r) => <TicketCard key={r.id} row={r} qr={qrs[r.id]} onCancel={() => setConfirmCancelEventId(r.event_id)} pastView />)}
+              {past.map((r) => (
+                <TicketCard
+                  key={r.id}
+                  row={r}
+                  qr={qrs[r.id]}
+                  onCancel={() => setConfirmCancelEventId(r.event_id)}
+                  hidden={hideAll && !revealed[r.id]}
+                  onToggleHidden={() => setRevealed((p) => ({ ...p, [r.id]: !p[r.id] }))}
+                  pastView
+                />
+              ))}
             </TabsContent>
           </Tabs>
         )}
