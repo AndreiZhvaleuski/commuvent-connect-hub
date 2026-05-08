@@ -222,7 +222,7 @@ export default function Tickets() {
             onRetry={reload}
           />
         ) : busy && hasAny === null ? (
-          <SkeletonGrid count={3} className="space-y-4" itemHeightClass="h-48" />
+          <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
         ) : hasAny === false ? (
           <Card>
             <CardContent className="py-16 text-center">
