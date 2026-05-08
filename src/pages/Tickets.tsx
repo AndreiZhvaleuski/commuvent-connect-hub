@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 import { buildICS, downloadICS, googleCalendarUrl } from "@/lib/calendar";
 import { ConfirmDialog } from "@/components/confirm-dialog";
