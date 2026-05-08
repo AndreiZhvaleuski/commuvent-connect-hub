@@ -11,7 +11,7 @@ import { PublicEventCard, type PublicEvent } from "@/components/public-event-car
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useAsyncResource } from "@/hooks/use-async-resource";
-import { Spinner } from "@/components/ui/spinner";
+import { PageSpinner } from "@/components/page-spinner";
 import { ErrorState } from "@/components/error-state";
 import { EventListControls, type EventView, type EventSortDir } from "@/components/event-list-controls";
 import { ListPagination } from "@/components/list-pagination";
@@ -129,7 +129,7 @@ export default function HostPublic() {
     </div>
   );
   if (notFound) return <div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Host not found.</p></div>;
-  if ((busy && !data) || !host) return <div className="container mx-auto flex justify-center px-4 py-20"><Spinner className="size-8 text-muted-foreground" /></div>;
+  if ((busy && !data) || !host) return <PageSpinner py={20} container />;
 
   return (
     <>
@@ -183,7 +183,7 @@ export default function HostPublic() {
 
         <div className="pt-4">
           {busy ? (
-            <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>
+            <PageSpinner />
           ) : events.length === 0 ? (
             <EmptyState title={view === "upcoming" ? "No upcoming events." : "No past events."} />
           ) : (

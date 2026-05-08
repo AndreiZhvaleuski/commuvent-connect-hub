@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { EventGallery } from "@/components/event-gallery";
 import { MarkdownView } from "@/components/markdown-view";
 import { EventFeedback } from "@/components/event-feedback";
-import { Spinner } from "@/components/ui/spinner";
+import { PageSpinner } from "@/components/page-spinner";
 import { ErrorState } from "@/components/error-state";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 
@@ -105,7 +105,7 @@ export default function EventPage() {
     </div>
   );
   if (notFound) return <div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Event not found.</p></div>;
-  if (busy || !event) return <div className="container mx-auto flex justify-center px-4 py-20"><Spinner className="size-8 text-muted-foreground" /></div>;
+  if (busy || !event) return <PageSpinner py={20} container />;
 
   const ended = new Date(event.end_at).getTime() < Date.now();
 

@@ -18,7 +18,7 @@ import { buildICS, downloadICS, googleCalendarUrl } from "@/lib/calendar";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ErrorState } from "@/components/error-state";
-import { Spinner } from "@/components/ui/spinner";
+import { PageSpinner } from "@/components/page-spinner";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 import { EventListControls, type EventView, type EventSortDir } from "@/components/event-list-controls";
 import { ListPagination } from "@/components/list-pagination";
@@ -220,7 +220,7 @@ export default function Tickets() {
             onRetry={refetch}
           />
         ) : busy && hasAny === null ? (
-          <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
+          <PageSpinner py={16} />
         ) : hasAny === false ? (
           <EmptyState
             icon={<Ticket className="h-10 w-10" />}
@@ -241,7 +241,7 @@ export default function Tickets() {
 
             <div className="pt-4 space-y-4">
               {busy ? (
-                <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>
+                <PageSpinner />
               ) : rows.length === 0 ? (
                 <EmptyState title={view === "upcoming" ? "No upcoming tickets." : "No past tickets."} />
               ) : (

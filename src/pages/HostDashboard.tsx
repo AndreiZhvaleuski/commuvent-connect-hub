@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EventManagementCard, type ManagedEvent as Ev, type EventStat as Stat } from "@/components/event-management-card";
 import { ErrorState } from "@/components/error-state";
 import { Spinner } from "@/components/ui/spinner";
+import { PageSpinner } from "@/components/page-spinner";
 import { ListPagination } from "@/components/list-pagination";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 
@@ -173,7 +174,7 @@ export default function HostDashboard() {
     return (
       <div className="container mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8 h-14 w-64 animate-pulse rounded bg-muted" />
-        <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>
+        <PageSpinner />
       </div>
     );
   }
@@ -265,7 +266,7 @@ function EventsSection({
   emptyText: string;
 }) {
   if (loading) {
-    return <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>;
+    return <PageSpinner />;
   }
   if (error) {
     return <ErrorState title="Couldn't load events" description={error.message} onRetry={onRetry} />;

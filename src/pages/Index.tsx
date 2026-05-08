@@ -3,7 +3,7 @@ import { ArrowRightIcon as ArrowRight, UsersIcon as Users, SparkleIcon } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Spinner } from "@/components/ui/spinner";
+import { PageSpinner } from "@/components/page-spinner";
 import { PublicEventCard } from "@/components/public-event-card";
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
@@ -75,7 +75,7 @@ export default function Index() {
             onRetry={refetch}
           />
         ) : loading ? (
-          <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
+          <PageSpinner py={16} />
         ) : list.length === 0 ? (
           <EmptyState
             icon={<Users className="h-10 w-10" />}

@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { PublicEventCard } from "@/components/public-event-card";
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
-import { Spinner } from "@/components/ui/spinner";
+import { PageSpinner } from "@/components/page-spinner";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 import { ListPagination } from "@/components/list-pagination";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -206,7 +206,7 @@ export default function Explore() {
             onRetry={refetch}
           />
         ) : busy ? (
-          <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
+          <PageSpinner py={16} />
         ) : list.length === 0 ? (
           <EmptyState
             icon={<CalendarBlankIcon className="h-8 w-8" />}
