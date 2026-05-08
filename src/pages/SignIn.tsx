@@ -142,7 +142,7 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
               <Button variant="ghost" size="icon" aria-label="Demo accounts" className="shrink-0" onClick={() => setDemoOpen(true)}>
                 <InfoIcon className="h-5 w-5" />
               </Button>
-              <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+              <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto w-[calc(100vw-2rem)] sm:w-full">
                 <DialogHeader>
                   <DialogTitle>Demo accounts</DialogTitle>
                   <DialogDescription>
