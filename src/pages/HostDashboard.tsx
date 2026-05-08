@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EventManagementCard, type ManagedEvent as Ev, type EventStat as Stat } from "@/components/event-management-card";
 import { ErrorState } from "@/components/error-state";
-import { SkeletonGrid } from "@/components/skeleton-grid";
+import { Spinner } from "@/components/ui/spinner";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 
 type Host = { id: string; name: string; logo_url: string | null; bio: string | null };
@@ -100,7 +100,7 @@ export default function HostDashboard() {
     return (
       <><div className="container mx-auto max-w-6xl px-4 py-12">
           <div className="mb-8 h-14 w-64 animate-pulse rounded bg-muted" />
-          <SkeletonGrid count={3} className="grid gap-3" itemHeightClass="h-28" />
+          <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>
         </div>
       </>
     );
