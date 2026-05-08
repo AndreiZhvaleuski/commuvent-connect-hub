@@ -30,6 +30,7 @@ export default function Moderation() {
   const [eventsById, setEventsById] = useState<Record<string, EventLite>>({});
   const [busy, setBusy] = useState(true);
   const [rejectFor, setRejectFor] = useState<Photo | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const load = async () => {
     setBusy(true);
     const { data: evs } = await supabase
