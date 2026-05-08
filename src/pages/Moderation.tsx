@@ -194,6 +194,20 @@ export default function Moderation() {
             )}
           </TabsContent>
         </Tabs>
+
+      <ConfirmDialog
+        open={!!rejectFor}
+        onOpenChange={(o) => !o && setRejectFor(null)}
+        title="Reject this photo?"
+        description="The uploader will not be notified, and the photo will be hidden from the gallery."
+        confirmLabel="Reject"
+        destructive
+        onConfirm={async () => {
+          if (!rejectFor) return;
+          await setPhotoStatus(rejectFor.id, "rejected");
+          setRejectFor(null);
+        }}
+      />
     </main>
   );
 }
