@@ -22,6 +22,7 @@ type HeaderData = {
   role: "host" | "checker" | null;
   upcomingCount: number;
   pastCount: number;
+  openReportsCount: number;
 };
 type EventsData = { events: Ev[]; stats: Record<string, Stat>; total: number };
 
