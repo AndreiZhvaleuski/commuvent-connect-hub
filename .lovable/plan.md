@@ -1,34 +1,30 @@
 ## Goal
-On every data-fetching page, show the skeleton loader whenever a fetch is in flight (never show stale results), and show a clear error state with a retry action when a fetch fails.
+Make the RSVP CSV export robust by relying on a proper CSV library (PapaParse, already a dependency), keep the on-screen table in the viewer's local time zone, and emit check-in times as UTC in the file.
 
-## Changes
+## Library
+Continue using **PapaParse** (`papaparse` is already in `package.json` and powers `buildCsv`). It correctly handles:
+- field quoting and embedded `"` escaping (`""`)
+- commas, newlines, and unicode inside cells
+- explicit column ordering and CRLF line endings
 
-### 1. `src/hooks/use-async-resource.ts`
-- Keep default `keepPreviousData: false`. On every deps change: clear `data` to `null`, set `loading=true`, clear `error`. This guarantees consumers can render skeleton/error/data in three mutually exclusive branches.
+No new dependency needed.
 
-### 2. `src/pages/Explore.tsx`
-- Drop `keepPreviousData: true` from the `useAsyncResource` options. Keep `debounceMs: 250`.
-- Render order:
-  1. `loading` → `SkeletonGrid`
-  2. `error` → `ErrorState` with `onRetry={refetch}`
-  3. empty → `EmptyState`
-  4. otherwise the list (no `opacity-60` dimming since stale data is gone).
+## Changes — `src/lib/csv.ts`
 
-### 3. `src/pages/MyEvents.tsx`
-- Same change: remove `keepPreviousData`, render `SkeletonGrid` whenever `loading`, then `ErrorState` on `error` with retry, then `EmptyState`, then the list.
+1. Replace the hand-rolled `RsvpExportRow` plumbing with PapaParse driven by an explicit `fields` + `data` shape so we control header text and column order.
+2. **Friendly headers**: `Name`, `Email`, `RSVP Status`, `Check-in Time (UTC)`.
+3. **UTC formatter**: add `toUtcIso(iso)` that returns `YYYY-MM-DDTHH:mm:ssZ` (UTC, seconds precision). Drop the event-TZ formatter from the export path.
+4. **Formula-injection guard**: small `sanitizeCell(value)` helper — if a string starts with `=`, `+`, `-`, `@`, `\t`, or `\r`, prefix with `'`. Apply to every cell before unparse.
+5. **Excel/Sheets compatibility**: pass `{ quotes: true, newline: "\r\n" }` to `Papa.unparse`; keep the leading UTF-8 BOM (`\uFEFF`) and `text/csv;charset=utf-8` MIME on the Blob.
+6. Update `EXAMPLE_RSVP_ROWS` so check-in times are UTC (`...Z`) and add one row exercising edge cases (comma in name, embedded quote, leading `=`, non-ASCII) for the About-page sample download.
 
-### 4. `src/pages/HostDashboard.tsx`
-- Replace the manual `useEffect` + `setBusy` flow with `useAsyncResource` so it benefits from the same loading/error/cancel behavior. Fetcher loads host membership, host record, events, and stats together and returns one shape.
-- Render branches inside the page shell:
-  1. `loading` → `SkeletonGrid` (header + grid placeholders)
-  2. `error` → `ErrorState` with `onRetry={refetch}`
-  3. data missing host → "Host not found" copy as today
-  4. otherwise the dashboard
-- Realtime subscription stays; on change it calls `refetch()` instead of a separate `loadStats`.
+## Changes — `src/pages/EventRsvps.tsx`
 
-## Notes
-- `ErrorState` and `SkeletonGrid` already exist; no new components needed.
-- No DB, RPC, or business-logic changes.
+1. **Export**: build rows via the new helper, mapping each check-in time through `toUtcIso(...)` instead of `toIsoInTz(..., event.time_zone)`.
+2. **Table (viewer-friendly)**: render `check_in_time` using the viewer's local time zone (Intl.DateTimeFormat with `dateStyle: "medium", timeStyle: "short"`). Show a small "(your time)" hint in the column header, and add a one-liner under the Export button: "CSV uses UTC timestamps."
+3. No data-fetching changes.
 
 ## Out of scope
-- Other pages (EventPage, EventManage, EventRsvps, Tickets, HostPublic, Dashboard, Moderation). If you want the same treatment applied everywhere, say so and I'll extend the refactor.
+- Separate attendance-only export.
+- Surfacing the export from Check-In or Event Manage pages.
+- Server-side export.
