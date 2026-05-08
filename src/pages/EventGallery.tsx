@@ -278,12 +278,14 @@ export default function EventGalleryPage() {
 
       {user && (
         <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)} className="mb-4">
-          <TabsList>
-            <TabsTrigger value="published">Published</TabsTrigger>
-            <TabsTrigger value="mine">Uploaded by me</TabsTrigger>
-            <TabsTrigger value="pending">My pending</TabsTrigger>
-            {isHost && <TabsTrigger value="review">Pending review</TabsTrigger>}
-          </TabsList>
+          <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <TabsList className="inline-flex w-max">
+              <TabsTrigger value="published">Published</TabsTrigger>
+              <TabsTrigger value="mine">Uploaded by me</TabsTrigger>
+              <TabsTrigger value="pending">My pending</TabsTrigger>
+              {isHost && <TabsTrigger value="review">Pending review</TabsTrigger>}
+            </TabsList>
+          </div>
         </Tabs>
       )}
 
