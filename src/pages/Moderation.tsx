@@ -125,7 +125,7 @@ export default function Moderation() {
         const { error } = await supabase.from("gallery_photos").update({ status: "rejected" }).eq("id", report.target_id);
         if (error) { toast.error(error.message); setResolving(false); return; }
       } else if (report.target_type === "event") {
-        const { error } = await supabase.from("events").update({ status: "draft", visibility: "private" }).eq("id", report.target_id);
+        const { error } = await supabase.from("events").update({ status: "draft" }).eq("id", report.target_id);
         if (error) { toast.error(error.message); setResolving(false); return; }
       }
     }
