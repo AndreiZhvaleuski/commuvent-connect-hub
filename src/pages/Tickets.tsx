@@ -166,7 +166,7 @@ export default function Tickets() {
                   qr={qrs[r.id]}
                   onCancel={() => setConfirmCancelEventId(r.event_id)}
                   hidden={hideAll && !revealed[r.id]}
-                  onToggleHidden={() => setRevealed((p) => ({ ...p, [r.id]: !p[r.id] }))}
+                  onToggleHidden={hideAll ? () => setRevealed((p) => ({ ...p, [r.id]: !p[r.id] })) : undefined}
                 />
               ))}
             </TabsContent>
@@ -179,7 +179,7 @@ export default function Tickets() {
                   qr={qrs[r.id]}
                   onCancel={() => setConfirmCancelEventId(r.event_id)}
                   hidden={hideAll && !revealed[r.id]}
-                  onToggleHidden={() => setRevealed((p) => ({ ...p, [r.id]: !p[r.id] }))}
+                  onToggleHidden={hideAll ? () => setRevealed((p) => ({ ...p, [r.id]: !p[r.id] })) : undefined}
                   pastView
                 />
               ))}
