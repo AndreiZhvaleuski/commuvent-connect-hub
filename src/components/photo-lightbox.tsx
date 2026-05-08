@@ -80,7 +80,7 @@ export function PhotoLightbox({ images, index, open, onOpenChange, onIndexChange
         <VisuallyHidden><DialogTitle>Photo viewer</DialogTitle></VisuallyHidden>
 
         <div
-          className="relative h-full w-full overflow-hidden touch-none select-none"
+          className="relative flex h-full w-full items-center justify-center overflow-hidden touch-none select-none"
           onWheel={onWheel}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -92,8 +92,8 @@ export function PhotoLightbox({ images, index, open, onOpenChange, onIndexChange
             src={current.src}
             alt={current.alt ?? "Photo"}
             draggable={false}
-            className="absolute left-1/2 top-1/2 max-h-full max-w-full -translate-x-1/2 -translate-y-1/2 object-contain transition-transform duration-100"
-            style={{ transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(${scale})` }}
+            className="max-h-full max-w-full object-contain transition-transform duration-100"
+            style={{ transform: `translate(${tx}px, ${ty}px) scale(${scale})`, transformOrigin: "center" }}
           />
 
           {hasPrev && (
