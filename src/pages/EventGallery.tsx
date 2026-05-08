@@ -19,7 +19,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -31,7 +30,6 @@ import { SkeletonGrid } from "@/components/skeleton-grid";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { PageSpinner } from "@/components/page-spinner";
 import { ErrorState } from "@/components/error-state";
-import { EventDateTime } from "@/components/event-datetime";
 
 type Photo = { id: string; storage_path: string; user_id: string; status: string; created_at: string };
 type EventInfo = {
@@ -154,41 +152,51 @@ export default function EventGalleryPage() {
   );
   if (evLoading || !event) return <PageSpinner />;
 
+  const localDate = new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  }).format(new Date(event.start_at));
+
   return (
     <div className="container mx-auto max-w-5xl px-4 py-8">
-      <Button render={<Link to={`/e/${event.id}`} />} variant="ghost" size="sm" className="mb-4">
-        <ArrowLeftIcon className="mr-1 h-4 w-4" />Back to event
-      </Button>
-
-      <Card className="mb-6">
-        <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
-          {event.cover_image_url && (
-            <img
-              src={event.cover_image_url}
-              alt=""
-              className="h-20 w-32 shrink-0 rounded-md object-cover"
-            />
-          )}
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate text-xl font-semibold">{event.title}</h1>
-            <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-              <CalendarIcon className="h-4 w-4 shrink-0" />
-              <EventDateTime
-                startIso={event.start_at}
-                endIso={event.end_at}
-                timeZone={event.time_zone}
-                variant="compact"
+      <Link
+        to={`/e/${event.id}`}
+        className="group mb-6 block overflow-hidden rounded-xl border bg-card transition hover:border-primary/40 hover:shadow-md"
+      >
+        <div className="flex flex-col sm:flex-row">
+          <div className="relative h-40 w-full shrink-0 overflow-hidden bg-muted sm:h-auto sm:w-56">
+            {event.cover_image_url ? (
+              <img
+                src={event.cover_image_url}
+                alt=""
+                className="h-full w-full object-cover transition group-hover:scale-[1.03]"
               />
-            </div>
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                <CalendarIcon className="h-10 w-10 opacity-40" />
+              </div>
+            )}
           </div>
-          <Link
-            to={`/e/${event.id}`}
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            Event details →
-          </Link>
-        </CardContent>
-      </Card>
+          <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 p-5">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Event</p>
+            <h1 className="truncate text-2xl font-semibold tracking-tight group-hover:text-primary">
+              {event.title}
+            </h1>
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <CalendarIcon className="h-4 w-4 shrink-0" />
+              <span className="truncate">{localDate}</span>
+            </p>
+          </div>
+          <div className="hidden items-center pr-5 text-primary sm:flex">
+            <ArrowLeftIcon className="h-5 w-5 rotate-180 transition group-hover:translate-x-1" />
+          </div>
+        </div>
+      </Link>
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
