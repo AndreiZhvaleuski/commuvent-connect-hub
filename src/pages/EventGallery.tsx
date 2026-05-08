@@ -117,6 +117,7 @@ export default function EventGalleryPage() {
       if (filter === "published") q = q.eq("status", "approved");
       if (filter === "mine" && user) q = q.eq("user_id", user.id);
       if (filter === "pending" && user) q = q.eq("user_id", user.id).eq("status", "pending");
+      if (filter === "review") q = q.eq("status", "pending");
       const { data: rows, count, error } = await q
         .order("created_at", { ascending: true })
         .abortSignal(signal);
