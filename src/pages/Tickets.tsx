@@ -39,8 +39,8 @@ type Row = {
 };
 
 const PAGE_SIZE = 5;
-type View = "upcoming" | "past";
-type SortDir = "asc" | "desc";
+type View = EventView;
+type SortDir = EventSortDir;
 
 type FetchResult = {
   rows: Row[];
