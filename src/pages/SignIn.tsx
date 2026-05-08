@@ -77,18 +77,6 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {mode === "signup" && (
-              <div className="grid grid-cols-2 gap-3 pb-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First name</Label>
-                  <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last name</Label>
-                  <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                </div>
-              </div>
-            )}
             <form
               className="space-y-4"
               onSubmit={(e) => {
@@ -96,6 +84,18 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
                 if (!busy) handlePassword();
               }}
             >
+              {mode === "signup" && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First name</Label>
+                    <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last name</Label>
+                    <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                  </div>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
