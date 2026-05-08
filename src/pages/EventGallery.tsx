@@ -249,16 +249,6 @@ export default function EventGalleryPage() {
           <h2 className="text-lg font-semibold">Photos{total > 0 ? ` · ${total}` : ""}</h2>
         </div>
         <div className="flex items-center gap-2">
-          {isHost && event && (
-            <Button
-              render={<Link to={`/dashboard/${event.host_id}/moderation`} />}
-              size="sm"
-              variant="outline"
-            >
-              <ShieldCheckIcon className="mr-2 h-4 w-4" />
-              Moderate
-            </Button>
-          )}
           {user ? (
             <>
               <input ref={fileRef} type="file" accept={ACCEPT} onChange={onFile} className="hidden" />
