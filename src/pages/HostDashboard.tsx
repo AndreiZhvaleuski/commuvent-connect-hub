@@ -66,7 +66,7 @@ export default function HostDashboard() {
 
       let eventsQuery = supabase.from("events")
         .select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url,time_zone")
-        .eq("host_id", hostId!).order("start_at", { ascending: sortDir === "asc" });
+        .eq("host_id", hostId!).order("start_at", { ascending: true });
       if (isChecker) eventsQuery = eventsQuery.eq("status", "published");
 
       const [hostRes, evRes, statsRes] = await Promise.all([
