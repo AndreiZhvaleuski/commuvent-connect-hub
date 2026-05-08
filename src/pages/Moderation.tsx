@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const PUBLIC_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/gallery/`;
 
 type Photo = { id: string; storage_path: string; status: string; event_id: string; created_at: string };
+type EventLite = { id: string; title: string; start_at: string };
 type Report = { id: string; target_type: string; target_id: string; reason: string; status: string; created_at: string };
 
 export default function Moderation() {
