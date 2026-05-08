@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import {
   ArrowRightIcon,
   CalendarBlankIcon,
-  ConfettiIcon,
+  
   GlobeIcon,
   HandHeartIcon,
   HeartIcon,
