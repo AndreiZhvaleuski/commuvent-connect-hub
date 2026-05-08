@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRightIcon as ArrowRight, UsersIcon as Users } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
-import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,8 +31,7 @@ export default function Index() {
   }, []);
 
   return (
-    <AppLayout>
-      <section className="relative overflow-hidden border-b">
+    <><section className="relative overflow-hidden border-b">
         <div className="container mx-auto px-4 py-24 sm:py-32 text-center">
           <Badge variant="secondary" className="mb-6">Free for communities, forever</Badge>
           <h1 className="text-4xl sm:text-6xl font-bold tracking-tight">
@@ -85,6 +83,6 @@ export default function Index() {
           </div>
         )}
       </section>
-    </AppLayout>
+    </>
   );
 }

@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -56,12 +55,11 @@ export default function HostPublic() {
   const upcoming = useMemo(() => events.filter((e) => e.end_at >= now), [events, now]);
   const past = useMemo(() => events.filter((e) => e.end_at < now).reverse(), [events, now]);
 
-  if (notFound) return <AppLayout><div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Host not found.</p></div></AppLayout>;
-  if (busy || !host) return <AppLayout><div className="container mx-auto px-4 py-12"><div className="h-24 animate-pulse rounded bg-muted" /></div></AppLayout>;
+  if (notFound) return <><div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Host not found.</p></div></>;
+  if (busy || !host) return <><div className="container mx-auto px-4 py-12"><div className="h-24 animate-pulse rounded bg-muted" /></div></>;
 
   return (
-    <AppLayout>
-      <section className="border-b">
+    <><section className="border-b">
         <div className="container mx-auto px-4 py-12 max-w-4xl">
           <div className="flex flex-wrap items-start gap-6">
             <Avatar className="h-20 w-20">
@@ -109,7 +107,7 @@ export default function HostPublic() {
           <TabsContent value="past" className="pt-4"><EventGrid events={past} empty="No past events." pastBadge /></TabsContent>
         </Tabs>
       </section>
-    </AppLayout>
+    </>
   );
 }
 

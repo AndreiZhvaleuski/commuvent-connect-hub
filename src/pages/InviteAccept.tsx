@@ -3,7 +3,6 @@ import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { ArrowSquareOutIcon } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -78,8 +77,7 @@ export default function InviteAccept() {
   const differentRole = existingRole && preview && existingRole !== preview.role;
 
   return (
-    <AppLayout>
-      <div className="container mx-auto max-w-md px-4 py-20">
+    <><div className="container mx-auto max-w-md px-4 py-20">
         <Card>
           <CardHeader><CardTitle>Host invitation</CardTitle></CardHeader>
           <CardContent className="space-y-5">
@@ -158,6 +156,6 @@ export default function InviteAccept() {
           </CardContent>
         </Card>
       </div>
-    </AppLayout>
+    </>
   );
 }

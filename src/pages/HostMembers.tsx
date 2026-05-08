@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeftIcon, CopyIcon, TrashIcon, PlusIcon, EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -136,18 +135,17 @@ export default function HostMembers() {
   }
 
   if (busy) {
-    return <AppLayout><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></AppLayout>;
+    return <><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></>;
   }
   if (!host) {
-    return <AppLayout><div className="container mx-auto px-4 py-12"><p>Host not found.</p></div></AppLayout>;
+    return <><div className="container mx-auto px-4 py-12"><p>Host not found.</p></div></>;
   }
   if (!myRole) {
-    return <AppLayout><div className="container mx-auto px-4 py-12"><p>You are not a member of this host.</p></div></AppLayout>;
+    return <><div className="container mx-auto px-4 py-12"><p>You are not a member of this host.</p></div></>;
   }
 
   return (
-    <AppLayout>
-      <div className="container mx-auto max-w-4xl px-4 py-12">
+    <><div className="container mx-auto max-w-4xl px-4 py-12">
         <Link to={`/dashboard/${host.id}`} className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeftIcon className="h-4 w-4" /> Back to dashboard
         </Link>
@@ -288,6 +286,6 @@ export default function HostMembers() {
           </Card>
         )}
       </div>
-    </AppLayout>
+    </>
   );
 }

@@ -10,7 +10,6 @@ import { useAuth } from "@/lib/auth";
 import { listTimezones, browserTz } from "@/lib/timezones";
 import { slugify } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -329,11 +328,10 @@ export default function EventEditor() {
 
   if (bootstrapping) {
     return (
-      <AppLayout>
-        <div className="container mx-auto px-4 py-12">
+      <><div className="container mx-auto px-4 py-12">
           <div className="h-8 w-64 animate-pulse rounded bg-muted" />
         </div>
-      </AppLayout>
+      </>
     );
   }
 
@@ -342,8 +340,7 @@ export default function EventEditor() {
   const locationMode = form.watch("location_mode");
 
   return (
-    <AppLayout>
-      <div className="container mx-auto max-w-3xl px-4 py-12">
+    <><div className="container mx-auto max-w-3xl px-4 py-12">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-semibold tracking-tight">{isEdit ? "Edit event" : "New event"}</h1>
           {isEdit && <Badge status={status} />}
@@ -529,7 +526,7 @@ export default function EventEditor() {
           </div>
         </form>
       </div>
-    </AppLayout>
+    </>
   );
 }
 

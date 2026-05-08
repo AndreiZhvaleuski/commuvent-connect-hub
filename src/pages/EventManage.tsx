@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowSquareOutIcon as ExternalLink, ArrowLeftIcon as ArrowLeft } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EventManagementCard, type ManagedEvent, type EventStat } from "@/components/event-management-card";
@@ -40,13 +39,12 @@ export default function EventManage() {
     })();
   }, [hostId, eventId, user, loading, navigate]);
 
-  if (busy) return <AppLayout><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></AppLayout>;
-  if (denied) return <AppLayout><div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">You don't have permission to manage this event.</p></div></AppLayout>;
-  if (!event || !host) return <AppLayout><div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Event not found.</p></div></AppLayout>;
+  if (busy) return <><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></>;
+  if (denied) return <><div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">You don't have permission to manage this event.</p></div></>;
+  if (!event || !host) return <><div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Event not found.</p></div></>;
 
   return (
-    <AppLayout>
-      <div className="container mx-auto max-w-4xl px-4 py-12">
+    <><div className="container mx-auto max-w-4xl px-4 py-12">
         <div className="mb-6">
           <Button render={<Link to={`/dashboard/${host.id}`} />} variant="ghost" size="sm">
             <ArrowLeft className="mr-1 h-4 w-4" /> All events
@@ -70,6 +68,6 @@ export default function EventManage() {
 
         <EventManagementCard event={event} stat={stat} hostId={host.id} showManage={false} />
       </div>
-    </AppLayout>
+    </>
   );
 }

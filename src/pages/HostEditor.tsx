@@ -6,7 +6,6 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -155,17 +154,15 @@ export default function HostEditor({ mode }: Props) {
 
   if (pageBusy) {
     return (
-      <AppLayout>
-        <div className="container mx-auto max-w-2xl px-4 py-12">
+      <><div className="container mx-auto max-w-2xl px-4 py-12">
           <div className="h-8 w-64 animate-pulse rounded bg-muted" />
         </div>
-      </AppLayout>
+      </>
     );
   }
 
   return (
-    <AppLayout>
-      <div className="container mx-auto max-w-2xl px-4 py-12">
+    <><div className="container mx-auto max-w-2xl px-4 py-12">
         <Card>
           <CardHeader>
             <CardTitle>{isEdit ? "Edit host" : "Become a host"}</CardTitle>
@@ -228,6 +225,6 @@ export default function HostEditor({ mode }: Props) {
           </CardContent>
         </Card>
       </div>
-    </AppLayout>
+    </>
   );
 }

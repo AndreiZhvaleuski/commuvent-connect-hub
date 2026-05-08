@@ -10,7 +10,6 @@ import {
 } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -152,8 +151,7 @@ export default function MyEvents() {
   const hasFilter = !!(hostId || search || fromStr || toStr) || time !== "upcoming";
 
   return (
-    <AppLayout>
-      <div className="container mx-auto max-w-6xl px-4 py-12">
+    <><div className="container mx-auto max-w-6xl px-4 py-12">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight">My Events</h1>
@@ -271,7 +269,7 @@ export default function MyEvents() {
           </div>
         )}
       </div>
-    </AppLayout>
+    </>
   );
 }
 

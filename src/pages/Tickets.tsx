@@ -6,7 +6,6 @@ import { EventDateTime } from "@/components/event-datetime";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -93,11 +92,10 @@ export default function Tickets() {
     load();
   };
 
-  if (busy) return <AppLayout><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></AppLayout>;
+  if (busy) return <><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></>;
 
   return (
-    <AppLayout>
-      <div className="container mx-auto max-w-4xl px-4 py-12">
+    <><div className="container mx-auto max-w-4xl px-4 py-12">
         <div className="mb-6">
           <h1 className="text-3xl font-semibold tracking-tight">My Tickets</h1>
           <p className="text-muted-foreground mt-1">Your RSVPs and waitlist positions.</p>
@@ -129,7 +127,7 @@ export default function Tickets() {
           </Tabs>
         )}
       </div>
-    </AppLayout>
+    </>
   );
 }
 

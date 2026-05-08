@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { PlusIcon as Plus, UsersIcon as Users } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -54,8 +53,7 @@ export default function Dashboard() {
   }, [user, loading, navigate]);
 
   return (
-    <AppLayout>
-      <div className="container mx-auto max-w-5xl px-4 py-12">
+    <><div className="container mx-auto max-w-5xl px-4 py-12">
         <div className="mb-8 flex items-end justify-between">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight">Your hosts</h1>
@@ -99,6 +97,6 @@ export default function Dashboard() {
           </div>
         )}
       </div>
-    </AppLayout>
+    </>
   );
 }
