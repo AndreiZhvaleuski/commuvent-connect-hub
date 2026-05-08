@@ -89,7 +89,7 @@ export default function About() {
             const Icon = s.icon;
             return (
               <Card key={s.label}>
-                <CardContent className="py-6">
+                <CardContent>
                   <Icon className="h-6 w-6 text-primary" />
                   <div className="mt-3 text-3xl font-semibold tracking-tight">{s.value}</div>
                   <div className="text-sm text-muted-foreground">{s.label}</div>
