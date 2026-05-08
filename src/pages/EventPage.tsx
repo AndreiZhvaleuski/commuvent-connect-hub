@@ -293,7 +293,24 @@ export default function EventPage() {
                 {event.capacity > 0 && <Progress value={capacityPct} aria-label="Capacity used" />}
 
                 {ended ? (
-                  <Button disabled className="w-full" variant="secondary">Event ended</Button>
+                  activeRsvp ? (
+                    checkedIn ? (
+                      <div className="rounded-md border border-primary/30 bg-primary/10 p-3 text-sm text-center">
+                        <p className="font-medium text-foreground">✓ You attended this event</p>
+                      </div>
+                    ) : activeRsvp.status === "going" ? (
+                      <div className="rounded-md border bg-muted/50 p-3 text-sm text-center">
+                        <p className="font-medium">You didn't check in</p>
+                        <p className="text-xs text-muted-foreground mt-1">No record of your attendance.</p>
+                      </div>
+                    ) : (
+                      <div className="rounded-md border bg-muted/50 p-3 text-sm text-center text-muted-foreground">
+                        You were on the waitlist
+                      </div>
+                    )
+                  ) : (
+                    <Button disabled className="w-full" variant="secondary">Event ended</Button>
+                  )
                 ) : canCheckIn ? (
                   <div className="rounded-md border bg-muted/50 p-3 text-sm text-center text-muted-foreground">
                     You're {canManage ? "hosting" : "checking in for"} this event
