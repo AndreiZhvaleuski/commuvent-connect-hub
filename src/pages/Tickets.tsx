@@ -51,6 +51,9 @@ export default function Tickets() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
+  const [total, setTotal] = useState(0);
+  const [counts, setCounts] = useState<{ upcoming: number; past: number }>({ upcoming: 0, past: 0 });
+  const [hasAny, setHasAny] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [qrs, setQrs] = useState<Record<string, string>>({});
@@ -61,34 +64,69 @@ export default function Tickets() {
   // Default: upcoming → nearest first (asc); past → most recent first (desc)
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [page, setPage] = useState(1);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     if (hideAll) setRevealed({});
   }, [hideAll]);
 
-  const load = async () => {
-    if (!user) return;
-    setError(null);
-    const { data, error: err } = await supabase
-      .from("rsvps")
-      .select("id,status,position,code,cancelled_at,event_id, events(id,title,start_at,end_at,time_zone,venue_address,online_url,description,cover_image_url), check_ins(id,undone)")
-      .eq("user_id", user.id)
-      .neq("status", "cancelled")
-      .order("created_at", { ascending: false });
-    if (err) {
-      setError(err.message);
-      setBusy(false);
-      return;
-    }
-    setRows(((data ?? []) as unknown) as Row[]);
-    setBusy(false);
-  };
-
+  // Server-side fetch: filter by view, sort by start_at, paginate.
   useEffect(() => {
     if (loading) return;
     if (!user) { navigate(`/sign-in?redirect=${encodeURIComponent("/tickets")}`); return; }
-    load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [user, loading]);
+
+    let cancelled = false;
+    const run = async () => {
+      setBusy(true);
+      setError(null);
+      const nowIso = new Date().toISOString();
+      const from = (page - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
+      const baseSelect = "id,status,position,code,cancelled_at,event_id, events!inner(id,title,start_at,end_at,time_zone,venue_address,online_url,description,cover_image_url), check_ins(id,undone)";
+
+      const pageQuery = supabase
+        .from("rsvps")
+        .select(baseSelect, { count: "exact" })
+        .eq("user_id", user.id)
+        .neq("status", "cancelled")
+        .filter("events.end_at", view === "upcoming" ? "gte" : "lt", nowIso)
+        .order("start_at", { foreignTable: "events", ascending: sortDir === "asc" })
+        .range(from, to);
+
+      const upcomingCount = supabase
+        .from("rsvps")
+        .select("id, events!inner(end_at)", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .neq("status", "cancelled")
+        .filter("events.end_at", "gte", nowIso);
+
+      const pastCount = supabase
+        .from("rsvps")
+        .select("id, events!inner(end_at)", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .neq("status", "cancelled")
+        .filter("events.end_at", "lt", nowIso);
+
+      const [pageRes, upRes, pastRes] = await Promise.all([pageQuery, upcomingCount, pastCount]);
+      if (cancelled) return;
+
+      if (pageRes.error) { setError(pageRes.error.message); setBusy(false); return; }
+      const up = upRes.count ?? 0;
+      const pst = pastRes.count ?? 0;
+      setRows(((pageRes.data ?? []) as unknown) as Row[]);
+      setTotal(pageRes.count ?? 0);
+      setCounts({ upcoming: up, past: pst });
+      setHasAny(up + pst > 0);
+      setBusy(false);
+    };
+
+    run();
+    return () => { cancelled = true; };
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [user, loading, view, sortDir, page, refreshKey]);
+
+  const reload = () => setRefreshKey((k) => k + 1);
 
   // Generate QR codes for going tickets
   useEffect(() => {
@@ -105,29 +143,19 @@ export default function Tickets() {
     if (!user) return;
     const ch = supabase.channel(`tickets-${user.id}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "rsvps", filter: `user_id=eq.${user.id}` }, () => {
-        load();
+        reload();
       })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, (payload) => {
         const n = payload.new as { type?: string };
         if (n?.type === "waitlist_promoted") {
           toast.success("You're in! A seat just opened.");
         }
-        load();
+        reload();
       })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [user?.id]);
-
-  const now = useMemo(() => Date.now(), [rows]);
-  const upcomingAll = useMemo(
-    () => rows.filter((r) => r.events && new Date(r.events.end_at).getTime() >= now),
-    [rows, now]
-  );
-  const pastAll = useMemo(
-    () => rows.filter((r) => r.events && new Date(r.events.end_at).getTime() < now),
-    [rows, now]
-  );
 
   // When switching tabs, set sensible default sort + reset page.
   const changeView = (v: View) => {
@@ -136,23 +164,12 @@ export default function Tickets() {
     setPage(1);
   };
 
-  const filtered = view === "upcoming" ? upcomingAll : pastAll;
-  const sorted = useMemo(() => {
-    const arr = [...filtered];
-    arr.sort((a, b) => {
-      const ax = new Date(a.events!.start_at).getTime();
-      const bx = new Date(b.events!.start_at).getTime();
-      return sortDir === "asc" ? ax - bx : bx - ax;
-    });
-    return arr;
-  }, [filtered, sortDir]);
-
-  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   useEffect(() => {
     if (page !== safePage) setPage(safePage);
   }, [page, safePage]);
-  const pageRows = sorted.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
 
   const [confirmCancelEventId, setConfirmCancelEventId] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
