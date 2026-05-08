@@ -28,14 +28,23 @@ export default function EventManage() {
       setBusy(true);
       const { data: hm } = await supabase.from("host_members").select("role").eq("host_id", hostId).eq("user_id", user.id).maybeSingle();
       if (!hm || hm.role !== "host") { setDenied(true); setBusy(false); return; }
-      const [{ data: h }, { data: ev }, { data: stats }] = await Promise.all([
+      const [{ data: h }, { data: ev }, { data: stats }, { data: photoIds }] = await Promise.all([
         supabase.from("hosts").select("id,name,logo_url").eq("id", hostId).maybeSingle(),
         supabase.from("events").select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url,time_zone").eq("id", eventId).maybeSingle(),
         supabase.rpc("event_stats", { p_host_id: hostId }),
+        supabase.from("gallery_photos").select("id").eq("event_id", eventId),
       ]);
       setHost((h ?? null) as Host | null);
       setEvent((ev ?? null) as ManagedEvent | null);
       setStat(((stats ?? []) as EventStat[]).find((s) => s.event_id === eventId));
+      const photoIdList = (photoIds ?? []).map((p: { id: string }) => p.id);
+      const [eventReports, photoReports] = await Promise.all([
+        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "open").eq("target_type", "event").eq("target_id", eventId),
+        photoIdList.length > 0
+          ? supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "open").eq("target_type", "photo").in("target_id", photoIdList)
+          : Promise.resolve({ count: 0 } as { count: number | null }),
+      ]);
+      setOpenReports((eventReports.count ?? 0) + (photoReports.count ?? 0));
       setBusy(false);
     })();
   }, [hostId, eventId, user, loading, navigate]);
