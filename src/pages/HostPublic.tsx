@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/empty-state";
 import { PublicEventCard, type PublicEvent } from "@/components/public-event-card";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
