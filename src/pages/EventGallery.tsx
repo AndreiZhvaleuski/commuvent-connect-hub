@@ -76,21 +76,17 @@ export default function EventGalleryPage() {
     async (signal) => {
       const from = (page - 1) * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
-      let q = supabase
+      const { data: rows, count, error } = await supabase
         .from("gallery_photos")
         .select("id,storage_path,user_id,status,created_at", { count: "exact" })
-        .eq("event_id", eventId);
-      if (filter === "all") q = q.eq("status", "approved");
-      if (filter === "mine" && user) q = q.eq("user_id", user.id);
-      if (filter === "pending" && user) q = q.eq("user_id", user.id).eq("status", "pending");
-      const { data: rows, count, error } = await q
+        .eq("event_id", eventId)
         .order("created_at", { ascending: false })
         .abortSignal(signal)
         .range(from, to);
       if (error) throw new Error(error.message);
       return { photos: (rows ?? []) as Photo[], total: count ?? 0 };
     },
-    [eventId, user?.id, page, filter],
+    [eventId, user?.id, page],
     { keepPreviousData: true }
   );
 
@@ -118,8 +114,8 @@ export default function EventGalleryPage() {
         throw insErr;
       }
       toast.success("Photo uploaded — pending host approval");
-      setPage(1);
-      if (filter !== "pending") setFilter("pending");
+      setFilter("pending");
+      if (page !== 1) setPage(1);
       else refetch();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");
@@ -230,7 +226,7 @@ export default function EventGalleryPage() {
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : photos.length === 0 ? (
         <EmptyState
-          title={filter === "pending" ? "No pending photos" : filter === "mine" ? "You haven't uploaded yet" : "No photos yet"}
+          title="No photos yet"
           description={user ? "Be the first to share!" : "Sign in to upload one."}
         />
       ) : (
@@ -239,8 +235,15 @@ export default function EventGalleryPage() {
             {photos.map((p, i) => {
               const isOwner = user?.id === p.user_id;
               const canDelete = isOwner && p.status === "pending";
+              const matches =
+                filter === "all" ||
+                (filter === "mine" && isOwner) ||
+                (filter === "pending" && isOwner && p.status === "pending");
               return (
-                <div key={p.id} className="group relative overflow-hidden rounded-lg border bg-muted">
+                <div
+                  key={p.id}
+                  className={`group relative overflow-hidden rounded-lg border bg-muted transition ${matches ? "" : "opacity-30 hover:opacity-100"}`}
+                >
                   <button
                     type="button"
                     onClick={() => setLightboxIndex(i)}
