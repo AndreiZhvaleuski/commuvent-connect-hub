@@ -43,6 +43,7 @@ export default function EventPage() {
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [canManage, setCanManage] = useState(false);
+  const [canCheckIn, setCanCheckIn] = useState(false);
   const load = async () => {
     if (!eventId) return;
     setBusy(true);
@@ -61,9 +62,11 @@ export default function EventPage() {
       setRsvp((r ?? null) as Rsvp | null);
       const { data: hm } = await supabase.from("host_members").select("role").eq("host_id", ev.host_id).eq("user_id", user.id).maybeSingle();
       setCanManage(hm?.role === "host");
+      setCanCheckIn(!!hm);
     } else {
       setRsvp(null);
       setCanManage(false);
+      setCanCheckIn(false);
     }
     setBusy(false);
   };
@@ -296,10 +299,15 @@ export default function EventPage() {
 
                 <p className="text-xs text-muted-foreground text-center">Free event · No fees</p>
 
-                {canManage && (
+                {canCheckIn && (
                   <div className="border-t pt-3 space-y-2">
-                    <Button render={<Link to={`/dashboard/${event.host_id}/events/${event.id}`} />} variant="outline" size="sm" className="w-full">Manage event</Button>
-                    <Button render={<Link to={`/dashboard/${event.host_id}`} />} variant="ghost" size="sm" className="w-full">Host dashboard</Button>
+                    <Button render={<Link to={`/checkin/${event.id}`} />} size="sm" className="w-full">Open check-in</Button>
+                    {canManage && (
+                      <>
+                        <Button render={<Link to={`/dashboard/${event.host_id}/events/${event.id}`} />} variant="outline" size="sm" className="w-full">Manage event</Button>
+                        <Button render={<Link to={`/dashboard/${event.host_id}`} />} variant="ghost" size="sm" className="w-full">Host dashboard</Button>
+                      </>
+                    )}
                   </div>
                 )}
               </CardContent>
