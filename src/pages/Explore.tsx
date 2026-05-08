@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { PublicEventCard } from "@/components/public-event-card";
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
-import { SkeletonGrid } from "@/components/skeleton-grid";
+import { Spinner } from "@/components/ui/spinner";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 
 type LocationMode = "any" | "in_person" | "online";
@@ -172,7 +172,7 @@ export default function Explore() {
         </Card>
 
         {busy ? (
-          <SkeletonGrid count={6} />
+          <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
         ) : error ? (
           <ErrorState
             title="Couldn't load events"
