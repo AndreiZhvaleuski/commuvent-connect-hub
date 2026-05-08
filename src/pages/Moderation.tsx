@@ -149,7 +149,14 @@ export default function Moderation() {
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                       {group.map((p) => (
                         <Card key={p.id} className="overflow-hidden">
-                          <img src={PUBLIC_BASE + p.storage_path} alt="Pending submission" className="aspect-square w-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setLightboxIndex(photos.findIndex((x) => x.id === p.id))}
+                            className="block w-full"
+                            aria-label="Open photo"
+                          >
+                            <img src={PUBLIC_BASE + p.storage_path} alt="Pending submission" className="aspect-square w-full object-cover transition hover:scale-[1.02]" />
+                          </button>
                           <CardContent className="flex gap-2 p-3">
                             <Button size="sm" className="flex-1" onClick={() => setPhotoStatus(p.id, "approved")}>
                               <Check className="w-4 h-4 mr-1" /> Approve
