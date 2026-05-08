@@ -154,7 +154,6 @@ export default function Moderation() {
             )}
           </TabsContent>
         </Tabs>
-      </main>
-    </>
+    </main>
   );
 }
