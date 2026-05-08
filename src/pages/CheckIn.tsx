@@ -151,9 +151,8 @@ export default function CheckIn() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <TopNav />
-      <main className="container max-w-md sm:max-w-2xl py-4 sm:py-8 px-4 space-y-5">
+    <AppLayout>
+      <div className="container mx-auto max-w-2xl px-4 py-6 sm:py-12 space-y-5">
         <Link
           to={`/dashboard/${event.host_id}`}
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground min-h-11"
