@@ -78,8 +78,8 @@ export default function EventPage() {
     if (!eventId) return;
     const ch = supabase.channel(`ev-${eventId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "rsvps", filter: `event_id=eq.${eventId}` }, () => {
-        supabase.from("rsvps").select("id", { count: "exact", head: true }).eq("event_id", eventId).eq("status", "going")
-          .then(({ count }) => setGoing(count ?? 0));
+        supabase.rpc("event_going_count", { p_event_id: eventId })
+          .then(({ data }) => setGoing(Number(data ?? 0)));
       }).subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [eventId]);
