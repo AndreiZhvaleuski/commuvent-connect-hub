@@ -125,7 +125,7 @@ export default function Moderation() {
         const { error } = await supabase.from("gallery_photos").update({ status: "rejected" }).eq("id", report.target_id);
         if (error) { toast.error(error.message); setResolving(false); return; }
       } else if (report.target_type === "event") {
-        const { error } = await supabase.from("events").update({ status: "draft", visibility: "private" }).eq("id", report.target_id);
+        const { error } = await supabase.from("events").update({ status: "draft" }).eq("id", report.target_id);
         if (error) { toast.error(error.message); setResolving(false); return; }
       }
     }
@@ -150,7 +150,7 @@ export default function Moderation() {
         {reports.length > 0 && <Badge variant="secondary">{reports.length} open</Badge>}
       </div>
       <p className="text-sm text-muted-foreground">
-        Reports submitted by attendees, oldest first. Hiding a photo rejects it; hiding an event reverts it to a private draft.
+        Reports submitted by attendees, oldest first. Hiding a photo rejects it; hiding an event reverts it to a draft.
       </p>
 
       {loading && !data ? (
@@ -240,7 +240,7 @@ export default function Moderation() {
               {pending?.action === "hide"
                 ? pending?.report.target_type === "photo"
                   ? "The photo will be rejected and removed from the public gallery. The report will be marked as actioned."
-                  : "The event will be reverted to a private draft and removed from public listings. The report will be marked as actioned."
+                  : "The event will be reverted to a draft and removed from public listings. The host can republish it later. The report will be marked as actioned."
                 : "The report will be dismissed without changes. The reporter can submit a new report after this is resolved."}
             </AlertDialogDescription>
           </AlertDialogHeader>
