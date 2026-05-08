@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { MapPinIcon as MapPin } from "@phosphor-icons/react";
-import { MagnifyingGlassIcon as Search, GlobeIcon, SparkleIcon } from "@phosphor-icons/react";
+import { MagnifyingGlassIcon as Search, GlobeIcon, SparkleIcon, CalendarBlankIcon } from "@phosphor-icons/react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
@@ -14,6 +13,10 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import { PublicEventCard } from "@/components/public-event-card";
+import { EmptyState } from "@/components/empty-state";
+import { ErrorState } from "@/components/error-state";
+import { SkeletonGrid } from "@/components/skeleton-grid";
+import { useAsyncResource } from "@/hooks/use-async-resource";
 
 type LocationMode = "any" | "in_person" | "online";
 
