@@ -139,15 +139,26 @@ export default function Tickets() {
             </TabsList>
             <TabsContent value="upcoming" className="pt-4 space-y-4">
               {upcoming.length === 0 && <Card><CardContent className="py-12 text-center text-muted-foreground">No upcoming tickets.</CardContent></Card>}
-              {upcoming.map((r) => <TicketCard key={r.id} row={r} qr={qrs[r.id]} onCancel={() => doCancel(r.event_id)} />)}
+              {upcoming.map((r) => <TicketCard key={r.id} row={r} qr={qrs[r.id]} onCancel={() => setConfirmCancelEventId(r.event_id)} />)}
             </TabsContent>
             <TabsContent value="past" className="pt-4 space-y-4">
               {past.length === 0 && <Card><CardContent className="py-12 text-center text-muted-foreground">No past tickets.</CardContent></Card>}
-              {past.map((r) => <TicketCard key={r.id} row={r} qr={qrs[r.id]} onCancel={() => doCancel(r.event_id)} pastView />)}
+              {past.map((r) => <TicketCard key={r.id} row={r} qr={qrs[r.id]} onCancel={() => setConfirmCancelEventId(r.event_id)} pastView />)}
             </TabsContent>
           </Tabs>
         )}
       </div>
+      <ConfirmDialog
+        open={!!confirmCancelEventId}
+        onOpenChange={(o) => !o && setConfirmCancelEventId(null)}
+        title="Cancel this RSVP?"
+        description="You'll lose your spot. If the event is full, your seat may be given to someone on the waitlist."
+        confirmLabel="Cancel RSVP"
+        cancelLabel="Keep RSVP"
+        destructive
+        loading={cancelling}
+        onConfirm={doCancel}
+      />
     </>
   );
 }
