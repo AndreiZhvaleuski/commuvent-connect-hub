@@ -12,8 +12,9 @@ export type ManagedEvent = {
 };
 export type EventStat = { event_id: string; going_count: number; waitlist_count: number; checked_in_count: number };
 
-export function EventManagementCard({ event, stat, hostId, showManage = true }: { event: ManagedEvent; stat?: EventStat; hostId: string; showManage?: boolean }) {
+export function EventManagementCard({ event, stat, hostId, showManage = true, role = "host" }: { event: ManagedEvent; stat?: EventStat; hostId: string; showManage?: boolean; role?: "host" | "checker" }) {
   const s = stat ?? { event_id: event.id, going_count: 0, waitlist_count: 0, checked_in_count: 0 };
+  const isHost = role === "host";
   return (
     <Card>
       <CardHeader className="flex-row items-start justify-between gap-4">
@@ -34,10 +35,10 @@ export function EventManagementCard({ event, stat, hostId, showManage = true }: 
           />
         </div>
         <div className="flex flex-wrap gap-2">
-          {showManage && <Button render={<Link to={`/dashboard/${hostId}/events/${event.id}`} />} size="sm">Manage</Button>}
-          <Button render={<Link to={`/dashboard/${hostId}/events/${event.id}/edit`} />} size="sm" variant="outline">Edit</Button>
-          <Button render={<Link to={`/dashboard/${hostId}/events/${event.id}/rsvps`} />} size="sm" variant="outline">RSVPs</Button>
-          <Button render={<Link to={`/checkin/${event.id}`} />} size="sm" variant="outline">Check-in</Button>
+          {isHost && showManage && <Button render={<Link to={`/dashboard/${hostId}/events/${event.id}`} />} size="sm">Manage</Button>}
+          {isHost && <Button render={<Link to={`/dashboard/${hostId}/events/${event.id}/edit`} />} size="sm" variant="outline">Edit</Button>}
+          {isHost && <Button render={<Link to={`/dashboard/${hostId}/events/${event.id}/rsvps`} />} size="sm" variant="outline">RSVPs</Button>}
+          <Button render={<Link to={`/checkin/${event.id}`} />} size="sm" variant={isHost ? "outline" : "default"}>Check-in</Button>
         </div>
       </CardHeader>
       <CardContent>

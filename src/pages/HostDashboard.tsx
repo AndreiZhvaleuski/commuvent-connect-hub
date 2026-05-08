@@ -19,6 +19,7 @@ export default function HostDashboard() {
   const [host, setHost] = useState<Host | null>(null);
   const [events, setEvents] = useState<Ev[]>([]);
   const [stats, setStats] = useState<Record<string, Stat>>({});
+  const [role, setRole] = useState<"host" | "checker" | null>(null);
   const [busy, setBusy] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = searchParams.get("tab") === "past" ? "past" : "upcoming";
@@ -28,17 +29,28 @@ export default function HostDashboard() {
     if (!hostId) return;
     (async () => {
       setBusy(true);
-      const [{ data: h }, { data: ev }, { data: st }] = await Promise.all([
+      const { data: member } = await supabase
+        .from("host_members")
+        .select("role")
+        .eq("host_id", hostId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const r = (member?.role as "host" | "checker" | undefined) ?? null;
+      setRole(r);
+      const isChecker = r === "checker";
+      const eventsQuery = supabase.from("events")
+        .select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url,time_zone")
+        .eq("host_id", hostId).order("start_at", { ascending: false });
+      if (isChecker) eventsQuery.eq("status", "published");
+      const [{ data: h }, { data: ev }, statsRes] = await Promise.all([
         supabase.from("hosts").select("id,name,logo_url,bio").eq("id", hostId).maybeSingle(),
-        supabase.from("events")
-          .select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url,time_zone")
-          .eq("host_id", hostId).order("start_at", { ascending: false }),
-        supabase.rpc("event_stats", { p_host_id: hostId }),
+        eventsQuery,
+        isChecker ? Promise.resolve({ data: [] as Stat[] }) : supabase.rpc("event_stats", { p_host_id: hostId }),
       ]);
       setHost((h ?? null) as Host | null);
       setEvents((ev ?? []) as Ev[]);
       const map: Record<string, Stat> = {};
-      ((st ?? []) as Stat[]).forEach((s) => { map[s.event_id] = s; });
+      ((statsRes.data ?? []) as Stat[]).forEach((s) => { map[s.event_id] = s; });
       setStats(map);
       setBusy(false);
     })();
@@ -71,11 +83,16 @@ export default function HostDashboard() {
               </Link>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button render={<Link to={`/dashboard/${host.id}/edit`} />} variant="outline">Edit host</Button>
-            <Button render={<Link to={`/dashboard/${host.id}/members`} />} variant="outline">Members</Button>
-            <Button render={<Link to={`/dashboard/${host.id}/events/new`} />}><Plus className="mr-1 h-4 w-4" />New event</Button>
-          </div>
+          {role === "host" && (
+            <div className="flex flex-wrap gap-2">
+              <Button render={<Link to={`/dashboard/${host.id}/edit`} />} variant="outline">Edit host</Button>
+              <Button render={<Link to={`/dashboard/${host.id}/members`} />} variant="outline">Members</Button>
+              <Button render={<Link to={`/dashboard/${host.id}/events/new`} />}><Plus className="mr-1 h-4 w-4" />New event</Button>
+            </div>
+          )}
+          {role === "checker" && (
+            <span className="rounded-full border px-3 py-1 text-xs uppercase tracking-wide text-muted-foreground">Checker access</span>
+          )}
         </div>
 
         <Tabs
@@ -87,10 +104,10 @@ export default function HostDashboard() {
             <TabsTrigger value="past">Past ({past.length})</TabsTrigger>
           </TabsList>
           <TabsContent value="upcoming" className="pt-4">
-            <EventList events={upcoming} stats={stats} hostId={host.id} emptyText="No upcoming events." />
+            <EventList events={upcoming} stats={stats} hostId={host.id} role={role ?? "checker"} emptyText="No upcoming events." />
           </TabsContent>
           <TabsContent value="past" className="pt-4">
-            <EventList events={past} stats={stats} hostId={host.id} emptyText="No past events yet." />
+            <EventList events={past} stats={stats} hostId={host.id} role={role ?? "checker"} emptyText="No past events yet." />
           </TabsContent>
         </Tabs>
       </div>
@@ -98,14 +115,14 @@ export default function HostDashboard() {
   );
 }
 
-function EventList({ events, stats, hostId, emptyText }: { events: Ev[]; stats: Record<string, Stat>; hostId: string; emptyText: string }) {
+function EventList({ events, stats, hostId, role, emptyText }: { events: Ev[]; stats: Record<string, Stat>; hostId: string; role: "host" | "checker"; emptyText: string }) {
   if (events.length === 0) {
     return <Card><CardContent className="py-12 text-center text-muted-foreground">{emptyText}</CardContent></Card>;
   }
   return (
     <div className="grid gap-3">
       {events.map((e) => (
-        <EventManagementCard key={e.id} event={e} stat={stats[e.id]} hostId={hostId} />
+        <EventManagementCard key={e.id} event={e} stat={stats[e.id]} hostId={hostId} role={role} />
       ))}
     </div>
   );

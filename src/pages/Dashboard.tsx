@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type Host = { id: string; name: string; logo_url: string | null; bio: string | null };
+type Host = { id: string; name: string; logo_url: string | null; bio: string | null; role: "host" | "checker" };
 
 function stripMarkdown(md: string): string {
   return md
@@ -39,15 +39,16 @@ export default function Dashboard() {
     (async () => {
       const { data: members } = await supabase
         .from("host_members")
-        .select("host_id")
+        .select("host_id, role")
         .eq("user_id", user.id);
       const ids = (members ?? []).map((m) => m.host_id);
       if (ids.length === 0) { setHosts([]); setBusy(false); return; }
+      const roleMap = new Map<string, "host" | "checker">((members ?? []).map((m) => [m.host_id, m.role as "host" | "checker"]));
       const { data } = await supabase
         .from("hosts")
         .select("id,name,logo_url,bio")
         .in("id", ids);
-      setHosts((data ?? []) as Host[]);
+      setHosts(((data ?? []) as Omit<Host, "role">[]).map((h) => ({ ...h, role: roleMap.get(h.id) ?? "checker" })));
       setBusy(false);
     })();
   }, [user, loading, navigate]);
@@ -88,7 +89,7 @@ export default function Dashboard() {
                     </Avatar>
                     <div>
                       <CardTitle className="text-base">{h.name}</CardTitle>
-                      <p className="text-xs text-muted-foreground">Manage events</p>
+                      <p className="text-xs text-muted-foreground capitalize">{h.role === "checker" ? "Checker · Check-in events" : "Manage events"}</p>
                     </div>
                   </CardHeader>
                   {h.bio && <CardContent className="text-sm text-muted-foreground line-clamp-2">{stripMarkdown(h.bio)}</CardContent>}
