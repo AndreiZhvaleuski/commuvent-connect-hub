@@ -348,15 +348,23 @@ export default function EventPage() {
               value={reportReason}
               onChange={(e) => setReportReason(e.target.value)}
               placeholder="What's wrong with this event?"
+              aria-invalid={reportReason.length > 0 && reportReason.trim().length < 5}
             />
+            <div className="flex justify-between text-xs">
+              <span className={reportReason.length > 0 && reportReason.trim().length < 5 ? "text-destructive" : "text-muted-foreground"}>
+                {reportReason.trim().length < 5
+                  ? `Please add at least ${5 - reportReason.trim().length} more character${5 - reportReason.trim().length === 1 ? "" : "s"}`
+                  : "Looks good"}
+              </span>
+              <span className="text-muted-foreground">{reportReason.trim().length}/500</span>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setReportOpen(false)}>Cancel</Button>
             <Button
-              disabled={reporting}
+              disabled={reporting || reportReason.trim().length < 5 || reportReason.trim().length > 500}
               onClick={async () => {
                 if (!user || !event) return;
-                if (reportReason.trim().length < 5) { toast.error("Please add at least 5 characters describing the issue"); return; }
                 setReporting(true);
                 const { error } = await supabase.from("reports").insert({
                   target_type: "event", target_id: event.id, reason: reportReason.trim(), reporter_id: user.id,
