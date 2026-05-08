@@ -268,8 +268,7 @@ export default function EventEditor() {
   const onPublish = form.handleSubmit(async (v) => {
     const id = await save(v, "published");
     if (!id) return;
-    if (isEdit) goManage(id);
-    else navigate(`/dashboard/${hostId}/events/${id}/edit`);
+    goManage(id);
   }, onError);
   const onUnpublish = form.handleSubmit(async (v) => {
     const id = await save(v, "draft");
