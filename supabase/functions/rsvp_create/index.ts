@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
     if (!event_id) return json({ error: "event_id required" }, 400);
 
     const db = admin();
-    const { data: ev, error: evErr } = await db.from("events").select("id, capacity, status").eq("id", event_id).maybeSingle();
+    const { data: ev, error: evErr } = await db.from("events").select("id, capacity, status, host_id").eq("id", event_id).maybeSingle();
     if (evErr) {
       console.error("event lookup error", evErr);
       return json({ error: "event_lookup_failed", detail: evErr.message }, 500);
@@ -21,6 +21,9 @@ Deno.serve(async (req) => {
       return json({ error: "event_not_found", event_id }, 404);
     }
     if (ev.status !== "published") return json({ error: "event_not_published" }, 400);
+
+    const { data: hm } = await db.from("host_members").select("role").eq("host_id", ev.host_id).eq("user_id", user.id).maybeSingle();
+    if (hm) return json({ error: "host_members_cannot_rsvp" }, 403);
 
     const { data: existing } = await db.from("rsvps").select("*").eq("event_id", event_id).eq("user_id", user.id).maybeSingle();
     if (existing && existing.status !== "cancelled") return json({ rsvp: existing });

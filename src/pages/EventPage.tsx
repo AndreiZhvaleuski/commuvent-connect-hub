@@ -280,6 +280,10 @@ export default function EventPage() {
 
                 {ended ? (
                   <Button disabled className="w-full" variant="secondary">Event ended</Button>
+                ) : canCheckIn ? (
+                  <div className="rounded-md border bg-muted/50 p-3 text-sm text-center text-muted-foreground">
+                    You're {canManage ? "hosting" : "checking in for"} this event
+                  </div>
                 ) : activeRsvp ? (
                   <div className="space-y-2">
                     <div className="rounded-md border bg-muted/50 p-3 text-sm">
@@ -297,7 +301,7 @@ export default function EventPage() {
                   <Button onClick={() => (user ? setConfirmOpen(true) : requireAuth("rsvp"))} disabled={acting} className="w-full">RSVP</Button>
                 )}
 
-                <p className="text-xs text-muted-foreground text-center">Free event · No fees</p>
+                {!canCheckIn && <p className="text-xs text-muted-foreground text-center">Free event · No fees</p>}
 
                 {canCheckIn && (
                   <div className="border-t pt-3 space-y-2">
