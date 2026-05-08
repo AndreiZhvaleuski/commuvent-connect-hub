@@ -9,6 +9,8 @@ checkers verify codes at the door — all in one mobile-first app.
 Built with React + Vite + TypeScript + Tailwind + shadcn/ui on top of
 Supabase (Postgres + Auth + Storage + Edge Functions + Realtime).
 
+**Live demo:** https://commuvent-connect-hub.lovable.app
+
 ---
 
 ## Demo data
