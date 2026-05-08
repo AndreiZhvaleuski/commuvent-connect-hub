@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function CheckIn() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -125,6 +126,9 @@ export default function CheckIn() {
 
   const capacitySuffix = event.capacity ? `/ ${event.capacity}` : "";
 
+  const ended = event ? new Date(event.end_at).getTime() < now : false;
+  const checkInDisabled = ended && !isHost;
+
   async function submit(e?: React.FormEvent) {
     e?.preventDefault();
     const trimmed = code.trim().toUpperCase();
@@ -142,6 +146,7 @@ export default function CheckIn() {
       else if (status === "not_found") toast.error("Code not found");
       else if (status === "cancelled") toast.error("RSVP was cancelled");
       else if (status === "not_going") toast.error("Ticket is on the waitlist — not allowed");
+      else if (status === "event_ended") toast.error("Event has ended — check-in is closed");
       else toast.error("Check-in failed");
       setCode("");
       inputRef.current?.focus();
@@ -157,7 +162,9 @@ export default function CheckIn() {
     try {
       const { data, error } = await supabase.functions.invoke("check_in_undo", { body: { event_id: eventId } });
       if (error) throw error;
-      if ((data as any)?.ok) toast.success("Last check-in undone");
+      const d = data as any;
+      if (d?.ok) toast.success("Last check-in undone");
+      else if (d?.error === "event_ended") toast.error("Event has ended — check-in is closed");
       else toast.message("Nothing to undo");
       refreshCounters();
     } catch (err: any) {
