@@ -18,7 +18,7 @@ import { buildICS, downloadICS, googleCalendarUrl } from "@/lib/calendar";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ErrorState } from "@/components/error-state";
-import { Spinner } from "@/components/ui/spinner";
+import { PageSpinner } from "@/components/page-spinner";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 import { EventListControls, type EventView, type EventSortDir } from "@/components/event-list-controls";
 import { ListPagination } from "@/components/list-pagination";
