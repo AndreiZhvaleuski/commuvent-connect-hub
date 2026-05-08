@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { buildICS, downloadICS, googleCalendarUrl } from "@/lib/calendar";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Row = {
   id: string;
