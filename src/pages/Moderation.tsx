@@ -103,27 +103,59 @@ export default function Moderation() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="gallery" className="mt-4">
+          <TabsContent value="gallery" className="mt-4 space-y-8">
             {busy ? (
               <p className="text-muted-foreground">Loading…</p>
             ) : photos.length === 0 ? (
               <p className="text-muted-foreground">Nothing waiting for review.</p>
             ) : (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                {photos.map((p) => (
-                  <Card key={p.id} className="overflow-hidden">
-                    <img src={PUBLIC_BASE + p.storage_path} alt="Pending submission" className="aspect-square w-full object-cover" />
-                    <CardContent className="flex gap-2 p-3">
-                      <Button size="sm" className="flex-1" onClick={() => setPhotoStatus(p.id, "approved")}>
-                        <Check className="w-4 h-4 mr-1" /> Approve
-                      </Button>
-                      <Button size="sm" variant="outline" className="flex-1" onClick={() => setPhotoStatus(p.id, "rejected")}>
-                        <X className="w-4 h-4 mr-1" /> Reject
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              Object.entries(
+                photos.reduce<Record<string, Photo[]>>((acc, p) => {
+                  (acc[p.event_id] ||= []).push(p);
+                  return acc;
+                }, {})
+              ).map(([eventId, group]) => {
+                const ev = eventsById[eventId];
+                return (
+                  <section key={eventId} className="space-y-3">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2 border-b pb-2">
+                      <div className="min-w-0">
+                        <h2 className="truncate text-lg font-semibold">
+                          {ev?.title ?? "Unknown event"}
+                        </h2>
+                        {ev && (
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(ev.start_at).toLocaleString()} · {group.length} pending
+                          </p>
+                        )}
+                      </div>
+                      {ev && (
+                        <Link
+                          to={`/e/${ev.id}/gallery`}
+                          className="text-xs font-medium text-primary hover:underline"
+                        >
+                          Open gallery →
+                        </Link>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                      {group.map((p) => (
+                        <Card key={p.id} className="overflow-hidden">
+                          <img src={PUBLIC_BASE + p.storage_path} alt="Pending submission" className="aspect-square w-full object-cover" />
+                          <CardContent className="flex gap-2 p-3">
+                            <Button size="sm" className="flex-1" onClick={() => setPhotoStatus(p.id, "approved")}>
+                              <Check className="w-4 h-4 mr-1" /> Approve
+                            </Button>
+                            <Button size="sm" variant="outline" className="flex-1" onClick={() => setPhotoStatus(p.id, "rejected")}>
+                              <X className="w-4 h-4 mr-1" /> Reject
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </section>
+                );
+              })
             )}
           </TabsContent>
 
