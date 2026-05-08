@@ -44,7 +44,7 @@ const App = () => (
             <Route path="/sign-in" element={<SignIn mode="signin" />} />
             <Route path="/sign-up" element={<SignIn mode="signup" />} />
             <Route path="/tickets" element={<Tickets />} />
-            <Route path="/my-events" element={<Placeholder title="My Events" />} />
+            <Route path="/my-events" element={<MyEvents />} />
             <Route path="/become-a-host" element={<HostEditor mode="create" />} />
             <Route path="/dashboard/:hostId/edit" element={<HostEditor mode="edit" />} />
             <Route path="/dashboard" element={<Dashboard />} />
