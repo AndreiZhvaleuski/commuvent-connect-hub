@@ -21,6 +21,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import Lightbox from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import "yet-another-react-lightbox/styles.css";
 
 type ReportRow = {
   id: string;
@@ -51,6 +54,7 @@ export default function Moderation() {
   const navigate = useNavigate();
   const [pending, setPending] = useState<{ report: ReportRow; action: "hide" | "dismiss" } | null>(null);
   const [resolving, setResolving] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
   if (!authLoading && !user) {
     navigate(`/sign-in?redirect=/dashboard/${hostId}/moderation`);
@@ -211,11 +215,10 @@ export default function Moderation() {
                   </div>
 
                   {photo && (
-                    <a
-                      href={PUBLIC_BASE + photo.storage_path}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block overflow-hidden rounded-md border bg-muted"
+                    <button
+                      type="button"
+                      onClick={() => setLightboxSrc(PUBLIC_BASE + photo.storage_path)}
+                      className="block w-full overflow-hidden rounded-md border bg-muted text-left"
                     >
                       <img
                         src={PUBLIC_BASE + photo.storage_path}
@@ -223,7 +226,7 @@ export default function Moderation() {
                         className="max-h-64 w-full object-contain bg-black/5"
                         loading="lazy"
                       />
-                    </a>
+                    </button>
                   )}
 
                   {ev && (
@@ -290,6 +293,13 @@ export default function Moderation() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Lightbox
+        open={lightboxSrc !== null}
+        close={() => setLightboxSrc(null)}
+        slides={lightboxSrc ? [{ src: lightboxSrc, alt: "Reported photo" }] : []}
+        plugins={[Zoom]}
+      />
     </main>
   );
 }
