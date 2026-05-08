@@ -453,6 +453,36 @@ export type Database = {
         Args: { p_target_id: string; p_target_type: string }
         Returns: boolean
       }
+      my_events: {
+        Args: {
+          p_from?: string
+          p_host_ids?: string[]
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+          p_time_filter?: string
+          p_to?: string
+        }
+        Returns: {
+          capacity: number
+          checked_in_count: number
+          cover_image_url: string
+          end_at: string
+          event_id: string
+          going_count: number
+          host_id: string
+          host_logo_url: string
+          host_name: string
+          start_at: string
+          status: string
+          time_zone: string
+          title: string
+          total_count: number
+          user_role: string
+          visibility: string
+          waitlist_count: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
