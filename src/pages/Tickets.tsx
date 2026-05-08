@@ -220,7 +220,7 @@ export default function Tickets() {
             onRetry={refetch}
           />
         ) : busy && hasAny === null ? (
-          <PageSpinner py={16} />
+          <PageSpinner />
         ) : hasAny === false ? (
           <EmptyState
             icon={<Ticket className="h-10 w-10" />}

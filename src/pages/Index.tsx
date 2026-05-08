@@ -75,7 +75,7 @@ export default function Index() {
             onRetry={refetch}
           />
         ) : loading ? (
-          <PageSpinner py={16} />
+          <PageSpinner />
         ) : list.length === 0 ? (
           <EmptyState
             icon={<Users className="h-10 w-10" />}
