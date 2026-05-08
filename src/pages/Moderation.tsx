@@ -36,7 +36,7 @@ type ReportRow = {
 };
 
 type Reporter = { id: string; display_name: string | null; avatar_url: string | null; email: string | null };
-type EventInfo = { id: string; title: string; start_at: string; description: string | null };
+type EventInfo = { id: string; title: string; cover_image_url: string | null };
 type PhotoInfo = { id: string; storage_path: string; event_id: string; status: string };
 
 type Data = {
@@ -104,7 +104,7 @@ export default function Moderation() {
       ]));
 
       const eventsRes = eventIds.length > 0
-        ? await supabase.from("events").select("id,title,start_at,description").in("id", eventIds).abortSignal(signal)
+        ? await supabase.from("events").select("id,title,cover_image_url").in("id", eventIds).abortSignal(signal)
         : { data: [] as EventInfo[], error: null };
       if (eventsRes.error) throw new Error(eventsRes.error.message);
 
@@ -232,15 +232,14 @@ export default function Moderation() {
                   {ev && (
                     <Link
                       to={`/e/${ev.id}`}
-                      className="block rounded-md border bg-muted/30 p-3 hover:bg-muted/60 transition-colors"
+                      className="flex items-center gap-3 rounded-md border bg-muted/30 p-2 hover:bg-muted/60 transition-colors"
                     >
-                      <div className="text-sm font-medium truncate">{ev.title}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {new Date(ev.start_at).toLocaleString()}
+                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded bg-muted">
+                        {ev.cover_image_url && (
+                          <img src={ev.cover_image_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                        )}
                       </div>
-                      {ev.description && (
-                        <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{ev.description}</p>
-                      )}
+                      <div className="text-sm font-medium truncate">{ev.title}</div>
                     </Link>
                   )}
 
