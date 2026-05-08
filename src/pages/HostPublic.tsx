@@ -11,7 +11,7 @@ import { PublicEventCard, type PublicEvent } from "@/components/public-event-car
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useAsyncResource } from "@/hooks/use-async-resource";
-import { Spinner } from "@/components/ui/spinner";
+import { PageSpinner } from "@/components/page-spinner";
 import { ErrorState } from "@/components/error-state";
 import { EventListControls, type EventView, type EventSortDir } from "@/components/event-list-controls";
 import { ListPagination } from "@/components/list-pagination";
