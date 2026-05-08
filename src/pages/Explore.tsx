@@ -206,7 +206,7 @@ export default function Explore() {
             onRetry={refetch}
           />
         ) : busy ? (
-          <PageSpinner py={16} />
+          <PageSpinner />
         ) : list.length === 0 ? (
           <EmptyState
             icon={<CalendarBlankIcon className="h-8 w-8" />}

@@ -105,7 +105,7 @@ export default function EventPage() {
     </div>
   );
   if (notFound) return <div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Event not found.</p></div>;
-  if (busy || !event) return <PageSpinner py={20} container />;
+  if (busy || !event) return <PageSpinner />;
 
   const ended = new Date(event.end_at).getTime() < Date.now();
 
