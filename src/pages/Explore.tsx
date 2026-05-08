@@ -173,15 +173,24 @@ export default function Explore() {
           </CardContent>
         </Card>
 
-        {busy ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => <Card key={i} className="animate-pulse"><CardContent className="h-48" /></Card>)}
-          </div>
-        ) : events.length === 0 ? (
-          <Card><CardContent className="py-16 text-center text-muted-foreground">No events match your filters.</CardContent></Card>
+        {busy && !events ? (
+          <SkeletonGrid count={6} />
+        ) : error ? (
+          <ErrorState
+            title="Couldn't load events"
+            description={error.message}
+            onRetry={refetch}
+          />
+        ) : list.length === 0 ? (
+          <EmptyState
+            icon={<CalendarBlankIcon className="h-8 w-8" />}
+            title={hasFilter ? "No events match your filters" : "No published events yet"}
+            description={hasFilter ? "Try clearing the search or expanding the date range." : "Check back soon for new events."}
+            action={hasFilter ? <Button variant="outline" size="sm" onClick={clearAll}>Clear filters</Button> : undefined}
+          />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {events.map((e) => (
+          <div className={cn("grid gap-4 sm:grid-cols-2 lg:grid-cols-3", busy && "opacity-60 transition-opacity")}>
+            {list.map((e) => (
               <PublicEventCard key={e.id} event={e} showStatusBadge={includePast} />
             ))}
           </div>
