@@ -62,9 +62,11 @@ export default function EventPage() {
       setRsvp((r ?? null) as Rsvp | null);
       const { data: hm } = await supabase.from("host_members").select("role").eq("host_id", ev.host_id).eq("user_id", user.id).maybeSingle();
       setCanManage(hm?.role === "host");
+      setCanCheckIn(!!hm);
     } else {
       setRsvp(null);
       setCanManage(false);
+      setCanCheckIn(false);
     }
     setBusy(false);
   };
