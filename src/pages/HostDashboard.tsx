@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { PlusIcon as Plus, ArrowSquareOutIcon as ExternalLink } from "@phosphor-icons/react";
+import { PlusIcon as Plus, ArrowSquareOutIcon as ExternalLink, FlagIcon } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ type HeaderData = {
   role: "host" | "checker" | null;
   upcomingCount: number;
   pastCount: number;
+  openReportsCount: number;
 };
 type EventsData = { events: Ev[]; stats: Record<string, Stat>; total: number };
 
@@ -69,7 +70,7 @@ export default function HostDashboard() {
     refetch: refetchHeader,
   } = useAsyncResource<HeaderData>(
     async (signal) => {
-      if (!ready) return { host: null, role: null, upcomingCount: 0, pastCount: 0 };
+      if (!ready) return { host: null, role: null, upcomingCount: 0, pastCount: 0, openReportsCount: 0 };
       const { data: member, error: memberErr } = await supabase
         .from("host_members")
         .select("role")
@@ -88,20 +89,25 @@ export default function HostDashboard() {
         return q;
       };
 
-      const [hostRes, upRes, pastRes] = await Promise.all([
+      const [hostRes, upRes, pastRes, reportsRes] = await Promise.all([
         supabase.from("hosts").select("id,name,logo_url,bio").eq("id", hostId!).abortSignal(signal).maybeSingle(),
         baseCount().gte("end_at", nowIso).abortSignal(signal),
         baseCount().lt("end_at", nowIso).abortSignal(signal),
+        role === "host"
+          ? supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "open").abortSignal(signal)
+          : Promise.resolve({ count: 0, error: null } as { count: number | null; error: null }),
       ]);
       if (hostRes.error) throw new Error(hostRes.error.message);
       if (upRes.error) throw new Error(upRes.error.message);
       if (pastRes.error) throw new Error(pastRes.error.message);
+      if ("error" in reportsRes && reportsRes.error) throw new Error(reportsRes.error.message);
 
       return {
         host: (hostRes.data ?? null) as Host | null,
         role,
         upcomingCount: upRes.count ?? 0,
         pastCount: pastRes.count ?? 0,
+        openReportsCount: reportsRes.count ?? 0,
       };
     },
     [ready, hostId, user?.id]
@@ -214,7 +220,18 @@ export default function HostDashboard() {
           <div className="flex flex-wrap gap-2">
             <Button render={<Link to={`/dashboard/${host.id}/edit`} />} variant="outline">Edit host</Button>
             <Button render={<Link to={`/dashboard/${host.id}/members`} />} variant="outline">Members</Button>
-            <Button render={<Link to={`/dashboard/${host.id}/moderation`} />} variant="outline">Reports</Button>
+            <Button
+              render={<Link to={`/dashboard/${host.id}/moderation`} />}
+              variant={(header?.openReportsCount ?? 0) > 0 ? "default" : "outline"}
+            >
+              <FlagIcon className="mr-1 h-4 w-4" />
+              Reports
+              {(header?.openReportsCount ?? 0) > 0 && (
+                <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-medium text-destructive-foreground">
+                  {header!.openReportsCount}
+                </span>
+              )}
+            </Button>
             <Button render={<Link to={`/dashboard/${host.id}/events/new`} />}><Plus className="mr-1 h-4 w-4" />New event</Button>
           </div>
         )}
