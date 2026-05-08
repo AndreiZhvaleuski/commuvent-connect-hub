@@ -236,7 +236,7 @@ export default function EventGalleryPage() {
       </div>
 
       {user && (
-        <Tabs value={filter} onValueChange={(v) => { setFilter(v as Filter); setPage(1); }} className="mb-4">
+        <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)} className="mb-4">
           <TabsList>
             <TabsTrigger value="published">Published</TabsTrigger>
             <TabsTrigger value="mine">Uploaded by me</TabsTrigger>
