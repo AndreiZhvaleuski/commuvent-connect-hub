@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 const PUBLIC_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/gallery/`;
 
@@ -23,6 +24,7 @@ export default function Moderation() {
   const [reports, setReports] = useState<Report[]>([]);
   const [eventsById, setEventsById] = useState<Record<string, EventLite>>({});
   const [busy, setBusy] = useState(true);
+  const [rejectFor, setRejectFor] = useState<Photo | null>(null);
   const load = async () => {
     setBusy(true);
     const { data: evs } = await supabase
@@ -146,7 +148,7 @@ export default function Moderation() {
                             <Button size="sm" className="flex-1" onClick={() => setPhotoStatus(p.id, "approved")}>
                               <Check className="w-4 h-4 mr-1" /> Approve
                             </Button>
-                            <Button size="sm" variant="outline" className="flex-1" onClick={() => setPhotoStatus(p.id, "rejected")}>
+                            <Button size="sm" variant="outline" className="flex-1" onClick={() => setRejectFor(p)}>
                               <X className="w-4 h-4 mr-1" /> Reject
                             </Button>
                           </CardContent>
@@ -192,6 +194,20 @@ export default function Moderation() {
             )}
           </TabsContent>
         </Tabs>
+
+      <ConfirmDialog
+        open={!!rejectFor}
+        onOpenChange={(o) => !o && setRejectFor(null)}
+        title="Reject this photo?"
+        description="The uploader will not be notified, and the photo will be hidden from the gallery."
+        confirmLabel="Reject"
+        destructive
+        onConfirm={async () => {
+          if (!rejectFor) return;
+          await setPhotoStatus(rejectFor.id, "rejected");
+          setRejectFor(null);
+        }}
+      />
     </main>
   );
 }
