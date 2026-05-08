@@ -88,7 +88,15 @@ export default function Tickets() {
   const doCancel = async (eventId: string) => {
     if (!confirm("Cancel this RSVP?")) return;
     const { data, error } = await supabase.functions.invoke("rsvp_cancel", { body: { event_id: eventId } });
-    if (error || data?.error) { toast.error(error?.message ?? data?.error); return; }
+    const code = (data?.error as string | undefined) ?? error?.message;
+    if (code) {
+      const msg =
+        code === "event_ended" ? "This event has ended."
+        : code === "already_checked_in" ? "You've already checked in — RSVP can't be cancelled."
+        : code;
+      toast.error(msg);
+      return;
+    }
     toast.success("RSVP cancelled");
     load();
   };
