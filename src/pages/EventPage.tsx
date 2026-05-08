@@ -103,8 +103,13 @@ export default function EventPage() {
     const next = new URLSearchParams(params); next.delete("intent"); setParams(next, { replace: true });
   }, [event, user, rsvp, params, setParams]);
 
-  if (notFound) return <><div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Event not found.</p></div></>;
-  if (busy || !event) return <><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></>;
+  if (error) return (
+    <div className="container mx-auto max-w-2xl px-4 py-12">
+      <ErrorState description={error.message} onRetry={refetch} />
+    </div>
+  );
+  if (notFound) return <div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Event not found.</p></div>;
+  if (busy || !event) return <div className="container mx-auto flex justify-center px-4 py-20"><Spinner className="size-8 text-muted-foreground" /></div>;
 
   const ended = new Date(event.end_at).getTime() < Date.now();
 
