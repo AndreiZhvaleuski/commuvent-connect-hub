@@ -91,10 +91,9 @@ export default function CheckIn() {
 
   if (loading || evLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <TopNav />
-        <div className="container py-12 text-muted-foreground">Loading…</div>
-      </div>
+      <AppLayout>
+        <div className="container mx-auto px-4 py-12 text-muted-foreground">Loading…</div>
+      </AppLayout>
     );
   }
 
@@ -102,13 +101,12 @@ export default function CheckIn() {
   if (!event) return <Navigate to="/dashboard" replace />;
   if (!access) {
     return (
-      <div className="min-h-screen bg-background">
-        <TopNav />
-        <div className="container py-12">
+      <AppLayout>
+        <div className="container mx-auto px-4 py-12">
           <h1 className="text-2xl font-bold mb-2">Not authorized</h1>
           <p className="text-muted-foreground">You must be a host or checker for this event.</p>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
