@@ -7,7 +7,7 @@ import { AuthProvider } from "@/lib/auth";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import SignIn from "./pages/SignIn.tsx";
-import { Placeholder } from "./pages/Placeholder.tsx";
+
 import HostEditor from "./pages/HostEditor.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import HostDashboard from "./pages/HostDashboard.tsx";
@@ -24,6 +24,7 @@ import EventManage from "./pages/EventManage.tsx";
 import HostMembers from "./pages/HostMembers.tsx";
 import InviteAccept from "./pages/InviteAccept.tsx";
 import ScrollToTop from "./components/scroll-to-top";
+import MyEvents from "./pages/MyEvents.tsx";
 
 const queryClient = new QueryClient();
 
@@ -43,7 +44,7 @@ const App = () => (
             <Route path="/sign-in" element={<SignIn mode="signin" />} />
             <Route path="/sign-up" element={<SignIn mode="signup" />} />
             <Route path="/tickets" element={<Tickets />} />
-            <Route path="/my-events" element={<Placeholder title="My Events" />} />
+            <Route path="/my-events" element={<MyEvents />} />
             <Route path="/become-a-host" element={<HostEditor mode="create" />} />
             <Route path="/dashboard/:hostId/edit" element={<HostEditor mode="edit" />} />
             <Route path="/dashboard" element={<Dashboard />} />

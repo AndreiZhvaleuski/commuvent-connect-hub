@@ -1,0 +1,2 @@
+revoke execute on function public.my_events(uuid[], timestamptz, timestamptz, text, text, int, int) from anon, public;
+grant execute on function public.my_events(uuid[], timestamptz, timestamptz, text, text, int, int) to authenticated;
