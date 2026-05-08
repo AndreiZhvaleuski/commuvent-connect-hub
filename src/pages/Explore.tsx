@@ -207,6 +207,7 @@ export default function Explore() {
             ))}
           </div>
         )}
+        <ListPagination page={safePage} totalPages={totalPages} onPageChange={setPage} />
       </section>
     </>
   );
