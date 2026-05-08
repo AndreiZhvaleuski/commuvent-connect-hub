@@ -334,6 +334,45 @@ export default function EventPage() {
         </div>
       </div>
 
+      <Dialog open={reportOpen} onOpenChange={(o) => { setReportOpen(o); if (!o) setReportReason(""); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Report this event</DialogTitle>
+            <DialogDescription>The host will review your report.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="event-report-reason">Reason</Label>
+            <Textarea
+              id="event-report-reason"
+              rows={4}
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              placeholder="What's wrong with this event?"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReportOpen(false)}>Cancel</Button>
+            <Button
+              disabled={reporting}
+              onClick={async () => {
+                if (!user || !event) return;
+                if (reportReason.trim().length < 5) { toast.error("Please describe the issue"); return; }
+                setReporting(true);
+                const { error } = await supabase.from("reports").insert({
+                  target_type: "event", target_id: event.id, reason: reportReason.trim(), reporter_id: user.id,
+                });
+                setReporting(false);
+                if (error) { toast.error(error.message); return; }
+                toast.success("Report submitted");
+                setReportOpen(false); setReportReason("");
+              }}
+            >
+              {reporting ? "Submitting…" : "Submit report"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
           <DialogHeader>
