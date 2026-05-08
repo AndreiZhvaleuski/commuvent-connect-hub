@@ -307,7 +307,11 @@ export default function EventPage() {
                       <p className="font-mono text-xs text-muted-foreground mt-1">Code: {activeRsvp.code}</p>
                     </div>
                     <Button render={<Link to="/tickets" />} variant="outline" className="w-full">View ticket</Button>
-                    <Button onClick={onCancel} disabled={acting} variant="ghost" className="w-full">Cancel RSVP</Button>
+                    {checkedIn ? (
+                      <p className="text-xs text-muted-foreground text-center">Checked in — RSVP can't be cancelled.</p>
+                    ) : (
+                      <Button onClick={onCancel} disabled={acting} variant="ghost" className="w-full">Cancel RSVP</Button>
+                    )}
                   </div>
                 ) : isFull ? (
                   <Button onClick={() => (user ? setConfirmOpen(true) : requireAuth("rsvp"))} disabled={acting} className="w-full" variant="secondary">Join waitlist</Button>
