@@ -23,7 +23,13 @@ export default function CheckIn() {
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [counters, setCounters] = useState({ going: 0, checkedIn: 0 });
+  const [now, setNow] = useState(() => Date.now());
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   const { data: event, isLoading: evLoading } = useQuery({
     queryKey: ["checkin-event", eventId],
