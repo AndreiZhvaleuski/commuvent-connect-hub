@@ -8,6 +8,9 @@ import {
   QrCodeIcon as QrCode,
   ArrowSquareOutIcon as ExternalLink,
   GearIcon as Settings,
+  UsersIcon as Users,
+  ClockIcon as Clock,
+  CheckCircleIcon as CheckCircle2,
 } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
