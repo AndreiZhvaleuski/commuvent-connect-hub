@@ -52,7 +52,7 @@ export default function HostMembers() {
     const userIds = (hm ?? []).map((m: any) => m.user_id);
     let profiles: any[] = [];
     if (userIds.length) {
-      const { data: profs } = await supabase.from("profiles").select("id,display_name,avatar_url,email").in("id", userIds);
+      const { data: profs } = await supabase.from("profiles").select("id,display_name,avatar_url").in("id", userIds);
       profiles = profs ?? [];
     }
     setMembers(((hm ?? []) as any[]).map((m) => ({
