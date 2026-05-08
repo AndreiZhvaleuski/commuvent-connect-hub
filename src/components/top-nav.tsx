@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { UsersIcon as Users, ListIcon as Menu } from "@phosphor-icons/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup,
@@ -7,6 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useAuth } from "@/lib/auth";
+import { userAvatarUrl } from "@/lib/avatar";
+import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "./theme-toggle";
 
 const links = [
@@ -19,6 +23,26 @@ const links = [
 export function TopNav() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [profile, setProfile] = useState<{ id: string; display_name: string | null; avatar_url: string | null } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!user?.id) return;
+
+    supabase
+      .from("profiles")
+      .select("id,display_name,avatar_url")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled) setProfile(data ?? null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
@@ -45,14 +69,19 @@ export function TopNav() {
           <ThemeToggle />
           {user ? (
             (() => {
-              const meta = (user.user_metadata ?? {}) as { first_name?: string; last_name?: string; display_name?: string };
+              const profileForUser = profile?.id === user.id ? profile : null;
+              const meta = (user.user_metadata ?? {}) as { first_name?: string; last_name?: string; display_name?: string; avatar_url?: string };
               const first = meta.first_name?.trim() ?? "";
               const last = meta.last_name?.trim() ?? "";
               const fullName = [first, last].filter(Boolean).join(" ");
-              const displayName = meta.display_name?.trim() || fullName || user.email?.split("@")[0] || "Account";
-              const initials = (first || last)
-                ? `${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase()
-                : (user.email?.[0] ?? "U").toUpperCase();
+              const displayName = profileForUser?.display_name?.trim() || meta.display_name?.trim() || fullName || user.email?.split("@")[0] || "Account";
+              const initials = displayName
+                .split(/\s+/)
+                .map((part) => part[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase() || (user.email?.[0] ?? "U").toUpperCase();
+              const avatarUrl = userAvatarUrl({ id: user.id, avatar_url: profileForUser?.avatar_url || meta.avatar_url });
               return (
                 <DropdownMenu>
                   <DropdownMenuTrigger
@@ -65,9 +94,10 @@ export function TopNav() {
                     }
                   >
                     <span className="hidden text-sm font-medium text-foreground sm:inline">{displayName}</span>
-                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-                      {initials}
-                    </span>
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src={avatarUrl} alt={displayName} />
+                      <AvatarFallback className="bg-primary text-xs font-semibold text-primary-foreground">{initials}</AvatarFallback>
+                    </Avatar>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="min-w-56">
                     <DropdownMenuGroup>
