@@ -173,7 +173,14 @@ export default function EventGalleryPage() {
     const { error } = await supabase.from("reports").insert({
       target_type: "photo", target_id: reportFor, reason: reason.trim(), reporter_id: user.id,
     });
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      if (error.code === "23505") {
+        toast.error("You already have a pending report on this photo. The host hasn't reviewed it yet.");
+      } else {
+        toast.error(error.message);
+      }
+      return;
+    }
     toast.success("Report submitted");
     setReportFor(null); setReason("");
   };
