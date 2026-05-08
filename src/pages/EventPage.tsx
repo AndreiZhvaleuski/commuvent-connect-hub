@@ -370,7 +370,15 @@ export default function EventPage() {
                   target_type: "event", target_id: event.id, reason: reportReason.trim(), reporter_id: user.id,
                 });
                 setReporting(false);
-                if (error) { toast.error(error.message); return; }
+                if (error) {
+                  if (error.code === "23505") {
+                    toast.error("You already have a pending report on this event. The host hasn't reviewed it yet.");
+                    setReportOpen(false); setReportReason("");
+                  } else {
+                    toast.error(error.message);
+                  }
+                  return;
+                }
                 toast.success("Report submitted");
                 setReportOpen(false); setReportReason("");
               }}
