@@ -223,8 +223,8 @@ export default function Tickets() {
         {error ? (
           <ErrorState
             title="Couldn't load tickets"
-            description={error}
-            onRetry={reload}
+            description={error.message}
+            onRetry={refetch}
           />
         ) : busy && hasAny === null ? (
           <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
