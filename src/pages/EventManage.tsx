@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowSquareOutIcon as ExternalLink, ArrowLeftIcon as ArrowLeft } from "@phosphor-icons/react";
+import { ArrowSquareOutIcon as ExternalLink, ArrowLeftIcon as ArrowLeft, FlagIcon } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ export default function EventManage() {
   const [host, setHost] = useState<Host | null>(null);
   const [event, setEvent] = useState<ManagedEvent | null>(null);
   const [stat, setStat] = useState<EventStat | undefined>(undefined);
+  const [openReports, setOpenReports] = useState(0);
   const [busy, setBusy] = useState(true);
   const [denied, setDenied] = useState(false);
 
@@ -27,14 +28,23 @@ export default function EventManage() {
       setBusy(true);
       const { data: hm } = await supabase.from("host_members").select("role").eq("host_id", hostId).eq("user_id", user.id).maybeSingle();
       if (!hm || hm.role !== "host") { setDenied(true); setBusy(false); return; }
-      const [{ data: h }, { data: ev }, { data: stats }] = await Promise.all([
+      const [{ data: h }, { data: ev }, { data: stats }, { data: photoIds }] = await Promise.all([
         supabase.from("hosts").select("id,name,logo_url").eq("id", hostId).maybeSingle(),
         supabase.from("events").select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url,time_zone").eq("id", eventId).maybeSingle(),
         supabase.rpc("event_stats", { p_host_id: hostId }),
+        supabase.from("gallery_photos").select("id").eq("event_id", eventId),
       ]);
       setHost((h ?? null) as Host | null);
       setEvent((ev ?? null) as ManagedEvent | null);
       setStat(((stats ?? []) as EventStat[]).find((s) => s.event_id === eventId));
+      const photoIdList = (photoIds ?? []).map((p: { id: string }) => p.id);
+      const [eventReports, photoReports] = await Promise.all([
+        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "open").eq("target_type", "event").eq("target_id", eventId),
+        photoIdList.length > 0
+          ? supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "open").eq("target_type", "photo").in("target_id", photoIdList)
+          : Promise.resolve({ count: 0 } as { count: number | null }),
+      ]);
+      setOpenReports((eventReports.count ?? 0) + (photoReports.count ?? 0));
       setBusy(false);
     })();
   }, [hostId, eventId, user, loading, navigate]);
@@ -61,9 +71,24 @@ export default function EventManage() {
               <p className="text-sm text-muted-foreground">Manage event</p>
             </div>
           </Link>
-          <Link to={`/e/${event.id}`} className="text-sm text-muted-foreground inline-flex items-center gap-1 hover:text-foreground">
-            View public page <ExternalLink className="h-3 w-3" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Button
+              render={<Link to={`/dashboard/${host.id}/moderation`} />}
+              variant={openReports > 0 ? "default" : "outline"}
+              size="sm"
+            >
+              <FlagIcon className="mr-1 h-4 w-4" />
+              Reports
+              {openReports > 0 && (
+                <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-medium text-destructive-foreground">
+                  {openReports}
+                </span>
+              )}
+            </Button>
+            <Link to={`/e/${event.id}`} className="text-sm text-muted-foreground inline-flex items-center gap-1 hover:text-foreground">
+              View public page <ExternalLink className="h-3 w-3" />
+            </Link>
+          </div>
         </div>
 
         <EventManagementCard event={event} stat={stat} hostId={host.id} showManage={false} />
