@@ -489,6 +489,13 @@ export type Database = {
           waitlist_count: number
         }[]
       }
+      report_reporter_emails: {
+        Args: { p_report_ids: string[] }
+        Returns: {
+          email: string
+          report_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
