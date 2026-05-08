@@ -75,7 +75,12 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
       const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/seed_demo`;
       const r = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-seed-secret": seedSecret.trim() },
+        headers: {
+          "Content-Type": "application/json",
+          "x-seed-secret": seedSecret.trim(),
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
         body: "{}",
       });
       const data = await r.json().catch(() => ({}));
