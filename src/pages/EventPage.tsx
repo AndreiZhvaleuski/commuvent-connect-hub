@@ -322,7 +322,7 @@ export default function EventPage() {
                       <p className="font-medium">
                         {activeRsvp.status === "going" ? "You're going" : `On waitlist (#${activeRsvp.position ?? "?"})`}
                       </p>
-                      <p className="font-mono text-xs text-muted-foreground mt-1">Code: {activeRsvp.code}</p>
+                      
                     </div>
                     <Button render={<Link to="/tickets" />} variant="outline" className="w-full">View ticket</Button>
                     {checkedIn ? (
