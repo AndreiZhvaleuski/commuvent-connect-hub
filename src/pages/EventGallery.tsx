@@ -25,7 +25,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/empty-state";
 
@@ -289,10 +289,11 @@ export default function EventGalleryPage() {
             return (
               <>
                 {/* Mobile: dropdown */}
-                <div className="sm:hidden">
+                <div className="sm:hidden space-y-1.5">
+                  <Label htmlFor="gallery-filter" className="text-xs text-muted-foreground">Show</Label>
                   <Select value={filter} onValueChange={(v) => setFilter(v as Filter)}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
+                    <SelectTrigger id="gallery-filter" className="w-full">
+                      {options.find((o) => o.value === filter)?.label ?? "Select…"}
                     </SelectTrigger>
                     <SelectContent>
                       {options.map((o) => (
