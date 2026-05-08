@@ -116,11 +116,9 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
               </CardDescription>
             </div>
             <Dialog open={demoOpen} onOpenChange={setDemoOpen}>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Demo accounts" className="shrink-0">
-                  <Info className="h-5 w-5" />
-                </Button>
-              </DialogTrigger>
+              <Button variant="ghost" size="icon" aria-label="Demo accounts" className="shrink-0" onClick={() => setDemoOpen(true)}>
+                <InfoIcon className="h-5 w-5" />
+              </Button>
               <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Demo accounts</DialogTitle>
