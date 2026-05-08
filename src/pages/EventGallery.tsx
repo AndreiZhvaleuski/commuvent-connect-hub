@@ -216,7 +216,7 @@ export default function EventGalleryPage() {
         </Tabs>
       )}
 
-      {user && (
+      {user && filter === "pending" && (
         <p className="mb-4 text-xs text-muted-foreground">
           Up to 5 pending uploads per event · max 5 MB · JPG, PNG, WebP, GIF, HEIC
         </p>
