@@ -306,7 +306,7 @@ export default function EventGalleryPage() {
         />
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+          <div className={`grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 ${loading ? "opacity-50 transition-opacity" : ""}`}>
             {photos.map((p, i) => {
               const isOwner = user?.id === p.user_id;
               const canDelete = isOwner && p.status === "pending";
