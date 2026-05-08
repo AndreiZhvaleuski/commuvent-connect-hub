@@ -151,7 +151,7 @@ export default function Moderation() {
     }
     const { error } = await supabase
       .from("reports")
-      .update({ status: action === "hide" ? "actioned" : "dismissed" })
+      .update({ status: action === "hide" ? "hidden" : "dismissed" })
       .eq("id", report.id);
     setResolving(false);
     if (error) { toast.error(error.message); return; }
