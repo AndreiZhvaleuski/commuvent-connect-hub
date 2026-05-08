@@ -163,8 +163,17 @@ function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; on
         <div className="min-w-0">
           <div className="mb-1 flex flex-wrap items-center gap-2">
             {row.status === "going" ? <Badge>Going</Badge> : <Badge variant="secondary">Waitlist · #{row.position ?? "?"}</Badge>}
-            {checkedIn && <Badge variant="outline">Checked in</Badge>}
-            {pastView && <Badge variant="outline">Ended</Badge>}
+            {pastView ? (
+              checkedIn ? (
+                <Badge className="bg-primary/15 text-foreground border-primary/30" variant="outline">✓ Attended</Badge>
+              ) : row.status === "going" ? (
+                <Badge variant="outline">Did not check in</Badge>
+              ) : (
+                <Badge variant="outline">Ended</Badge>
+              )
+            ) : (
+              checkedIn && <Badge variant="outline">Checked in</Badge>
+            )}
           </div>
           <CardTitle className="truncate">
             <Link to={`/e/${e.id}`} className="hover:underline inline-flex items-center gap-1">
