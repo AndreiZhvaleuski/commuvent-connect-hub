@@ -88,21 +88,23 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
     }
   };
 
-  const Section = ({ title, accounts }: { title: string; accounts: DemoAccount[] }) => (
-    <div className="space-y-2">
-      <h4 className="text-sm font-semibold">{title}</h4>
-      <div className="space-y-1">
-        {accounts.map((a) => (
-          <div key={a.email} className="flex items-center justify-between gap-2 rounded-md border bg-muted/30 px-2 py-1.5 text-sm">
-            <div className="min-w-0">
-              <div className="truncate font-medium">{a.name}{a.detail ? <span className="text-muted-foreground"> · {a.detail}</span> : null}</div>
-              <div className="truncate text-xs text-muted-foreground">{a.email}</div>
+  const Section = ({ value, title, accounts }: { value: string; title: string; accounts: DemoAccount[] }) => (
+    <AccordionItem value={value}>
+      <AccordionTrigger>{title} <span className="ml-2 text-xs font-normal text-muted-foreground">({accounts.length})</span></AccordionTrigger>
+      <AccordionContent>
+        <div className="space-y-1">
+          {accounts.map((a) => (
+            <div key={a.email} className="flex items-center justify-between gap-2 rounded-md border bg-muted/30 px-2 py-1.5 text-sm">
+              <div className="min-w-0">
+                <div className="truncate font-medium">{a.name}{a.detail ? <span className="text-muted-foreground"> · {a.detail}</span> : null}</div>
+                <div className="truncate text-xs text-muted-foreground">{a.email}</div>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => useAccount(a)}>Use</Button>
             </div>
-            <Button size="sm" variant="outline" onClick={() => useAccount(a)}>Use</Button>
-          </div>
-        ))}
-      </div>
-    </div>
+          ))}
+        </div>
+      </AccordionContent>
+    </AccordionItem>
   );
 
   return (
