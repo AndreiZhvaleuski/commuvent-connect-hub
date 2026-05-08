@@ -221,6 +221,16 @@ export default function Moderation() {
           setRejectFor(null);
         }}
       />
+
+      <Lightbox
+        open={lightboxIndex !== null}
+        index={lightboxIndex ?? 0}
+        close={() => setLightboxIndex(null)}
+        slides={photos.map((p) => ({ src: PUBLIC_BASE + p.storage_path, alt: "Pending submission" }))}
+        plugins={[Zoom, Counter]}
+        on={{ view: ({ index }) => setLightboxIndex(index) }}
+        zoom={{ maxZoomPixelRatio: 4, scrollToZoom: true }}
+      />
     </main>
   );
 }
