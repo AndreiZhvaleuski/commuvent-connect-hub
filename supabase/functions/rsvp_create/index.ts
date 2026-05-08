@@ -22,6 +22,9 @@ Deno.serve(async (req) => {
     }
     if (ev.status !== "published") return json({ error: "event_not_published" }, 400);
 
+    const { data: hm } = await db.from("host_members").select("role").eq("host_id", ev.host_id).eq("user_id", user.id).maybeSingle();
+    if (hm) return json({ error: "host_members_cannot_rsvp" }, 403);
+
     const { data: existing } = await db.from("rsvps").select("*").eq("event_id", event_id).eq("user_id", user.id).maybeSingle();
     if (existing && existing.status !== "cancelled") return json({ rsvp: existing });
 
