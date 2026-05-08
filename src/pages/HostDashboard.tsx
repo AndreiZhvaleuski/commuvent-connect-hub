@@ -214,6 +214,7 @@ export default function HostDashboard() {
           <div className="flex flex-wrap gap-2">
             <Button render={<Link to={`/dashboard/${host.id}/edit`} />} variant="outline">Edit host</Button>
             <Button render={<Link to={`/dashboard/${host.id}/members`} />} variant="outline">Members</Button>
+            <Button render={<Link to={`/dashboard/${host.id}/moderation`} />} variant="outline">Reports</Button>
             <Button render={<Link to={`/dashboard/${host.id}/events/new`} />}><Plus className="mr-1 h-4 w-4" />New event</Button>
           </div>
         )}
