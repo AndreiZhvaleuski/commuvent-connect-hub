@@ -195,7 +195,7 @@ export default function Tickets() {
         return;
       }
       toast.success("RSVP cancelled");
-      reload();
+      refetch();
     } finally {
       setCancelling(false);
       setConfirmCancelEventId(null);
