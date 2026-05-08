@@ -49,13 +49,8 @@ export default function Explore() {
   const setMode = (v: LocationMode) => updateParam("type", v === "any" ? null : v);
   const clearAll = () => setSearchParams({}, { replace: true });
 
-  const [events, setEvents] = useState<Ev[]>([]);
-  const [busy, setBusy] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    const t = setTimeout(async () => {
-      setBusy(true);
+  const { data: events, loading: busy, error, refetch } = useAsyncResource<Ev[]>(
+    async (signal) => {
       let qb = supabase.from("events")
         .select("id,title,description,cover_image_url,start_at,end_at,time_zone,venue_address,online_url")
         .eq("status", "published").eq("visibility", "public")
@@ -76,13 +71,16 @@ export default function Explore() {
       if (mode === "online") qb = qb.not("online_url", "is", null);
       else if (mode === "in_person") qb = qb.not("venue_address", "is", null);
 
-      const { data } = await qb;
-      if (!cancelled) { setEvents((data ?? []) as Ev[]); setBusy(false); }
-    }, 250);
-    return () => { cancelled = true; clearTimeout(t); };
-  }, [q, from, to, includePast, mode]);
+      const { data, error } = await qb.abortSignal(signal);
+      if (error) throw new Error(error.message);
+      return (data ?? []) as Ev[];
+    },
+    [q, from, to, includePast, mode],
+    { debounceMs: 250, keepPreviousData: true }
+  );
 
-  
+  const list = events ?? [];
+  const hasFilter = !!(q || from || to || includePast || mode !== "any");
 
   return (
     <AppLayout>
