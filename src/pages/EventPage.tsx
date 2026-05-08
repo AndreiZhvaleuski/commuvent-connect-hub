@@ -241,7 +241,7 @@ export default function EventPage() {
               </Card>
             )}
 
-            <div className="mt-8 flex items-center justify-between gap-2">
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-2">
               <Button variant="outline" size="sm" onClick={async () => {
                 const shareUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-preview?type=event&id=${event.id}`;
                 await navigator.clipboard.writeText(shareUrl);
@@ -249,6 +249,11 @@ export default function EventPage() {
               }}>
                 <ShareIcon className="mr-1 h-4 w-4" />Share this event
               </Button>
+              {user && !canCheckIn && (
+                <Button variant="ghost" size="sm" onClick={() => setReportOpen(true)}>
+                  <FlagIcon className="mr-1 h-4 w-4" />Report event
+                </Button>
+              )}
             </div>
 
             <EventGallery eventId={event.id} />
