@@ -210,6 +210,22 @@ export default function Moderation() {
                     </div>
                   </div>
 
+                  {photo && (
+                    <a
+                      href={PUBLIC_BASE + photo.storage_path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block overflow-hidden rounded-md border bg-muted"
+                    >
+                      <img
+                        src={PUBLIC_BASE + photo.storage_path}
+                        alt="Reported photo"
+                        className="max-h-64 w-full object-contain bg-black/5"
+                        loading="lazy"
+                      />
+                    </a>
+                  )}
+
                   {ev && (
                     <Link
                       to={`/e/${ev.id}`}
