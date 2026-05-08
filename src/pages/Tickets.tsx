@@ -162,10 +162,8 @@ export default function Tickets() {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [user?.id]);
 
-  // When switching tabs, set sensible default sort + reset page.
   const changeView = (v: View) => {
     setView(v);
-    setSortDir(v === "upcoming" ? "asc" : "desc");
     setPage(1);
   };
 
