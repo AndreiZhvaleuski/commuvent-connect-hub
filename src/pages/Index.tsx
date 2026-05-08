@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRightIcon as ArrowRight, UsersIcon as Users } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
 import { PublicEventCard } from "@/components/public-event-card";
 import { EmptyState } from "@/components/empty-state";
+import { ErrorState } from "@/components/error-state";
+import { useAsyncResource } from "@/hooks/use-async-resource";
+
 type Ev = {
   id: string; title: string; description: string | null;
   cover_image_url: string | null; start_at: string; end_at: string; time_zone: string | null;
@@ -14,22 +16,23 @@ type Ev = {
 };
 
 export default function Index() {
-  const [events, setEvents] = useState<Ev[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase
+  const { data: events, loading, error, refetch } = useAsyncResource<Ev[]>(
+    async (signal) => {
+      const { data, error } = await supabase
         .from("events")
         .select("id,title,description,cover_image_url,start_at,end_at,time_zone,venue_address,online_url")
         .eq("status", "published").eq("visibility", "public")
         .gte("end_at", new Date().toISOString())
         .order("start_at", { ascending: true })
-        .limit(12);
-      setEvents((data ?? []) as Ev[]);
-      setLoading(false);
-    })();
-  }, []);
+        .limit(3)
+        .abortSignal(signal);
+      if (error) throw new Error(error.message);
+      return (data ?? []) as Ev[];
+    },
+    []
+  );
+
+  const list = events ?? [];
 
   return (
     <><section className="relative overflow-hidden border-b">
@@ -61,13 +64,15 @@ export default function Index() {
           <Button render={<Link to="/explore" />} variant="ghost">See all</Button>
         </div>
 
-        {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i} className="animate-pulse"><CardContent className="h-48" /></Card>
-            ))}
-          </div>
-        ) : events.length === 0 ? (
+        {error ? (
+          <ErrorState
+            title="Couldn't load events"
+            description={error.message}
+            onRetry={refetch}
+          />
+        ) : loading ? (
+          <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
+        ) : list.length === 0 ? (
           <EmptyState
             icon={<Users className="h-10 w-10" />}
             title="No upcoming events yet"
@@ -76,7 +81,7 @@ export default function Index() {
           />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {events.map((e) => (
+            {list.map((e) => (
               <PublicEventCard key={e.id} event={e} />
             ))}
           </div>
