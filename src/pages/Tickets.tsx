@@ -26,7 +26,7 @@ import { buildICS, downloadICS, googleCalendarUrl } from "@/lib/calendar";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ErrorState } from "@/components/error-state";
-import { SkeletonGrid } from "@/components/skeleton-grid";
+import { Spinner } from "@/components/ui/spinner";
 
 type Row = {
   id: string;
@@ -222,7 +222,7 @@ export default function Tickets() {
             onRetry={reload}
           />
         ) : busy && hasAny === null ? (
-          <SkeletonGrid count={3} className="space-y-4" itemHeightClass="h-48" />
+          <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
         ) : hasAny === false ? (
           <Card>
             <CardContent className="py-16 text-center">
@@ -257,7 +257,7 @@ export default function Tickets() {
 
             <div className="pt-4 space-y-4">
               {busy ? (
-                <SkeletonGrid count={3} className="space-y-4" itemHeightClass="h-48" />
+                <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>
               ) : rows.length === 0 ? (
                 <Card><CardContent className="py-12 text-center text-muted-foreground">
                   {view === "upcoming" ? "No upcoming tickets." : "No past tickets."}
