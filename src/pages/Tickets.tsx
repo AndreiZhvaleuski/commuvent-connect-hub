@@ -205,7 +205,7 @@ export default function Tickets() {
   );
 }
 
-function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; onCancel: () => void; pastView?: boolean }) {
+function TicketCard({ row, qr, onCancel, pastView, hidden, onToggleHidden }: { row: Row; qr?: string; onCancel: () => void; pastView?: boolean; hidden?: boolean; onToggleHidden?: () => void }) {
   const e = row.events;
   if (!e) return null;
   const checkedIn = (row.check_ins ?? []).some((c) => !c.undone);
@@ -256,19 +256,29 @@ function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; on
         <div className="grid gap-4 sm:grid-cols-[160px_1fr] items-center">
           {row.status === "going" ? (
             qr ? (
-              <button
-                type="button"
-                onClick={() => setZoomed(true)}
-                aria-label="Enlarge QR code"
-                className="group flex flex-col items-center gap-1 focus:outline-none"
-              >
-                <div className="relative h-40 w-40 rounded-md border bg-card p-2 transition group-hover:border-primary group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
-                  <img src={qr} alt={`QR code ${row.code}`} className="h-full w-full" />
-                </div>
-                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground group-hover:text-foreground">
-                  <ZoomIn className="h-3 w-3" /> Tap to enlarge
-                </span>
-              </button>
+              <div className="flex flex-col items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => !hidden && setZoomed(true)}
+                  aria-label={hidden ? "Hidden QR code" : "Enlarge QR code"}
+                  disabled={hidden}
+                  className="group relative flex focus:outline-none"
+                >
+                  <div className="relative h-40 w-40 rounded-md border bg-card p-2 transition group-hover:border-primary group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
+                    <img src={qr} alt={`QR code ${row.code}`} className={`h-full w-full transition ${hidden ? "blur-md" : ""}`} />
+                    {hidden && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <EyeOff className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                </button>
+                {!hidden && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                    <ZoomIn className="h-3 w-3" /> Tap to enlarge
+                  </span>
+                )}
+              </div>
             ) : (
               <div className="h-40 w-40 animate-pulse rounded-md bg-muted" />
             )
@@ -281,8 +291,17 @@ function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; on
           )}
           <div className="space-y-3">
             <div>
-              <p className="text-xs text-muted-foreground">Ticket code</p>
-              <p className="font-mono text-lg tracking-wider">{row.code}</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs text-muted-foreground">Ticket code</p>
+                {onToggleHidden && row.status === "going" && (
+                  <Button size="sm" variant="ghost" className="h-7 px-2" onClick={onToggleHidden} aria-label={hidden ? "Show ticket details" : "Hide ticket details"}>
+                    {hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  </Button>
+                )}
+              </div>
+              <p className={`font-mono text-lg tracking-wider transition ${hidden ? "select-none blur-sm" : ""}`}>
+                {hidden ? "••••••••" : row.code}
+              </p>
             </div>
             {!pastView && (
               <div className="flex flex-wrap gap-2">
