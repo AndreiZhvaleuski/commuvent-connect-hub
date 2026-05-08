@@ -54,6 +54,7 @@ export default function Explore() {
   const setTo = (v: string) => updateParam("to", v);
   const setIncludePast = (v: boolean) => updateParam("past", v ? "1" : null);
   const setMode = (v: LocationMode) => updateParam("type", v === "any" ? null : v);
+  const setSortDir = (v: SortDir) => updateParam("sort", v === "desc" ? "desc" : null);
   const clearAll = () => setSearchParams({}, { replace: true });
 
   const [page, setPage] = useState(1);
