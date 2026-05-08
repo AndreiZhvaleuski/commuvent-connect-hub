@@ -72,7 +72,7 @@ export default function EventGalleryPage() {
     [eventId]
   );
 
-  const { data, loading, refetch } = useAsyncResource<{ photos: Photo[]; total: number }>(
+  const { data, loading, error, refetch } = useAsyncResource<{ photos: Photo[]; total: number }>(
     async (signal) => {
       const from = (page - 1) * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
