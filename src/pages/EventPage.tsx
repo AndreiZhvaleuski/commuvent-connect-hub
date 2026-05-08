@@ -42,8 +42,6 @@ export default function EventPage() {
   const [params, setParams] = useSearchParams();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [acting, setActing] = useState(false);
-  const [reportOpen, setReportOpen] = useState(false);
-  const [reportReason, setReportReason] = useState("");
   const [liveGoing, setLiveGoing] = useState<number | null>(null);
 
   const userId = user?.id ?? null;
