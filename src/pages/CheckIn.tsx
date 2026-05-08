@@ -278,35 +278,6 @@ export default function CheckIn() {
             </Button>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Enter ticket code</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={submit} className="space-y-3">
-              <Input
-                ref={inputRef}
-                autoFocus
-                value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase())}
-                placeholder="e.g. AB12CD"
-                className="h-16 text-2xl tracking-widest text-center font-mono uppercase"
-                aria-label="Ticket code"
-                inputMode="text"
-                autoCapitalize="characters"
-                autoCorrect="off"
-                spellCheck={false}
-              />
-              <Button type="submit" size="lg" className="w-full h-14 text-lg" disabled={!code.trim() || submitting}>
-                {submitting ? "Checking in…" : "Check in"}
-              </Button>
-            </form>
-            <Button variant="outline" className="w-full mt-3 h-12" onClick={undo}>
-              <Undo2 className="w-4 h-4 mr-2" /> Undo last scan
-            </Button>
-          </CardContent>
-        </Card>
       </div>
     </>
   );
