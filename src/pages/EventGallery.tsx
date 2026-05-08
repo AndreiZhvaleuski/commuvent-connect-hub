@@ -80,7 +80,7 @@ export default function EventGalleryPage() {
         .from("gallery_photos")
         .select("id,storage_path,user_id,status,created_at", { count: "exact" })
         .eq("event_id", eventId)
-        .order("created_at", { ascending: false })
+        .order("created_at", { ascending: true })
         .abortSignal(signal)
         .range(from, to);
       if (error) throw new Error(error.message);
