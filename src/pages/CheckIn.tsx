@@ -8,6 +8,9 @@ import {
   QrCodeIcon as QrCode,
   ArrowSquareOutIcon as ExternalLink,
   GearIcon as Settings,
+  UsersIcon as Users,
+  ClockIcon as Clock,
+  CheckCircleIcon as CheckCircle2,
 } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -22,7 +25,7 @@ export default function CheckIn() {
   const { user, loading } = useAuth();
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [counters, setCounters] = useState({ going: 0, checkedIn: 0 });
+  const [counters, setCounters] = useState({ going: 0, waitlist: 0, checkedIn: 0 });
   const [now, setNow] = useState(() => Date.now());
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -64,7 +67,7 @@ export default function CheckIn() {
   const refreshCounters = useMemo(
     () => async () => {
       if (!eventId) return;
-      const [{ count: going }, { count: checkedIn }] = await Promise.all([
+      const [{ count: going }, { count: waitlist }, { count: checkedIn }] = await Promise.all([
         supabase
           .from("rsvps")
           .select("id", { count: "exact", head: true })
@@ -72,12 +75,18 @@ export default function CheckIn() {
           .eq("status", "going")
           .is("cancelled_at", null),
         supabase
+          .from("rsvps")
+          .select("id", { count: "exact", head: true })
+          .eq("event_id", eventId)
+          .eq("status", "waitlist")
+          .is("cancelled_at", null),
+        supabase
           .from("check_ins")
           .select("id", { count: "exact", head: true })
           .eq("event_id", eventId)
           .eq("undone", false),
       ]);
-      setCounters({ going: going ?? 0, checkedIn: checkedIn ?? 0 });
+      setCounters({ going: going ?? 0, waitlist: waitlist ?? 0, checkedIn: checkedIn ?? 0 });
     },
     [eventId]
   );
@@ -116,7 +125,7 @@ export default function CheckIn() {
     );
   }
 
-  const remaining = Math.max(0, (event.capacity || 0) - counters.checkedIn);
+  const capacitySuffix = event.capacity ? `/ ${event.capacity}` : "";
 
   async function submit(e?: React.FormEvent) {
     e?.preventDefault();
@@ -194,10 +203,10 @@ export default function CheckIn() {
           )}
         </div>
 
-        <div className="grid grid-cols-3 gap-2 sm:gap-3" aria-live="polite">
-          <Counter label="Going" value={counters.going} />
-          <Counter label="Checked-in" value={counters.checkedIn} highlight />
-          <Counter label="Remaining" value={remaining} />
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3" aria-live="polite">
+          <Counter label="Going" value={counters.going} icon={<Users className="h-4 w-4" />} suffix={capacitySuffix} />
+          <Counter label="Waitlist" value={counters.waitlist} icon={<Clock className="h-4 w-4" />} />
+          <Counter label="Checked-in" value={counters.checkedIn} icon={<CheckCircle2 className="h-4 w-4" />} highlight />
         </div>
 
         <Card>
@@ -254,14 +263,17 @@ export default function CheckIn() {
   );
 }
 
-function Counter({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
+function Counter({ label, value, icon, suffix, highlight }: { label: string; value: number; icon: React.ReactNode; suffix?: string; highlight?: boolean }) {
   return (
-    <Card className={highlight ? "border-primary" : undefined}>
-      <CardContent className="p-3 sm:p-4 text-center">
-        <div className="text-[10px] sm:text-xs uppercase tracking-wide text-muted-foreground">{label}</div>
-        <div className={`text-2xl sm:text-3xl font-bold ${highlight ? "text-primary" : ""}`}>{value}</div>
-      </CardContent>
-    </Card>
+    <div className={`rounded-lg border bg-card p-3 ${highlight ? "border-primary" : ""}`}>
+      <div className="text-xs text-muted-foreground flex items-center gap-1">
+        <span className="shrink-0">{icon}</span>
+        <span className="truncate">{label}</span>
+      </div>
+      <div className={`mt-1 text-xl font-semibold tabular-nums ${highlight ? "text-primary" : ""}`}>
+        {value}{suffix && <span className="text-sm font-normal text-muted-foreground ml-1">{suffix}</span>}
+      </div>
+    </div>
   );
 }
 
