@@ -13,13 +13,14 @@ const PREVIEW_COUNT = 6;
 
 export function EventGallery({ eventId }: { eventId: string }) {
   const { data, loading } = useAsyncResource<{ photos: Photo[]; total: number }>(
-    async () => {
+    async (signal) => {
       const { data: rows, count } = await supabase
         .from("gallery_photos")
         .select("id,storage_path", { count: "exact" })
         .eq("event_id", eventId)
         .eq("status", "approved")
         .order("created_at", { ascending: false })
+        .abortSignal(signal)
         .limit(PREVIEW_COUNT);
       return { photos: (rows ?? []) as Photo[], total: count ?? 0 };
     },
