@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import {
   Pagination,
   PaginationContent,
@@ -162,10 +162,8 @@ export default function Tickets() {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [user?.id]);
 
-  // When switching tabs, set sensible default sort + reset page.
   const changeView = (v: View) => {
     setView(v);
-    setSortDir(v === "upcoming" ? "asc" : "desc");
     setPage(1);
   };
 
@@ -246,18 +244,12 @@ export default function Tickets() {
                   <TabsTrigger value="past">Past ({counts.past})</TabsTrigger>
                 </TabsList>
               </Tabs>
-              <div className="flex items-center gap-2">
-                <Label htmlFor="sort-dir" className="text-xs text-muted-foreground">Sort</Label>
-                <Select value={sortDir} onValueChange={(v) => { setSortDir(v as SortDir); setPage(1); }}>
-                  <SelectTrigger id="sort-dir" className="h-9 w-[180px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="asc">{view === "upcoming" ? "Nearest first" : "Oldest first"}</SelectItem>
-                    <SelectItem value="desc">{view === "upcoming" ? "Furthest first" : "Newest first"}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <Tabs value={sortDir} onValueChange={(v) => { setSortDir(v as SortDir); setPage(1); }}>
+                <TabsList>
+                  <TabsTrigger value="asc">Earliest first</TabsTrigger>
+                  <TabsTrigger value="desc">Latest first</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
 
             <div className="pt-4 space-y-4">
