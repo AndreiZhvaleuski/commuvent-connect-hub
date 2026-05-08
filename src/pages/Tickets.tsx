@@ -157,6 +157,7 @@ function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; on
   const ics = () => {
     downloadICS(`${e.title.replace(/[^a-z0-9]+/gi, "_") || "event"}.ics`, buildICS({ ...calEvent, uid: `${row.id}@commuvent` }));
   };
+  const [zoomed, setZoomed] = useState(false);
 
   return (
     <Card>
