@@ -22,7 +22,7 @@ import { EventDateTime } from "@/components/event-datetime";
 import { StatBox } from "@/components/stat-box";
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
-import { Spinner } from "@/components/ui/spinner";
+import { PageSpinner } from "@/components/page-spinner";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 
 
