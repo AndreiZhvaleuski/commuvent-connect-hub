@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon, SpinnerIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { DEMO_HOSTS, DEMO_CHECKERS, DEMO_ATTENDEES, DEMO_PASSWORD, type DemoAccount } from "@/lib/demoAccounts";
@@ -26,6 +27,7 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
   const [demoOpen, setDemoOpen] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [seedSecret, setSeedSecret] = useState("");
+  const [seedError, setSeedError] = useState<string | null>(null);
 
   const handlePassword = async () => {
     setBusy(true);
@@ -69,7 +71,9 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
   };
 
   const reseed = async () => {
-    if (!seedSecret.trim()) return toast.error("Enter the SEED_SECRET");
+    const secret = seedSecret.trim();
+    setSeedError(null);
+    if (!secret) return toast.error("Enter the SEED_SECRET value");
     setSeeding(true);
     try {
       const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/seed_demo`;
@@ -77,17 +81,25 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-seed-secret": seedSecret.trim(),
+          "x-seed-secret": secret,
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: "{}",
       });
       const data = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(data?.error || `seed failed (${r.status})`);
+      if (!r.ok) {
+        const message = r.status === 401
+          ? "That value is not the SEED_SECRET. Paste the actual secret value you saved in Lovable, not the login error text."
+          : data?.error || `Seed failed (${r.status})`;
+        setSeedError(message);
+        return toast.error(message);
+      }
       toast.success(`Re-seeded! ${JSON.stringify(data.summary ?? {})}`);
     } catch (e: any) {
-      toast.error(e.message ?? "Re-seed failed");
+      const message = e.message ?? "Re-seed failed";
+      setSeedError(message);
+      toast.error(message);
     } finally {
       setSeeding(false);
     }
@@ -147,10 +159,15 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
                     </p>
                     <Input
                       type="password"
-                      placeholder="SEED_SECRET"
+                      placeholder="Paste the SEED_SECRET value"
                       value={seedSecret}
-                      onChange={(e) => setSeedSecret(e.target.value)}
+                      onChange={(e) => { setSeedSecret(e.target.value); setSeedError(null); }}
                     />
+                    {seedError ? (
+                      <Alert variant="destructive">
+                        <AlertDescription>{seedError}</AlertDescription>
+                      </Alert>
+                    ) : null}
                     <Button onClick={reseed} disabled={seeding} className="w-full">
                       {seeding ? <><SpinnerIcon className="mr-2 h-4 w-4 animate-spin" />Re-seeding…</> : "Re-seed demo data"}
                     </Button>

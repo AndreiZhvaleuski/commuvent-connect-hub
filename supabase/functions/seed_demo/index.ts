@@ -142,9 +142,13 @@ async function callFn(path: string, jwt: string, body: unknown) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  const provided = req.headers.get("x-seed-secret");
+  const provided = req.headers.get("x-seed-secret")?.trim();
   if (!SEED_SECRET || provided !== SEED_SECRET) {
-    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    console.warn("seed_demo unauthorized", {
+      hasSecret: Boolean(SEED_SECRET),
+      providedLength: provided?.length ?? 0,
+    });
+    return new Response(JSON.stringify({ error: "Invalid SEED_SECRET" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
   const db = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { persistSession: false } });
