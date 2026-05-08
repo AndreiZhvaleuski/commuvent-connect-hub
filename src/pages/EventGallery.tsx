@@ -58,12 +58,13 @@ export default function EventGalleryPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const { data: event, loading: evLoading, error: evError } = useAsyncResource<EventInfo | null>(
-    async () => {
+    async (signal) => {
       if (!eventId) return null;
       const { data, error } = await supabase
         .from("events")
         .select("id,title,start_at,end_at,time_zone,cover_image_url,host_id")
         .eq("id", eventId)
+        .abortSignal(signal)
         .maybeSingle();
       if (error) throw new Error(error.message);
       return data as EventInfo | null;
@@ -72,7 +73,7 @@ export default function EventGalleryPage() {
   );
 
   const { data, loading, refetch } = useAsyncResource<{ photos: Photo[]; total: number }>(
-    async () => {
+    async (signal) => {
       const from = (page - 1) * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
       let q = supabase
@@ -84,6 +85,7 @@ export default function EventGalleryPage() {
       if (filter === "pending" && user) q = q.eq("user_id", user.id).eq("status", "pending");
       const { data: rows, count, error } = await q
         .order("created_at", { ascending: false })
+        .abortSignal(signal)
         .range(from, to);
       if (error) throw new Error(error.message);
       return { photos: (rows ?? []) as Photo[], total: count ?? 0 };
