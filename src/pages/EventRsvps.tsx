@@ -38,6 +38,7 @@ export default function EventRsvps() {
   const [event, setEvent] = useState<{ id: string; title: string; time_zone: string; host_id: string } | null>(null);
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState(true);
+  const [infoOpen, setInfoOpen] = useState(false);
   useEffect(() => {
     if (loading) return;
     if (!user) { navigate(`/sign-in?redirect=/dashboard/${hostId}/events/${eventId}/rsvps`); return; }
@@ -120,7 +121,22 @@ export default function EventRsvps() {
     const safeTitle = event.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase().slice(0, 40);
     downloadBlob(blob, `rsvps-${safeTitle}.csv`);
     toast.success(`Exported ${data.length} RSVPs`);
+    setInfoOpen(true);
   }
+
+  const csvNotes = (
+    <div className="space-y-3 text-sm text-muted-foreground">
+      <p><strong className="text-foreground">Format:</strong> UTF-8, comma-separated, with check-in times in UTC.</p>
+      <div>
+        <p className="font-medium text-foreground">Google Sheets</p>
+        <p>File → Import → Upload, leave the separator as <em>Detect automatically</em>. Names with accents and non-Latin characters render correctly.</p>
+      </div>
+      <div>
+        <p className="font-medium text-foreground">Excel</p>
+        <p>In regions where the default list separator is <code>;</code> (most of Europe), double-clicking the file may put everything in column A. Open Excel first, then Data → From Text/CSV and pick comma as the delimiter.</p>
+      </div>
+    </div>
+  );
 
   return (
     <><main className="container max-w-5xl py-8 space-y-6">
@@ -133,22 +149,32 @@ export default function EventRsvps() {
             <h1 className="text-3xl font-bold">{event?.title ?? "Event"}</h1>
             <p className="text-muted-foreground">RSVPs · {rows.length} total</p>
           </div>
-          <div className="flex flex-col items-end gap-1">
+          <div className="flex items-center gap-2">
             <Button onClick={exportCsv} disabled={!event || rows.length === 0}>
               <Download className="w-4 h-4 mr-2" /> Export CSV
             </Button>
-            <p className="text-xs text-muted-foreground">CSV uses UTC timestamps.</p>
+            <Dialog open={infoOpen} onOpenChange={setInfoOpen}>
+              <DialogTrigger
+                render={
+                  <Button variant="outline" size="icon" aria-label="CSV format details">
+                    <InfoIcon className="h-4 w-4" />
+                  </Button>
+                }
+              />
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Opening the CSV</DialogTitle>
+                  <DialogDescription>How to import this file into Google Sheets and Excel.</DialogDescription>
+                </DialogHeader>
+                {csvNotes}
+                <DialogFooter>
+                  <Button onClick={() => setInfoOpen(false)}>Got it</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
-        <div className="flex gap-2 rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
-          <InfoIcon className="mt-0.5 h-4 w-4 shrink-0" />
-          <div className="space-y-1">
-            <p><strong className="text-foreground">About the CSV:</strong> UTF-8, comma-separated, check-in times in UTC.</p>
-            <p><strong className="text-foreground">Google Sheets:</strong> File → Import → Upload, leave the separator as <em>Detect automatically</em>. Names with accents and non-Latin characters render correctly.</p>
-            <p><strong className="text-foreground">Excel:</strong> in regions where the default list separator is <code>;</code> (most of Europe), double-clicking may put everything in column A. Open Excel first, then Data → From Text/CSV and pick comma as the delimiter.</p>
-          </div>
-        </div>
 
         <Card>
           <CardHeader>
