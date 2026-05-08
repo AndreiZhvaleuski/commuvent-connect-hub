@@ -5,8 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { InfoIcon, SpinnerIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
+import { DEMO_HOSTS, DEMO_CHECKERS, DEMO_ATTENDEES, DEMO_PASSWORD, type DemoAccount } from "@/lib/demoAccounts";
+
 export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup" }) {
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -19,6 +22,9 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [demoOpen, setDemoOpen] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+  const [seedSecret, setSeedSecret] = useState("");
 
   const handlePassword = async () => {
     setBusy(true);
@@ -33,11 +39,7 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
           email, password,
           options: {
             emailRedirectTo: `${window.location.origin}${redirect}`,
-            data: {
-              first_name: firstName.trim(),
-              last_name: lastName.trim(),
-              display_name,
-            },
+            data: { first_name: firstName.trim(), last_name: lastName.trim(), display_name },
           },
         });
         if (error) throw error;
@@ -45,14 +47,9 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
           toast.success("Welcome to Commuvent!");
           navigate(redirect);
         } else {
-          // Fallback if email confirmation is still required
           const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-          if (signInError) {
-            toast.success("Check your email to confirm.");
-          } else {
-            toast.success("Welcome to Commuvent!");
-            navigate(redirect);
-          }
+          if (signInError) toast.success("Check your email to confirm.");
+          else { toast.success("Welcome to Commuvent!"); navigate(redirect); }
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -63,59 +60,134 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
     finally { setBusy(false); }
   };
 
+  const useAccount = (acc: DemoAccount) => {
+    setEmail(acc.email);
+    setPassword(DEMO_PASSWORD);
+    setDemoOpen(false);
+    toast.success(`Filled ${acc.name}`);
+  };
 
+  const reseed = async () => {
+    if (!seedSecret.trim()) return toast.error("Enter the SEED_SECRET");
+    setSeeding(true);
+    try {
+      const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/seed_demo`;
+      const r = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-seed-secret": seedSecret.trim() },
+        body: "{}",
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data?.error || `seed failed (${r.status})`);
+      toast.success(`Re-seeded! ${JSON.stringify(data.summary ?? {})}`);
+    } catch (e: any) {
+      toast.error(e.message ?? "Re-seed failed");
+    } finally {
+      setSeeding(false);
+    }
+  };
+
+  const Section = ({ title, accounts }: { title: string; accounts: DemoAccount[] }) => (
+    <div className="space-y-2">
+      <h4 className="text-sm font-semibold">{title}</h4>
+      <div className="space-y-1">
+        {accounts.map((a) => (
+          <div key={a.email} className="flex items-center justify-between gap-2 rounded-md border bg-muted/30 px-2 py-1.5 text-sm">
+            <div className="min-w-0">
+              <div className="truncate font-medium">{a.name}{a.detail ? <span className="text-muted-foreground"> · {a.detail}</span> : null}</div>
+              <div className="truncate text-xs text-muted-foreground">{a.email}</div>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => useAccount(a)}>Use</Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
-    <><div className="container mx-auto px-4 py-20 max-w-md">
-        <Card>
-          <CardHeader>
-            <CardTitle>{mode === "signin" ? "Welcome back" : "Join Commuvent"}</CardTitle>
-            <CardDescription>
-              {mode === "signin" ? "Sign in to RSVP and host events." : "Create an account to get started."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form
-              className="space-y-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (!busy) handlePassword();
-              }}
-            >
-              {mode === "signup" && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First name</Label>
-                    <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last name</Label>
-                    <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+    <div className="container mx-auto px-4 py-20 max-w-md">
+      <Card>
+        <CardHeader>
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <CardTitle>{mode === "signin" ? "Welcome back" : "Join Commuvent"}</CardTitle>
+              <CardDescription>
+                {mode === "signin" ? "Sign in to RSVP and host events." : "Create an account to get started."}
+              </CardDescription>
+            </div>
+            <Dialog open={demoOpen} onOpenChange={setDemoOpen}>
+              <Button variant="ghost" size="icon" aria-label="Demo accounts" className="shrink-0" onClick={() => setDemoOpen(true)}>
+                <InfoIcon className="h-5 w-5" />
+              </Button>
+              <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Demo accounts</DialogTitle>
+                  <DialogDescription>
+                    Password for all demo users: <code className="rounded bg-muted px-1.5 py-0.5">{DEMO_PASSWORD}</code>
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <Section title="Hosts" accounts={DEMO_HOSTS} />
+                  <Section title="Checkers" accounts={DEMO_CHECKERS} />
+                  <Section title="Attendees" accounts={DEMO_ATTENDEES} />
+                  <div className="space-y-2 rounded-md border p-3">
+                    <h4 className="text-sm font-semibold">Re-seed demo data</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Wipes ALL data + auth users + storage and reseeds. Requires the project's <code>SEED_SECRET</code>.
+                    </p>
+                    <Input
+                      type="password"
+                      placeholder="SEED_SECRET"
+                      value={seedSecret}
+                      onChange={(e) => setSeedSecret(e.target.value)}
+                    />
+                    <Button onClick={reseed} disabled={seeding} className="w-full">
+                      {seeding ? <><SpinnerIcon className="mr-2 h-4 w-4 animate-spin" />Re-seeding…</> : "Re-seed demo data"}
+                    </Button>
                   </div>
                 </div>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => { e.preventDefault(); if (!busy) handlePassword(); }}
+          >
+            {mode === "signup" && (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First name</Label>
+                  <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last name</Label>
+                  <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-              </div>
-              <Button type="submit" className="w-full" disabled={busy}>
-                {mode === "signin" ? "Sign in" : "Create account"}
-              </Button>
-            </form>
-            <p className="mt-6 text-center text-sm text-muted-foreground">
-              {mode === "signin" ? (
-                <>No account? <Link to={`/sign-up?redirect=${encodeURIComponent(redirect)}`} className="text-foreground underline">Sign up</Link></>
-              ) : (
-                <>Already have an account? <Link to={`/sign-in?redirect=${encodeURIComponent(redirect)}`} className="text-foreground underline">Sign in</Link></>
-              )}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    </>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </div>
+            <Button type="submit" className="w-full" disabled={busy}>
+              {mode === "signin" ? "Sign in" : "Create account"}
+            </Button>
+          </form>
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            {mode === "signin" ? (
+              <>No account? <Link to={`/sign-up?redirect=${encodeURIComponent(redirect)}`} className="text-foreground underline">Sign up</Link></>
+            ) : (
+              <>Already have an account? <Link to={`/sign-in?redirect=${encodeURIComponent(redirect)}`} className="text-foreground underline">Sign in</Link></>
+            )}
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
