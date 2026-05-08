@@ -204,7 +204,7 @@ export default function Tickets() {
             <h1 className="text-3xl font-semibold tracking-tight">My Tickets</h1>
             <p className="text-muted-foreground mt-1">Your RSVPs and waitlist positions.</p>
           </div>
-          {!busy && !error && rows.length > 0 && (
+          {hasAny && (
             <div className="flex items-center gap-2 rounded-md border bg-card px-3 py-2">
               <Switch id="hide-sensitive" checked={hideAll} onCheckedChange={setHideAll} />
               <Label htmlFor="hide-sensitive" className="cursor-pointer text-sm inline-flex items-center gap-1.5">
@@ -215,15 +215,15 @@ export default function Tickets() {
           )}
         </div>
 
-        {busy ? (
-          <SkeletonGrid count={3} className="space-y-4" itemHeightClass="h-48" />
-        ) : error ? (
+        {error ? (
           <ErrorState
             title="Couldn't load tickets"
             description={error}
-            onRetry={() => { setBusy(true); load(); }}
+            onRetry={reload}
           />
-        ) : rows.length === 0 ? (
+        ) : busy && hasAny === null ? (
+          <SkeletonGrid count={3} className="space-y-4" itemHeightClass="h-48" />
+        ) : hasAny === false ? (
           <Card>
             <CardContent className="py-16 text-center">
               <Ticket className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
@@ -237,8 +237,8 @@ export default function Tickets() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <Tabs value={view} onValueChange={(v) => changeView(v as View)}>
                 <TabsList>
-                  <TabsTrigger value="upcoming">Upcoming ({upcomingAll.length})</TabsTrigger>
-                  <TabsTrigger value="past">Past ({pastAll.length})</TabsTrigger>
+                  <TabsTrigger value="upcoming">Upcoming ({counts.upcoming})</TabsTrigger>
+                  <TabsTrigger value="past">Past ({counts.past})</TabsTrigger>
                 </TabsList>
               </Tabs>
               <div className="flex items-center gap-2">
@@ -256,12 +256,14 @@ export default function Tickets() {
             </div>
 
             <div className="pt-4 space-y-4">
-              {sorted.length === 0 ? (
+              {busy ? (
+                <SkeletonGrid count={3} className="space-y-4" itemHeightClass="h-48" />
+              ) : rows.length === 0 ? (
                 <Card><CardContent className="py-12 text-center text-muted-foreground">
                   {view === "upcoming" ? "No upcoming tickets." : "No past tickets."}
                 </CardContent></Card>
               ) : (
-                pageRows.map((r) => (
+                rows.map((r) => (
                   <TicketCard
                     key={r.id}
                     row={r}
