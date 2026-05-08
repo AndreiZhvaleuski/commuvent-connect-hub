@@ -17,7 +17,10 @@ import { ErrorState } from "@/components/error-state";
 import { Spinner } from "@/components/ui/spinner";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 import { ListPagination } from "@/components/list-pagination";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
+
+type SortDir = "asc" | "desc";
 
 const PAGE_SIZE = 12;
 
@@ -36,6 +39,7 @@ export default function Explore() {
   const to = searchParams.get("to") ?? "";
   const includePast = searchParams.get("past") === "1";
   const mode = (searchParams.get("type") as LocationMode) || "any";
+  const sortDir = (searchParams.get("sort") as SortDir) === "desc" ? "desc" : "asc";
 
   const updateParam = (key: string, value: string | null) => {
     setSearchParams((prev) => {
@@ -50,11 +54,12 @@ export default function Explore() {
   const setTo = (v: string) => updateParam("to", v);
   const setIncludePast = (v: boolean) => updateParam("past", v ? "1" : null);
   const setMode = (v: LocationMode) => updateParam("type", v === "any" ? null : v);
+  const setSortDir = (v: SortDir) => updateParam("sort", v === "desc" ? "desc" : null);
   const clearAll = () => setSearchParams({}, { replace: true });
 
   const [page, setPage] = useState(1);
   // Reset to page 1 whenever filters change
-  useEffect(() => { setPage(1); }, [q, from, to, includePast, mode]);
+  useEffect(() => { setPage(1); }, [q, from, to, includePast, mode, sortDir]);
 
   const { data, loading: busy, error, refetch } = useAsyncResource<{ rows: Ev[]; total: number }>(
     async (signal) => {
@@ -63,7 +68,7 @@ export default function Explore() {
       let qb = supabase.from("events")
         .select("id,title,description,cover_image_url,start_at,end_at,time_zone,venue_address,online_url", { count: "exact" })
         .eq("status", "published").eq("visibility", "public")
-        .order("start_at", { ascending: true })
+        .order("start_at", { ascending: sortDir === "asc" })
         .range(fromIdx, toIdx);
 
       if (!includePast) qb = qb.gte("end_at", new Date().toISOString());
@@ -84,7 +89,7 @@ export default function Explore() {
       if (error) throw new Error(error.message);
       return { rows: (data ?? []) as Ev[], total: count ?? 0 };
     },
-    [q, from, to, includePast, mode, page],
+    [q, from, to, includePast, mode, sortDir, page],
     { debounceMs: 250, keepPreviousData: true }
   );
 
@@ -184,6 +189,15 @@ export default function Explore() {
             </div>
           </CardContent>
         </Card>
+
+        <div className="mb-4 flex justify-end">
+          <Tabs value={sortDir} onValueChange={(v) => setSortDir(v as SortDir)}>
+            <TabsList>
+              <TabsTrigger value="asc">Earliest first</TabsTrigger>
+              <TabsTrigger value="desc">Latest first</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
         {error ? (
           <ErrorState
