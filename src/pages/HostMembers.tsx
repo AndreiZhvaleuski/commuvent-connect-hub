@@ -18,7 +18,7 @@ import { format } from "date-fns";
 
 type Role = "host" | "checker";
 type Host = { id: string; name: string; logo_url: string | null };
-type Member = { user_id: string; role: Role; created_at: string; profile: { display_name: string | null; avatar_url: string | null; email: string | null } | null };
+type Member = { user_id: string; role: Role; created_at: string; profile: { display_name: string | null; avatar_url: string | null } | null };
 type Invite = { id: string; role: Role; token: string; expires_at: string; created_at: string };
 
 const ROLE_DESC: Record<Role, string> = {
@@ -52,7 +52,7 @@ export default function HostMembers() {
     const userIds = (hm ?? []).map((m: any) => m.user_id);
     let profiles: any[] = [];
     if (userIds.length) {
-      const { data: profs } = await supabase.from("profiles").select("id,display_name,avatar_url,email").in("id", userIds);
+      const { data: profs } = await supabase.from("profiles").select("id,display_name,avatar_url").in("id", userIds);
       profiles = profs ?? [];
     }
     setMembers(((hm ?? []) as any[]).map((m) => ({
@@ -179,7 +179,6 @@ export default function HostMembers() {
                         <span className="truncate font-medium">{m.profile?.display_name ?? "Unnamed"}</span>
                         {isMe && <Badge variant="outline">You</Badge>}
                       </div>
-                      <div className="truncate text-xs text-muted-foreground">{m.profile?.email ?? "—"}</div>
                       <div className="text-xs text-muted-foreground">Joined {format(new Date(m.created_at), "MMM d, yyyy")}</div>
                     </div>
                   </div>

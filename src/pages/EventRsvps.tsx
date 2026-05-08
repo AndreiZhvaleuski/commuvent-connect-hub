@@ -76,10 +76,11 @@ export default function EventRsvps() {
         .order("created_at", { ascending: true });
 
       const userIds = (rs ?? []).map((r) => r.user_id);
-      const [{ data: profiles }, { data: checkIns }] = await Promise.all([
+      const [{ data: profiles }, { data: emails }, { data: checkIns }] = await Promise.all([
         userIds.length
-          ? supabase.from("profiles").select("id,display_name,email").in("id", userIds)
+          ? supabase.from("profiles").select("id,display_name").in("id", userIds)
           : Promise.resolve({ data: [] as any[] }),
+        supabase.rpc("event_rsvp_emails", { p_event_id: eventId }),
         supabase
           .from("check_ins")
           .select("rsvp_id,checked_in_at,undone")
@@ -88,10 +89,11 @@ export default function EventRsvps() {
       ]);
 
       const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
+      const emailMap = new Map((emails ?? []).map((e: any) => [e.user_id, e.email]));
       const ciMap = new Map((checkIns ?? []).map((c: any) => [c.rsvp_id, c.checked_in_at]));
 
       const enriched: Row[] = (rs ?? []).map((r) => {
-        const p = profileMap.get(r.user_id) as { display_name: string | null; email: string | null } | undefined;
+        const p = profileMap.get(r.user_id) as { display_name: string | null } | undefined;
         return {
           id: r.id,
           status: r.status,
@@ -99,7 +101,7 @@ export default function EventRsvps() {
           created_at: r.created_at,
           user_id: r.user_id,
           display_name: p?.display_name ?? null,
-          email: p?.email ?? "",
+          email: emailMap.get(r.user_id) ?? "",
           check_in_time: ciMap.get(r.id) ?? null,
         };
       });
