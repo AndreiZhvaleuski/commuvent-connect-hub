@@ -89,7 +89,13 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
                 </div>
               </div>
             )}
-            <div className="space-y-4">
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!busy) handlePassword();
+              }}
+            >
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -98,10 +104,10 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
                 <Label htmlFor="password">Password</Label>
                 <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
-              <Button className="w-full" onClick={handlePassword} disabled={busy}>
+              <Button type="submit" className="w-full" disabled={busy}>
                 {mode === "signin" ? "Sign in" : "Create account"}
               </Button>
-            </div>
+            </form>
             <p className="mt-6 text-center text-sm text-muted-foreground">
               {mode === "signin" ? (
                 <>No account? <Link to={`/sign-up?redirect=${encodeURIComponent(redirect)}`} className="text-foreground underline">Sign up</Link></>
