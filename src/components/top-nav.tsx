@@ -23,19 +23,16 @@ const links = [
 export function TopNav() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<{ display_name: string | null; avatar_url: string | null } | null>(null);
+  const [profile, setProfile] = useState<{ id: string; display_name: string | null; avatar_url: string | null } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    if (!user?.id) {
-      setProfile(null);
-      return;
-    }
+    if (!user?.id) return;
 
     supabase
       .from("profiles")
-      .select("display_name,avatar_url")
+      .select("id,display_name,avatar_url")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => {
@@ -72,18 +69,19 @@ export function TopNav() {
           <ThemeToggle />
           {user ? (
             (() => {
+              const profileForUser = profile?.id === user.id ? profile : null;
               const meta = (user.user_metadata ?? {}) as { first_name?: string; last_name?: string; display_name?: string; avatar_url?: string };
               const first = meta.first_name?.trim() ?? "";
               const last = meta.last_name?.trim() ?? "";
               const fullName = [first, last].filter(Boolean).join(" ");
-              const displayName = profile?.display_name?.trim() || meta.display_name?.trim() || fullName || user.email?.split("@")[0] || "Account";
+              const displayName = profileForUser?.display_name?.trim() || meta.display_name?.trim() || fullName || user.email?.split("@")[0] || "Account";
               const initials = displayName
                 .split(/\s+/)
                 .map((part) => part[0])
                 .join("")
                 .slice(0, 2)
                 .toUpperCase() || (user.email?.[0] ?? "U").toUpperCase();
-              const avatarUrl = userAvatarUrl({ id: user.id, avatar_url: profile?.avatar_url || meta.avatar_url });
+              const avatarUrl = userAvatarUrl({ id: user.id, avatar_url: profileForUser?.avatar_url || meta.avatar_url });
               return (
                 <DropdownMenu>
                   <DropdownMenuTrigger
