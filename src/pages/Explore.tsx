@@ -190,6 +190,15 @@ export default function Explore() {
           </CardContent>
         </Card>
 
+        <div className="mb-4 flex justify-end">
+          <Tabs value={sortDir} onValueChange={(v) => setSortDir(v as SortDir)}>
+            <TabsList>
+              <TabsTrigger value="asc">Earliest first</TabsTrigger>
+              <TabsTrigger value="desc">Latest first</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
         {error ? (
           <ErrorState
             title="Couldn't load events"
