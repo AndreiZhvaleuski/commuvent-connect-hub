@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EventDateTime } from "@/components/event-datetime";
+import { StatBox } from "@/components/stat-box";
 
 export type ManagedEvent = {
   id: string; title: string; status: string; visibility: string;
