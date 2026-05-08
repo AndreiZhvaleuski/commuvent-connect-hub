@@ -27,6 +27,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/empty-state";
 import { ListPagination } from "@/components/list-pagination";
+import { SkeletonGrid } from "@/components/skeleton-grid";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { PageSpinner } from "@/components/page-spinner";
 import { ErrorState } from "@/components/error-state";
