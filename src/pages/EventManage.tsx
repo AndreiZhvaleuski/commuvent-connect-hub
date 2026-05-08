@@ -27,7 +27,7 @@ export default function EventManage() {
     (async () => {
       setBusy(true);
       const { data: hm } = await supabase.from("host_members").select("role").eq("host_id", hostId).eq("user_id", user.id).maybeSingle();
-      if (!hm) { setDenied(true); setBusy(false); return; }
+      if (!hm || hm.role !== "host") { setDenied(true); setBusy(false); return; }
       const [{ data: h }, { data: ev }, { data: stats }] = await Promise.all([
         supabase.from("hosts").select("id,name,logo_url").eq("id", hostId).maybeSingle(),
         supabase.from("events").select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url,time_zone").eq("id", eventId).maybeSingle(),
