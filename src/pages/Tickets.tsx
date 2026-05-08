@@ -234,6 +234,15 @@ function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; on
           </div>
         </div>
       </CardContent>
+      <Dialog open={zoomed} onOpenChange={setZoomed}>
+        <DialogContent className="max-w-md w-[calc(100vw-2rem)] sm:w-full">
+          <DialogHeader>
+            <DialogTitle>{e.title}</DialogTitle>
+          </DialogHeader>
+          {qr && <img src={qr} alt={`QR code ${row.code}`} className="mx-auto h-auto w-full max-w-sm rounded-md border bg-card p-3" />}
+          <p className="text-center font-mono text-base tracking-widest">{row.code}</p>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
