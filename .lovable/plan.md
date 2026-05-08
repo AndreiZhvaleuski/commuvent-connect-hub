@@ -1,121 +1,75 @@
 ## Goal
+Reusable async-list primitives so MyEvents and Explore both get: proper loading state, request cancellation when filters change, distinct empty state, distinct **error state**, and consistent skeletons.
 
-Complete host dashboard + operations: ensure stats accuracy, add email to CSV exports, build the My Events aggregation page with server-side filtering and pagination.
+## New reusable pieces
 
-## Current state
+### 1. `src/hooks/use-async-resource.ts`
+Generic hook keyed by deps, with cancellation.
 
-- HostDashboard already lists Upcoming/Past with Going/Waitlist/Checked-in via `event_stats` RPC (working, with realtime).
-- EventRsvps already exports CSV with name/status/check-in time, but **email is blank** (TODO in code).
-- `/my-events` route renders a `Placeholder` — needs implementation.
+```ts
+type State<T> = { data: T | null; loading: boolean; error: Error | null };
 
-## Changes
-
-### 1. RSVP CSV export — include email
-
-File: `src/pages/EventRsvps.tsx`
-
-- Select `email` from `profiles` alongside `display_name`; map into `Row.email`.
-- CSV format unchanged (BOM + UTF-8 already correct for Excel/Sheets).
-
-### 2. New page: `/my-events` with server-side filtering + pagination
-
-#### DB migration — new RPC `my_events`
-
-Returns paginated events the user has any role on, with stats joined and filters applied server-side.
-
-```sql
-create or replace function public.my_events(
-  p_host_ids uuid[] default null,    -- null = all hosts user belongs to
-  p_from timestamptz default null,
-  p_to   timestamptz default null,
-  p_search text default null,        -- ilike on title
-  p_time_filter text default 'upcoming', -- 'upcoming' | 'past' | 'all'
-  p_limit int default 20,
-  p_offset int default 0
-) returns table (
-  event_id uuid, title text, status text, visibility text,
-  start_at timestamptz, end_at timestamptz, capacity int,
-  cover_image_url text, time_zone text,
-  host_id uuid, host_name text, host_logo_url text,
-  user_role text,
-  going_count bigint, waitlist_count bigint, checked_in_count bigint,
-  total_count bigint   -- window count for pagination
-) language sql stable security definer set search_path = public as $$
-  with my as (
-    select hm.host_id, hm.role
-    from public.host_members hm
-    where hm.user_id = auth.uid()
-  ),
-  filtered as (
-    select e.*, h.name as host_name, h.logo_url as host_logo_url, my.role as user_role
-    from public.events e
-    join my on my.host_id = e.host_id
-    join public.hosts h on h.id = e.host_id
-    where (p_host_ids is null or e.host_id = any(p_host_ids))
-      and (my.role = 'host' or e.status = 'published')   -- checkers see published only
-      and (p_from is null or e.start_at >= p_from)
-      and (p_to   is null or e.start_at <  p_to)
-      and (p_search is null or e.title ilike '%' || p_search || '%')
-      and (
-        p_time_filter = 'all'
-        or (p_time_filter = 'upcoming' and e.end_at >= now())
-        or (p_time_filter = 'past'     and e.end_at <  now())
-      )
-  ),
-  counted as (
-    select *, count(*) over () as total_count
-    from filtered
-    order by start_at desc
-    limit p_limit offset p_offset
-  )
-  select
-    c.id, c.title, c.status, c.visibility, c.start_at, c.end_at, c.capacity,
-    c.cover_image_url, c.time_zone, c.host_id, c.host_name, c.host_logo_url, c.user_role,
-    coalesce(sum(case when r.status='going' and r.cancelled_at is null then 1 else 0 end),0)::bigint,
-    coalesce(sum(case when r.status='waitlist' and r.cancelled_at is null then 1 else 0 end),0)::bigint,
-    coalesce((select count(*) from public.check_ins ci where ci.event_id=c.id and ci.undone=false),0)::bigint,
-    c.total_count
-  from counted c
-  left join public.rsvps r on r.event_id = c.id
-  group by c.id, c.title, c.status, c.visibility, c.start_at, c.end_at, c.capacity,
-           c.cover_image_url, c.time_zone, c.host_id, c.host_name, c.host_logo_url, c.user_role, c.total_count
-  order by c.start_at desc;
-$$;
+useAsyncResource<T>(
+  fetcher: (signal: AbortSignal) => Promise<T>,
+  deps: unknown[],
+  opts?: { debounceMs?: number; keepPreviousData?: boolean }
+): State<T> & { refetch: () => void }
 ```
 
-Plus a small helper to list the user's hosts for the filter dropdown — can reuse a direct query on `host_members` + `hosts` (no RPC needed).
+Behavior:
+- On deps change: optional debounce, set `loading=true` (keep previous data if `keepPreviousData`), call fetcher with a fresh `AbortController.signal`.
+- On unmount or new run: abort previous controller; ignore stale results.
+- Catch `AbortError` silently. Other errors surfaced via `error`.
+- `refetch()` re-runs current deps.
 
-#### Frontend
+### 2. `src/components/empty-state.tsx`
+Single shared empty state (used inside a `Card`):
 
-File: `src/pages/MyEvents.tsx` (new), wired in `src/App.tsx` replacing the `Placeholder`.
+```tsx
+<EmptyState
+  icon={<CalendarSlashIcon ... />}
+  title="No events match your filters"
+  description="Try clearing the search or expanding the date range."
+  action={<Button onClick={clear}>Clear filters</Button>}
+/>
+```
 
-UI:
+### 3. `src/components/error-state.tsx`
+Shared error state mirroring EmptyState's API:
 
-- Header "My Events".
-- Filter bar (controlled state synced to URL search params for shareability):
-  - **Host** multi-select combobox (options = user's hosts).
-  - **Date range** with two `DatePicker` inputs (from / to).
-  - **Text search** input (debounced ~300ms).
-  - **Tabs**: Upcoming / Past / All (default Upcoming).
-- Results list using a compact card (new `MyEventRow` component or `compact` variant of `EventManagementCard`):
-  - Title (link to `/e/:id`), host avatar+name, `EventDateTime`, status badge.
-  - Inline `StatBox` trio (Going / Waitlist / Checked-in).
-  - Quick actions: **View** (`/e/:id`), **Check-in** (`/checkin/:id`), and **Manage** (`/dashboard/:hostId/events/:id`) only when `user_role = 'host'`.
-- Pagination: Prev/Next buttons + page indicator using `total_count` from RPC; page size 20.
-- Loading skeleton + empty state.
+```tsx
+<ErrorState
+  title="Couldn't load events"
+  description={error.message}
+  onRetry={refetch}
+/>
+```
+- Uses a destructive-toned icon (`WarningCircleIcon`).
+- Renders a "Try again" button when `onRetry` is provided.
 
-Data:
+### 4. `src/components/skeleton-grid.tsx`
+Renders N pulsing `Card` placeholders given a className grid layout. Used by both pages.
 
-- One `supabase.rpc('my_events', { ... })` call on filter/page change.
-- Separate one-time fetch for the host filter list.
+## Refactor `src/pages/MyEvents.tsx`
+- Replace inline `useEffect` + `setBusy` + `setRows` with `useAsyncResource` keyed on the filter values.
+- Pass the abort signal to `supabase.rpc(...).abortSignal(signal)` to cancel in-flight requests.
+- Render order:
+  1. `loading && !data` → `SkeletonGrid`
+  2. `error` → `ErrorState` with `onRetry={refetch}`
+  3. `data.length === 0` → `EmptyState` (with Reset action when filters active; "You have no events yet" copy when not)
+  4. otherwise the list (with a subtle top opacity dim when `loading && data` to indicate refetch)
+- Keep previous data while refetching so the list doesn't flash.
+- Total/pagination derived from `data` like today.
 
-Reuse: `AppLayout`, `Card`, `Tabs`, `Input`, `Button`, `Avatar`, `Badge`, `EventDateTime`, `StatBox`, `DatePicker`, `Combobox`.
+## Refactor `src/pages/Explore.tsx`
+- Same migration with `debounceMs: 250` and `.abortSignal(signal)` on the Supabase query.
+- Replace skeletons with `SkeletonGrid`, empty card with `EmptyState`, and add `ErrorState` for fetch failures.
+- Two empty copies: "No events match your filters" (clear-filters action) vs "No published events yet" (no action).
 
-### 3. Nav
+## Notes
+- `supabase-js` v2 supports `.abortSignal(signal)` on PostgREST builders and `rpc(...)`. We'll use it everywhere.
+- AbortError from supabase comes through as a thrown error in `await`; the hook checks `signal.aborted` and `error.name === 'AbortError'` (and `code === '20'`) to suppress.
+- No DB or RPC changes.
 
-`src/components/top-nav.tsx` already links to `/my-events` — no change.
-
-## Out of scope (already correct)
-
-- HostDashboard stats + realtime.
-- CSV encoding (UTF-8 + BOM via `src/lib/csv.ts`).
+## Out of scope
+- Pagination changes, infinite scroll, global error toasts (in-card error UI is enough).
