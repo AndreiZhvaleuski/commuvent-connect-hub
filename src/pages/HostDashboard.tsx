@@ -220,7 +220,18 @@ export default function HostDashboard() {
           <div className="flex flex-wrap gap-2">
             <Button render={<Link to={`/dashboard/${host.id}/edit`} />} variant="outline">Edit host</Button>
             <Button render={<Link to={`/dashboard/${host.id}/members`} />} variant="outline">Members</Button>
-            <Button render={<Link to={`/dashboard/${host.id}/moderation`} />} variant="outline">Reports</Button>
+            <Button
+              render={<Link to={`/dashboard/${host.id}/moderation`} />}
+              variant={(header?.openReportsCount ?? 0) > 0 ? "default" : "outline"}
+            >
+              <FlagIcon className="mr-1 h-4 w-4" />
+              Reports
+              {(header?.openReportsCount ?? 0) > 0 && (
+                <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-medium text-destructive-foreground">
+                  {header!.openReportsCount}
+                </span>
+              )}
+            </Button>
             <Button render={<Link to={`/dashboard/${host.id}/events/new`} />}><Plus className="mr-1 h-4 w-4" />New event</Button>
           </div>
         )}
