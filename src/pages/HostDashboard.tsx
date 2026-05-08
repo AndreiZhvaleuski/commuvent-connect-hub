@@ -83,11 +83,16 @@ export default function HostDashboard() {
               </Link>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button render={<Link to={`/dashboard/${host.id}/edit`} />} variant="outline">Edit host</Button>
-            <Button render={<Link to={`/dashboard/${host.id}/members`} />} variant="outline">Members</Button>
-            <Button render={<Link to={`/dashboard/${host.id}/events/new`} />}><Plus className="mr-1 h-4 w-4" />New event</Button>
-          </div>
+          {role === "host" && (
+            <div className="flex flex-wrap gap-2">
+              <Button render={<Link to={`/dashboard/${host.id}/edit`} />} variant="outline">Edit host</Button>
+              <Button render={<Link to={`/dashboard/${host.id}/members`} />} variant="outline">Members</Button>
+              <Button render={<Link to={`/dashboard/${host.id}/events/new`} />}><Plus className="mr-1 h-4 w-4" />New event</Button>
+            </div>
+          )}
+          {role === "checker" && (
+            <span className="rounded-full border px-3 py-1 text-xs uppercase tracking-wide text-muted-foreground">Checker access</span>
+          )}
         </div>
 
         <Tabs
