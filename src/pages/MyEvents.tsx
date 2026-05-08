@@ -109,10 +109,10 @@ export default function MyEvents() {
     (async () => {
       setBusy(true);
       const { data, error } = await supabase.rpc("my_events", {
-        p_host_ids: hostId ? [hostId] : null,
-        p_from: fromStr ? new Date(fromStr).toISOString() : null,
-        p_to: toStr ? new Date(toStr).toISOString() : null,
-        p_search: search || null,
+        p_host_ids: hostId ? [hostId] : undefined,
+        p_from: fromStr ? new Date(fromStr).toISOString() : undefined,
+        p_to: toStr ? new Date(toStr).toISOString() : undefined,
+        p_search: search || undefined,
         p_time_filter: time,
         p_limit: PAGE_SIZE,
         p_offset: (page - 1) * PAGE_SIZE,
