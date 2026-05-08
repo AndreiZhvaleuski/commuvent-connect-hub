@@ -12,22 +12,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+
 import { buildICS, downloadICS, googleCalendarUrl } from "@/lib/calendar";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ErrorState } from "@/components/error-state";
 import { Spinner } from "@/components/ui/spinner";
 import { useAsyncResource } from "@/hooks/use-async-resource";
+import { EventListControls, type EventView, type EventSortDir } from "@/components/event-list-controls";
+import { ListPagination } from "@/components/list-pagination";
 
 type Row = {
   id: string;
@@ -45,8 +39,8 @@ type Row = {
 };
 
 const PAGE_SIZE = 5;
-type View = "upcoming" | "past";
-type SortDir = "asc" | "desc";
+type View = EventView;
+type SortDir = EventSortDir;
 
 type FetchResult = {
   rows: Row[];
@@ -237,20 +231,14 @@ export default function Tickets() {
           </Card>
         ) : (
           <>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <Tabs value={view} onValueChange={(v) => changeView(v as View)}>
-                <TabsList>
-                  <TabsTrigger value="upcoming">Upcoming ({counts.upcoming})</TabsTrigger>
-                  <TabsTrigger value="past">Past ({counts.past})</TabsTrigger>
-                </TabsList>
-              </Tabs>
-              <Tabs value={sortDir} onValueChange={(v) => { setSortDir(v as SortDir); setPage(1); }}>
-                <TabsList>
-                  <TabsTrigger value="asc">Earliest first</TabsTrigger>
-                  <TabsTrigger value="desc">Latest first</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
+            <EventListControls
+              view={view}
+              onViewChange={changeView}
+              sortDir={sortDir}
+              onSortChange={(s) => { setSortDir(s); setPage(1); }}
+              upcomingCount={counts.upcoming}
+              pastCount={counts.past}
+            />
 
             <div className="pt-4 space-y-4">
               {busy ? (
@@ -274,42 +262,7 @@ export default function Tickets() {
               )}
             </div>
 
-            {totalPages > 1 && (
-              <Pagination className="mt-6">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => { e.preventDefault(); if (safePage > 1) setPage(safePage - 1); }}
-                      aria-disabled={safePage === 1}
-                      className={safePage === 1 ? "pointer-events-none opacity-50" : undefined}
-                    />
-                  </PaginationItem>
-                  {Array.from({ length: totalPages }).map((_, i) => {
-                    const p = i + 1;
-                    return (
-                      <PaginationItem key={p}>
-                        <PaginationLink
-                          href="#"
-                          isActive={p === safePage}
-                          onClick={(e) => { e.preventDefault(); setPage(p); }}
-                        >
-                          {p}
-                        </PaginationLink>
-                      </PaginationItem>
-                    );
-                  })}
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => { e.preventDefault(); if (safePage < totalPages) setPage(safePage + 1); }}
-                      aria-disabled={safePage === totalPages}
-                      className={safePage === totalPages ? "pointer-events-none opacity-50" : undefined}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
+            <ListPagination page={safePage} totalPages={totalPages} onPageChange={setPage} />
           </>
         )}
       </div>
