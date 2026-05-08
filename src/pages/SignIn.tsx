@@ -130,9 +130,11 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
-                  <Section title="Hosts" accounts={DEMO_HOSTS} />
-                  <Section title="Checkers" accounts={DEMO_CHECKERS} />
-                  <Section title="Attendees" accounts={DEMO_ATTENDEES} />
+                  <Accordion defaultValue={["hosts"]}>
+                    <Section value="hosts" title="Hosts" accounts={DEMO_HOSTS} />
+                    <Section value="checkers" title="Checkers" accounts={DEMO_CHECKERS} />
+                    <Section value="attendees" title="Attendees" accounts={DEMO_ATTENDEES} />
+                  </Accordion>
                   <div className="space-y-2 rounded-md border p-3">
                     <h4 className="text-sm font-semibold">Re-seed demo data</h4>
                     <p className="text-xs text-muted-foreground">
