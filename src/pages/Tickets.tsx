@@ -27,6 +27,7 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ErrorState } from "@/components/error-state";
 import { Spinner } from "@/components/ui/spinner";
+import { useAsyncResource } from "@/hooks/use-async-resource";
 
 type Row = {
   id: string;
@@ -47,15 +48,15 @@ const PAGE_SIZE = 5;
 type View = "upcoming" | "past";
 type SortDir = "asc" | "desc";
 
+type FetchResult = {
+  rows: Row[];
+  total: number;
+  counts: { upcoming: number; past: number };
+};
+
 export default function Tickets() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const [rows, setRows] = useState<Row[]>([]);
-  const [total, setTotal] = useState(0);
-  const [counts, setCounts] = useState<{ upcoming: number; past: number }>({ upcoming: 0, past: 0 });
-  const [hasAny, setHasAny] = useState<boolean | null>(null);
-  const [busy, setBusy] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [qrs, setQrs] = useState<Record<string, string>>({});
   const [hideAll, setHideAll] = useState<boolean>(true);
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
@@ -64,21 +65,22 @@ export default function Tickets() {
   // Default: upcoming → nearest first (asc); past → most recent first (desc)
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [page, setPage] = useState(1);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     if (hideAll) setRevealed({});
   }, [hideAll]);
 
-  // Server-side fetch: filter by view, sort by start_at, paginate.
   useEffect(() => {
     if (loading) return;
-    if (!user) { navigate(`/sign-in?redirect=${encodeURIComponent("/tickets")}`); return; }
+    if (!user) navigate(`/sign-in?redirect=${encodeURIComponent("/tickets")}`);
+  }, [user, loading, navigate]);
 
-    let cancelled = false;
-    const run = async () => {
-      setBusy(true);
-      setError(null);
+  // Server-side fetch: filter by view, sort by start_at, paginate.
+  // useAsyncResource handles loading, errors, and cancels stale requests.
+  const userId = user?.id ?? null;
+  const { data, loading: busy, error, refetch } = useAsyncResource<FetchResult>(
+    async (signal) => {
+      if (!userId) return { rows: [], total: 0, counts: { upcoming: 0, past: 0 } };
       const nowIso = new Date().toISOString();
       const from = (page - 1) * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
@@ -88,45 +90,48 @@ export default function Tickets() {
       const pageQuery = supabase
         .from("rsvps")
         .select(baseSelect, { count: "exact" })
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .neq("status", "cancelled")
         .filter("events.end_at", view === "upcoming" ? "gte" : "lt", nowIso)
         .order("start_at", { foreignTable: "events", ascending: sortDir === "asc" })
-        .range(from, to);
+        .range(from, to)
+        .abortSignal(signal);
 
       const upcomingCount = supabase
         .from("rsvps")
         .select("id, events!inner(end_at)", { count: "exact", head: true })
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .neq("status", "cancelled")
-        .filter("events.end_at", "gte", nowIso);
+        .filter("events.end_at", "gte", nowIso)
+        .abortSignal(signal);
 
       const pastCount = supabase
         .from("rsvps")
         .select("id, events!inner(end_at)", { count: "exact", head: true })
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .neq("status", "cancelled")
-        .filter("events.end_at", "lt", nowIso);
+        .filter("events.end_at", "lt", nowIso)
+        .abortSignal(signal);
 
       const [pageRes, upRes, pastRes] = await Promise.all([pageQuery, upcomingCount, pastCount]);
-      if (cancelled) return;
+      if (pageRes.error) throw new Error(pageRes.error.message);
+      if (upRes.error) throw new Error(upRes.error.message);
+      if (pastRes.error) throw new Error(pastRes.error.message);
 
-      if (pageRes.error) { setError(pageRes.error.message); setBusy(false); return; }
-      const up = upRes.count ?? 0;
-      const pst = pastRes.count ?? 0;
-      setRows(((pageRes.data ?? []) as unknown) as Row[]);
-      setTotal(pageRes.count ?? 0);
-      setCounts({ upcoming: up, past: pst });
-      setHasAny(up + pst > 0);
-      setBusy(false);
-    };
+      return {
+        rows: ((pageRes.data ?? []) as unknown) as Row[],
+        total: pageRes.count ?? 0,
+        counts: { upcoming: upRes.count ?? 0, past: pastRes.count ?? 0 },
+      };
+    },
+    [userId, view, sortDir, page],
+    { keepPreviousData: true }
+  );
 
-    run();
-    return () => { cancelled = true; };
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [user, loading, view, sortDir, page, refreshKey]);
-
-  const reload = () => setRefreshKey((k) => k + 1);
+  const rows = data?.rows ?? [];
+  const total = data?.total ?? 0;
+  const counts = data?.counts ?? { upcoming: 0, past: 0 };
+  const hasAny: boolean | null = data ? counts.upcoming + counts.past > 0 : null;
 
   // Generate QR codes for going tickets
   useEffect(() => {
@@ -143,14 +148,14 @@ export default function Tickets() {
     if (!user) return;
     const ch = supabase.channel(`tickets-${user.id}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "rsvps", filter: `user_id=eq.${user.id}` }, () => {
-        reload();
+        refetch();
       })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, (payload) => {
         const n = payload.new as { type?: string };
         if (n?.type === "waitlist_promoted") {
           toast.success("You're in! A seat just opened.");
         }
-        reload();
+        refetch();
       })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -190,7 +195,7 @@ export default function Tickets() {
         return;
       }
       toast.success("RSVP cancelled");
-      reload();
+      refetch();
     } finally {
       setCancelling(false);
       setConfirmCancelEventId(null);
@@ -218,8 +223,8 @@ export default function Tickets() {
         {error ? (
           <ErrorState
             title="Couldn't load tickets"
-            description={error}
-            onRetry={reload}
+            description={error.message}
+            onRetry={refetch}
           />
         ) : busy && hasAny === null ? (
           <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
