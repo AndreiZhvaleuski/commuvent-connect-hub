@@ -39,15 +39,16 @@ export default function Dashboard() {
     (async () => {
       const { data: members } = await supabase
         .from("host_members")
-        .select("host_id")
+        .select("host_id, role")
         .eq("user_id", user.id);
       const ids = (members ?? []).map((m) => m.host_id);
       if (ids.length === 0) { setHosts([]); setBusy(false); return; }
+      const roleMap = new Map<string, "host" | "checker">((members ?? []).map((m) => [m.host_id, m.role as "host" | "checker"]));
       const { data } = await supabase
         .from("hosts")
         .select("id,name,logo_url,bio")
         .in("id", ids);
-      setHosts((data ?? []) as Host[]);
+      setHosts(((data ?? []) as Omit<Host, "role">[]).map((h) => ({ ...h, role: roleMap.get(h.id) ?? "checker" })));
       setBusy(false);
     })();
   }, [user, loading, navigate]);
