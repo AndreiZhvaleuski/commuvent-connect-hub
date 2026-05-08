@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
       hasSecret: Boolean(SEED_SECRET),
       providedLength: provided?.length ?? 0,
     });
-    return new Response(JSON.stringify({ error: "Invalid SEED_SECRET" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ ok: false, error: "Invalid SEED_SECRET" }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
   const db = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { persistSession: false } });
@@ -366,7 +366,7 @@ Deno.serve(async (req) => {
   } catch (e) {
     console.error("seed_demo error", e);
     return new Response(JSON.stringify({ ok: false, error: String(e), summary }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

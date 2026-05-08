@@ -88,9 +88,9 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
         body: "{}",
       });
       const data = await r.json().catch(() => ({}));
-      if (!r.ok) {
-        const message = r.status === 401
-          ? "That value is not the SEED_SECRET. Paste the actual secret value you saved in Lovable, not the login error text."
+      if (!r.ok || data?.ok === false) {
+        const message = data?.error === "Invalid SEED_SECRET" || r.status === 401
+          ? "Incorrect seed secret. Demo data was not re-seeded."
           : data?.error || `Seed failed (${r.status})`;
         setSeedError(message);
         return toast.error(message);
