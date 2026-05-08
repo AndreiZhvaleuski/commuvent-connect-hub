@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
-import { Info, Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { InfoIcon, SpinnerIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { DEMO_HOSTS, DEMO_CHECKERS, DEMO_ATTENDEES, DEMO_PASSWORD, type DemoAccount } from "@/lib/demoAccounts";
 
