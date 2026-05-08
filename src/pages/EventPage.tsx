@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ArrowSquareOutIcon as ExternalLink, GlobeIcon as Globe, MapPinIcon as MapPin, ShareIcon, UsersIcon as Users } from "@phosphor-icons/react";
+import { ArrowSquareOutIcon as ExternalLink, FlagIcon, GlobeIcon as Globe, MapPinIcon as MapPin, ShareIcon, UsersIcon as Users } from "@phosphor-icons/react";
 import { EventDateTime } from "@/components/event-datetime";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
