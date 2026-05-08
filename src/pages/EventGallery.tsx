@@ -51,7 +51,10 @@ export default function EventGalleryPage() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const filterParam = searchParams.get("filter");
-  const filter: Filter = filterParam === "mine" || filterParam === "pending" ? filterParam : "published";
+  const filter: Filter =
+    filterParam === "mine" || filterParam === "pending" || filterParam === "review"
+      ? filterParam
+      : "published";
   const setFilter = (next: Filter) => {
     const sp = new URLSearchParams(searchParams);
     if (next === "published") sp.delete("filter");
