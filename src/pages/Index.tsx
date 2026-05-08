@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRightIcon as ArrowRight, UsersIcon as Users } from "@phosphor-icons/react";
+import { ArrowRightIcon as ArrowRight, UsersIcon as Users, SparkleIcon } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,20 +35,24 @@ export default function Index() {
   const list = events ?? [];
 
   return (
-    <><section className="relative overflow-hidden border-b">
-        <div className="container mx-auto px-4 py-24 sm:py-32 text-center">
-          <Badge variant="secondary" className="mb-6">Free for communities, forever</Badge>
-          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight">
-            Where community meets event.
+    <>
+      <section className="relative overflow-hidden border-b bg-gradient-to-b from-primary/5 to-transparent">
+        <div className="container mx-auto max-w-6xl px-4 py-16 sm:py-24 text-center">
+          <Badge variant="secondary" className="mb-5">
+            <SparkleIcon className="mr-1 h-3.5 w-3.5" />
+            Free for communities, forever
+          </Badge>
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-semibold tracking-tight max-w-3xl mx-auto">
+            Where community meets <span className="text-primary">event.</span>
           </h1>
-          <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
             Host, attend, and check-in to events your community actually shows up for. No fees, no fluff.
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Button render={<Link to="/explore" />} size="lg">
+          <div className="mt-7 flex flex-col sm:flex-row sm:flex-wrap sm:justify-center gap-3">
+            <Button render={<Link to="/explore" />} size="lg" className="w-full sm:w-auto">
               Explore events <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button render={<Link to="/become-a-host" />} size="lg" variant="outline">
+            <Button render={<Link to="/become-a-host" />} size="lg" variant="outline" className="w-full sm:w-auto">
               Become a host
             </Button>
           </div>
