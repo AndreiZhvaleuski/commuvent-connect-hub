@@ -87,6 +87,22 @@ export default function EventGalleryPage() {
     [eventId]
   );
 
+  const { data: isHost } = useAsyncResource<boolean>(
+    async (signal) => {
+      if (!user || !event?.host_id) return false;
+      const { data, error } = await supabase
+        .from("host_members")
+        .select("role")
+        .eq("host_id", event.host_id)
+        .eq("user_id", user.id)
+        .abortSignal(signal)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return !!data;
+    },
+    [user?.id, event?.host_id]
+  );
+
   const { data, loading, error, refetch } = useAsyncResource<{ photos: Photo[]; total: number }>(
     async (signal) => {
       let q = supabase
