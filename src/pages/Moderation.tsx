@@ -36,7 +36,7 @@ type ReportRow = {
 };
 
 type Reporter = { id: string; display_name: string | null; avatar_url: string | null; email: string | null };
-type EventInfo = { id: string; title: string; start_at: string; description: string | null };
+type EventInfo = { id: string; title: string; cover_image_url: string | null };
 type PhotoInfo = { id: string; storage_path: string; event_id: string; status: string };
 
 type Data = {
