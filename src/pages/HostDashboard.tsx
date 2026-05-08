@@ -173,7 +173,7 @@ export default function HostDashboard() {
     return (
       <div className="container mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8 h-14 w-64 animate-pulse rounded bg-muted" />
-        <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>
+        <PageSpinner />
       </div>
     );
   }
