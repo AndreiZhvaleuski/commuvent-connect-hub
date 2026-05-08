@@ -16,6 +16,7 @@ export default function EventManage() {
   const [host, setHost] = useState<Host | null>(null);
   const [event, setEvent] = useState<ManagedEvent | null>(null);
   const [stat, setStat] = useState<EventStat | undefined>(undefined);
+  const [openReports, setOpenReports] = useState(0);
   const [busy, setBusy] = useState(true);
   const [denied, setDenied] = useState(false);
 
