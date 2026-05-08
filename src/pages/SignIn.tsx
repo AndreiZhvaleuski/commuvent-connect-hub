@@ -68,6 +68,9 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
     setPassword(DEMO_PASSWORD);
     setDemoOpen(false);
     toast.success(`Filled ${acc.name}`);
+    if (mode === "signup") {
+      navigate(`/sign-in?redirect=${encodeURIComponent(redirect)}`);
+    }
   };
 
   const reseed = async () => {
