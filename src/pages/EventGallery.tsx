@@ -238,7 +238,7 @@ export default function EventGalleryPage() {
       {user && (
         <Tabs value={filter} onValueChange={(v) => { setFilter(v as Filter); setPage(1); }} className="mb-4">
           <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="published">Published</TabsTrigger>
             <TabsTrigger value="mine">Uploaded by me</TabsTrigger>
             <TabsTrigger value="pending">My pending</TabsTrigger>
           </TabsList>
