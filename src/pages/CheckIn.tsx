@@ -22,7 +22,7 @@ export default function CheckIn() {
   const { user, loading } = useAuth();
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [counters, setCounters] = useState({ going: 0, checkedIn: 0 });
+  const [counters, setCounters] = useState({ going: 0, waitlist: 0, checkedIn: 0 });
   const [now, setNow] = useState(() => Date.now());
   const inputRef = useRef<HTMLInputElement>(null);
 
