@@ -88,7 +88,7 @@ export default function HostDashboard() {
         role,
       };
     },
-    [ready, hostId, user?.id]
+    [ready, hostId, user?.id, sortDir]
   );
 
   const role = data?.role ?? null;
