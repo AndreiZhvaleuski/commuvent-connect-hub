@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ArrowSquareOutIcon as ExternalLink, FlagIcon as Flag, GlobeIcon as Globe, MapPinIcon as MapPin, ShareIcon, UsersIcon as Users } from "@phosphor-icons/react";
+import { ArrowSquareOutIcon as ExternalLink, GlobeIcon as Globe, MapPinIcon as MapPin, ShareIcon, UsersIcon as Users } from "@phosphor-icons/react";
 import { EventDateTime } from "@/components/event-datetime";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -10,9 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { EventGallery } from "@/components/event-gallery";
 import { MarkdownView } from "@/components/markdown-view";
@@ -44,8 +42,6 @@ export default function EventPage() {
   const [params, setParams] = useSearchParams();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [acting, setActing] = useState(false);
-  const [reportOpen, setReportOpen] = useState(false);
-  const [reportReason, setReportReason] = useState("");
   const [liveGoing, setLiveGoing] = useState<number | null>(null);
 
   const userId = user?.id ?? null;
@@ -162,16 +158,7 @@ export default function EventPage() {
     } finally { setActing(false); }
   };
 
-  const submitReport = async () => {
-    if (!requireAuth()) return;
-    if (reportReason.trim().length < 5) { toast.error("Please describe the issue"); return; }
-    const { error } = await supabase.from("reports").insert({
-      target_type: "event", target_id: event.id, reason: reportReason.trim(), reporter_id: user!.id,
-    });
-    if (error) { toast.error(error.message); return; }
-    toast.success("Report submitted. Thank you.");
-    setReportOpen(false); setReportReason("");
-  };
+
 
   return (
     <>{event.cover_image_url && (
@@ -257,25 +244,6 @@ export default function EventPage() {
               }}>
                 <ShareIcon className="mr-1 h-4 w-4" />Share this event
               </Button>
-              <Dialog open={reportOpen} onOpenChange={setReportOpen}>
-                <DialogTrigger render={<Button variant="destructive" size="sm" />}>
-                  <Flag className="mr-1 h-4 w-4" />Report event
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Report this event</DialogTitle>
-                    <DialogDescription>Tell us what's wrong. The host will review your report.</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-2">
-                    <Label htmlFor="reason">Reason</Label>
-                    <Textarea id="reason" rows={4} value={reportReason} onChange={(e) => setReportReason(e.target.value)} />
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setReportOpen(false)}>Cancel</Button>
-                    <Button onClick={submitReport}>Submit</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
             </div>
 
             <EventGallery eventId={event.id} />
