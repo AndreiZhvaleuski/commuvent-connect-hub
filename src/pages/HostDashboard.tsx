@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { PlusIcon as Plus, ArrowSquareOutIcon as ExternalLink } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,78 +9,116 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EventManagementCard, type ManagedEvent as Ev, type EventStat as Stat } from "@/components/event-management-card";
+import { ErrorState } from "@/components/error-state";
+import { SkeletonGrid } from "@/components/skeleton-grid";
+import { useAsyncResource } from "@/hooks/use-async-resource";
 
 type Host = { id: string; name: string; logo_url: string | null; bio: string | null };
+type DashboardData = {
+  host: Host | null;
+  events: Ev[];
+  stats: Record<string, Stat>;
+  role: "host" | "checker" | null;
+};
 
 export default function HostDashboard() {
   const { hostId } = useParams<{ hostId: string }>();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const [host, setHost] = useState<Host | null>(null);
-  const [events, setEvents] = useState<Ev[]>([]);
-  const [stats, setStats] = useState<Record<string, Stat>>({});
-  const [role, setRole] = useState<"host" | "checker" | null>(null);
-  const [busy, setBusy] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = searchParams.get("tab") === "past" ? "past" : "upcoming";
-  const loadStats = useMemo(
-    () => async () => {
-      if (!hostId) return;
-      const { data } = await supabase.rpc("event_stats", { p_host_id: hostId });
-      const map: Record<string, Stat> = {};
-      ((data ?? []) as Stat[]).forEach((s) => { map[s.event_id] = s; });
-      setStats(map);
-    },
-    [hostId]
-  );
 
   useEffect(() => {
     if (loading) return;
-    if (!user) { navigate(`/sign-in?redirect=${encodeURIComponent(`/dashboard/${hostId}`)}`); return; }
-    if (!hostId) return;
-    (async () => {
-      setBusy(true);
-      const { data: member } = await supabase
+    if (!user) navigate(`/sign-in?redirect=${encodeURIComponent(`/dashboard/${hostId}`)}`);
+  }, [user, loading, navigate, hostId]);
+
+  const ready = !loading && !!user && !!hostId;
+  const { data, loading: busy, error, refetch } = useAsyncResource<DashboardData>(
+    async (signal) => {
+      if (!ready) {
+        return { host: null, events: [], stats: {}, role: null };
+      }
+      const { data: member, error: memberErr } = await supabase
         .from("host_members")
         .select("role")
-        .eq("host_id", hostId)
-        .eq("user_id", user.id)
+        .eq("host_id", hostId!)
+        .eq("user_id", user!.id)
+        .abortSignal(signal)
         .maybeSingle();
-      const r = (member?.role as "host" | "checker" | undefined) ?? null;
-      setRole(r);
-      const isChecker = r === "checker";
-      const eventsQuery = supabase.from("events")
-        .select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url,time_zone")
-        .eq("host_id", hostId).order("start_at", { ascending: false });
-      if (isChecker) eventsQuery.eq("status", "published");
-      const [{ data: h }, { data: ev }] = await Promise.all([
-        supabase.from("hosts").select("id,name,logo_url,bio").eq("id", hostId).maybeSingle(),
-        eventsQuery,
-      ]);
-      setHost((h ?? null) as Host | null);
-      setEvents((ev ?? []) as Ev[]);
-      await loadStats();
-      setBusy(false);
-    })();
-  }, [hostId, user, loading, navigate, loadStats]);
+      if (memberErr) throw new Error(memberErr.message);
+      const role = (member?.role as "host" | "checker" | undefined) ?? null;
+      const isChecker = role === "checker";
 
-  // Realtime: refresh stats when check-ins or RSVPs change for any event in this host
+      let eventsQuery = supabase.from("events")
+        .select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url,time_zone")
+        .eq("host_id", hostId!).order("start_at", { ascending: false });
+      if (isChecker) eventsQuery = eventsQuery.eq("status", "published");
+
+      const [hostRes, evRes, statsRes] = await Promise.all([
+        supabase.from("hosts").select("id,name,logo_url,bio").eq("id", hostId!).abortSignal(signal).maybeSingle(),
+        eventsQuery.abortSignal(signal),
+        supabase.rpc("event_stats", { p_host_id: hostId! }).abortSignal(signal),
+      ]);
+      if (hostRes.error) throw new Error(hostRes.error.message);
+      if (evRes.error) throw new Error(evRes.error.message);
+      if (statsRes.error) throw new Error(statsRes.error.message);
+
+      const statsMap: Record<string, Stat> = {};
+      ((statsRes.data ?? []) as Stat[]).forEach((s) => { statsMap[s.event_id] = s; });
+
+      return {
+        host: (hostRes.data ?? null) as Host | null,
+        events: (evRes.data ?? []) as Ev[],
+        stats: statsMap,
+        role,
+      };
+    },
+    [ready, hostId, user?.id]
+  );
+
+  const role = data?.role ?? null;
+  const host = data?.host ?? null;
+  const events = data?.events ?? [];
+  const stats = data?.stats ?? {};
+
+  // Realtime: refresh when check-ins or RSVPs change for any event in this host
   useEffect(() => {
     if (!hostId || !role) return;
     const ch = supabase
       .channel(`host-stats-${hostId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "check_ins" }, loadStats)
-      .on("postgres_changes", { event: "*", schema: "public", table: "rsvps" }, loadStats)
+      .on("postgres_changes", { event: "*", schema: "public", table: "check_ins" }, () => refetch())
+      .on("postgres_changes", { event: "*", schema: "public", table: "rsvps" }, () => refetch())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [hostId, role, loadStats]);
+  }, [hostId, role, refetch]);
 
   const now = new Date().toISOString();
   const upcoming = useMemo(() => events.filter((e) => e.end_at >= now), [events, now]);
   const past = useMemo(() => events.filter((e) => e.end_at < now), [events, now]);
 
   if (busy) {
-    return <AppLayout><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></AppLayout>;
+    return (
+      <AppLayout>
+        <div className="container mx-auto max-w-6xl px-4 py-12">
+          <div className="mb-8 h-14 w-64 animate-pulse rounded bg-muted" />
+          <SkeletonGrid count={3} className="grid gap-3" itemHeightClass="h-28" />
+        </div>
+      </AppLayout>
+    );
+  }
+  if (error) {
+    return (
+      <AppLayout>
+        <div className="container mx-auto max-w-6xl px-4 py-12">
+          <ErrorState
+            title="Couldn't load dashboard"
+            description={error.message}
+            onRetry={refetch}
+          />
+        </div>
+      </AppLayout>
+    );
   }
   if (!host) {
     return <AppLayout><div className="container mx-auto px-4 py-12"><p>Host not found.</p></div></AppLayout>;
