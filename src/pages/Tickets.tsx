@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { buildICS, downloadICS, googleCalendarUrl } from "@/lib/calendar";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 type Row = {
   id: string;
@@ -86,20 +87,30 @@ export default function Tickets() {
   const upcoming = rows.filter((r) => r.events && new Date(r.events.end_at).getTime() >= now);
   const past = rows.filter((r) => r.events && new Date(r.events.end_at).getTime() < now);
 
-  const doCancel = async (eventId: string) => {
-    if (!confirm("Cancel this RSVP?")) return;
-    const { data, error } = await supabase.functions.invoke("rsvp_cancel", { body: { event_id: eventId } });
-    const code = (data?.error as string | undefined) ?? error?.message;
-    if (code) {
-      const msg =
-        code === "event_ended" ? "This event has ended."
-        : code === "already_checked_in" ? "You've already checked in — RSVP can't be cancelled."
-        : code;
-      toast.error(msg);
-      return;
+  const [confirmCancelEventId, setConfirmCancelEventId] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+
+  const doCancel = async () => {
+    const eventId = confirmCancelEventId;
+    if (!eventId) return;
+    setCancelling(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("rsvp_cancel", { body: { event_id: eventId } });
+      const code = (data?.error as string | undefined) ?? error?.message;
+      if (code) {
+        const msg =
+          code === "event_ended" ? "This event has ended."
+          : code === "already_checked_in" ? "You've already checked in — RSVP can't be cancelled."
+          : code;
+        toast.error(msg);
+        return;
+      }
+      toast.success("RSVP cancelled");
+      load();
+    } finally {
+      setCancelling(false);
+      setConfirmCancelEventId(null);
     }
-    toast.success("RSVP cancelled");
-    load();
   };
 
   if (busy) return <><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></>;
@@ -128,15 +139,26 @@ export default function Tickets() {
             </TabsList>
             <TabsContent value="upcoming" className="pt-4 space-y-4">
               {upcoming.length === 0 && <Card><CardContent className="py-12 text-center text-muted-foreground">No upcoming tickets.</CardContent></Card>}
-              {upcoming.map((r) => <TicketCard key={r.id} row={r} qr={qrs[r.id]} onCancel={() => doCancel(r.event_id)} />)}
+              {upcoming.map((r) => <TicketCard key={r.id} row={r} qr={qrs[r.id]} onCancel={() => setConfirmCancelEventId(r.event_id)} />)}
             </TabsContent>
             <TabsContent value="past" className="pt-4 space-y-4">
               {past.length === 0 && <Card><CardContent className="py-12 text-center text-muted-foreground">No past tickets.</CardContent></Card>}
-              {past.map((r) => <TicketCard key={r.id} row={r} qr={qrs[r.id]} onCancel={() => doCancel(r.event_id)} pastView />)}
+              {past.map((r) => <TicketCard key={r.id} row={r} qr={qrs[r.id]} onCancel={() => setConfirmCancelEventId(r.event_id)} pastView />)}
             </TabsContent>
           </Tabs>
         )}
       </div>
+      <ConfirmDialog
+        open={!!confirmCancelEventId}
+        onOpenChange={(o) => !o && setConfirmCancelEventId(null)}
+        title="Cancel this RSVP?"
+        description="You'll lose your spot. If the event is full, your seat may be given to someone on the waitlist."
+        confirmLabel="Cancel RSVP"
+        cancelLabel="Keep RSVP"
+        destructive
+        loading={cancelling}
+        onConfirm={doCancel}
+      />
     </>
   );
 }
