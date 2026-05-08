@@ -45,6 +45,9 @@ export default function EventPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [acting, setActing] = useState(false);
   const [liveGoing, setLiveGoing] = useState<number | null>(null);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reporting, setReporting] = useState(false);
 
   const userId = user?.id ?? null;
   const { data, loading: busy, error, refetch } = useAsyncResource<LoadResult>(
