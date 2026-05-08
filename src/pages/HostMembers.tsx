@@ -179,7 +179,6 @@ export default function HostMembers() {
                         <span className="truncate font-medium">{m.profile?.display_name ?? "Unnamed"}</span>
                         {isMe && <Badge variant="outline">You</Badge>}
                       </div>
-                      <div className="truncate text-xs text-muted-foreground">{m.profile?.email ?? "—"}</div>
                       <div className="text-xs text-muted-foreground">Joined {format(new Date(m.created_at), "MMM d, yyyy")}</div>
                     </div>
                   </div>
