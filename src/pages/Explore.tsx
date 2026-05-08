@@ -89,7 +89,7 @@ export default function Explore() {
       if (error) throw new Error(error.message);
       return { rows: (data ?? []) as Ev[], total: count ?? 0 };
     },
-    [q, from, to, includePast, mode, page],
+    [q, from, to, includePast, mode, sortDir, page],
     { debounceMs: 250, keepPreviousData: true }
   );
 
