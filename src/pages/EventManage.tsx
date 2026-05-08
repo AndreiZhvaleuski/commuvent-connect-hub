@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowSquareOutIcon as ExternalLink, ArrowLeftIcon as ArrowLeft } from "@phosphor-icons/react";
+import { ArrowSquareOutIcon as ExternalLink, ArrowLeftIcon as ArrowLeft, FlagIcon } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
