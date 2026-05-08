@@ -101,7 +101,7 @@ export default function EventEditor() {
   const [persistedSlug, setPersistedSlug] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("draft");
   const [busy, setBusy] = useState(false);
-  const [bootstrapping, setBootstrapping] = useState(isEdit);
+  const [bootstrapping, setBootstrapping] = useState(true);
   const [, forceTick] = useState(0);
 
   const tzs = useMemo(() => listTimezones(), []);
