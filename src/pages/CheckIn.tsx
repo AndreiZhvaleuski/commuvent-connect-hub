@@ -170,25 +170,21 @@ export default function CheckIn() {
 
         <div className="flex flex-wrap gap-2">
           <Button
-            asChild
             size="sm"
             variant="outline"
             className="min-h-11"
+            render={<a href={`/e/${event.id}`} target="_blank" rel="noopener noreferrer" />}
           >
-            <a href={`/e/${event.id}`} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="w-4 h-4 mr-2" /> Public page
-            </a>
+            <ExternalLink className="w-4 h-4 mr-2" /> Public page
           </Button>
           {isHost && (
             <Button
-              asChild
               size="sm"
               variant="outline"
               className="min-h-11"
+              render={<Link to={`/dashboard/${event.host_id}/events/${event.id}`} />}
             >
-              <Link to={`/dashboard/${event.host_id}/events/${event.id}`}>
-                <Settings className="w-4 h-4 mr-2" /> Manage event
-              </Link>
+              <Settings className="w-4 h-4 mr-2" /> Manage event
             </Button>
           )}
         </div>
