@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EventListControls, type EventView, type EventSortDir } from "@/components/event-list-controls";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EventManagementCard, type ManagedEvent as Ev, type EventStat as Stat } from "@/components/event-management-card";
 import { ErrorState } from "@/components/error-state";
@@ -25,7 +25,22 @@ export default function HostDashboard() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const tab = searchParams.get("tab") === "past" ? "past" : "upcoming";
+  const tab: EventView = searchParams.get("tab") === "past" ? "past" : "upcoming";
+  const sortDir: EventSortDir = searchParams.get("sort") === "desc" ? "desc" : "asc";
+  const setTab = (v: EventView) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (v === "upcoming") next.delete("tab"); else next.set("tab", v);
+      return next;
+    }, { replace: true });
+  };
+  const setSortDir = (v: EventSortDir) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (v === "asc") next.delete("sort"); else next.set("sort", v);
+      return next;
+    }, { replace: true });
+  };
 
   useEffect(() => {
     if (loading) return;
@@ -51,7 +66,7 @@ export default function HostDashboard() {
 
       let eventsQuery = supabase.from("events")
         .select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url,time_zone")
-        .eq("host_id", hostId!).order("start_at", { ascending: false });
+        .eq("host_id", hostId!).order("start_at", { ascending: sortDir === "asc" });
       if (isChecker) eventsQuery = eventsQuery.eq("status", "published");
 
       const [hostRes, evRes, statsRes] = await Promise.all([
@@ -148,21 +163,23 @@ export default function HostDashboard() {
           )}
         </div>
 
-        <Tabs
-          value={tab}
-          onValueChange={(v) => setSearchParams(v === "upcoming" ? {} : { tab: v }, { replace: true })}
-        >
-          <TabsList>
-            <TabsTrigger value="upcoming">Upcoming ({upcoming.length})</TabsTrigger>
-            <TabsTrigger value="past">Past ({past.length})</TabsTrigger>
-          </TabsList>
-          <TabsContent value="upcoming" className="pt-4">
-            <EventList events={upcoming} stats={stats} hostId={host.id} role={role ?? "checker"} emptyText="No upcoming events." />
-          </TabsContent>
-          <TabsContent value="past" className="pt-4">
-            <EventList events={past} stats={stats} hostId={host.id} role={role ?? "checker"} emptyText="No past events yet." />
-          </TabsContent>
-        </Tabs>
+        <EventListControls
+          view={tab}
+          onViewChange={setTab}
+          sortDir={sortDir}
+          onSortChange={setSortDir}
+          upcomingCount={upcoming.length}
+          pastCount={past.length}
+        />
+        <div className="pt-4">
+          <EventList
+            events={tab === "upcoming" ? upcoming : past}
+            stats={stats}
+            hostId={host.id}
+            role={role ?? "checker"}
+            emptyText={tab === "upcoming" ? "No upcoming events." : "No past events yet."}
+          />
+        </div>
       </div>
     </>
   );
