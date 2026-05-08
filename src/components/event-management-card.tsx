@@ -53,14 +53,3 @@ export function EventManagementCard({ event, stat, hostId, showManage = true, ro
   );
 }
 
-function StatBox({ label, value, icon, suffix }: { label: string; value: number; icon: React.ReactNode; suffix?: string }) {
-  return (
-    <div className="rounded-lg border bg-card p-3">
-      <div className="text-xs text-muted-foreground flex items-center gap-1">
-        <span className="shrink-0">{icon}</span>
-        <span className="truncate">{label}</span>
-      </div>
-      <div className="mt-1 text-xl font-semibold tabular-nums">{value}{suffix && <span className="text-sm font-normal text-muted-foreground ml-1">{suffix}</span>}</div>
-    </div>
-  );
-}
