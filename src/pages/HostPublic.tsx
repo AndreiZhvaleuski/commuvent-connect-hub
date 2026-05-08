@@ -48,8 +48,8 @@ export default function HostPublic() {
         .from("hosts")
         .select("id,name,bio,logo_url,contact_email")
         .eq("id", id)
-        .maybeSingle()
-        .abortSignal(signal);
+        .abortSignal(signal)
+        .maybeSingle();
       if (hErr) throw new Error(hErr.message);
       if (!h) return empty;
 
