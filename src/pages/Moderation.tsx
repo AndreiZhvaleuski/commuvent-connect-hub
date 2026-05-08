@@ -240,7 +240,7 @@ export default function Moderation() {
               {pending?.action === "hide"
                 ? pending?.report.target_type === "photo"
                   ? "The photo will be rejected and removed from the public gallery. The report will be marked as actioned."
-                  : "The event will be reverted to a private draft and removed from public listings. The report will be marked as actioned."
+                  : "The event will be reverted to a draft and removed from public listings. The host can republish it later. The report will be marked as actioned."
                 : "The report will be dismissed without changes. The reporter can submit a new report after this is resolved."}
             </AlertDialogDescription>
           </AlertDialogHeader>
