@@ -76,7 +76,7 @@ export default function Explore() {
       return (data ?? []) as Ev[];
     },
     [q, from, to, includePast, mode],
-    { debounceMs: 250, keepPreviousData: true }
+    { debounceMs: 250 }
   );
 
   const list = events ?? [];
@@ -173,7 +173,7 @@ export default function Explore() {
           </CardContent>
         </Card>
 
-        {busy && !events ? (
+        {busy ? (
           <SkeletonGrid count={6} />
         ) : error ? (
           <ErrorState
@@ -189,7 +189,7 @@ export default function Explore() {
             action={hasFilter ? <Button variant="outline" size="sm" onClick={clearAll}>Clear filters</Button> : undefined}
           />
         ) : (
-          <div className={cn("grid gap-4 sm:grid-cols-2 lg:grid-cols-3", busy && "opacity-60 transition-opacity")}>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {list.map((e) => (
               <PublicEventCard key={e.id} event={e} showStatusBadge={includePast} />
             ))}

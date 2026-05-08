@@ -125,8 +125,7 @@ export default function MyEvents() {
       if (error) throw new Error(error.message);
       return (data ?? []) as Row[];
     },
-    [ready, hostId, fromStr, toStr, search, time, page],
-    { keepPreviousData: true }
+    [ready, hostId, fromStr, toStr, search, time, page]
   );
 
   const list = rows ?? [];
@@ -218,7 +217,7 @@ export default function MyEvents() {
           </TabsList>
         </Tabs>
 
-        {rowsLoading && !rows ? (
+        {rowsLoading ? (
           <SkeletonGrid count={3} className="grid gap-3" itemHeightClass="h-28" />
         ) : error ? (
           <ErrorState
@@ -238,7 +237,7 @@ export default function MyEvents() {
             action={hasFilter ? <Button variant="outline" size="sm" onClick={resetFilters}>Clear filters</Button> : undefined}
           />
         ) : (
-          <div className={cn("grid gap-3", rowsLoading && "opacity-60 transition-opacity")}>
+          <div className="grid gap-3">
             {list.map((r) => (
               <MyEventRow key={r.event_id} row={r} />
             ))}
