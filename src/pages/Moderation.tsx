@@ -179,7 +179,10 @@ export default function Moderation() {
         <div className="space-y-3">
           {reports.map((r) => {
             const reporter = r.reporter_id ? reporters[r.reporter_id] : undefined;
-            const ev = r.target_type === "event" ? events[r.target_id] : undefined;
+            const photo = r.target_type === "photo" ? photos[r.target_id] : undefined;
+            const ev = r.target_type === "event"
+              ? events[r.target_id]
+              : photo ? events[photo.event_id] : undefined;
             const initials = (reporter?.display_name ?? reporter?.email ?? "?").slice(0, 2).toUpperCase();
             return (
               <Card key={r.id}>
