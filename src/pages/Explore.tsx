@@ -17,7 +17,10 @@ import { ErrorState } from "@/components/error-state";
 import { Spinner } from "@/components/ui/spinner";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 import { ListPagination } from "@/components/list-pagination";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
+
+type SortDir = "asc" | "desc";
 
 const PAGE_SIZE = 12;
 
