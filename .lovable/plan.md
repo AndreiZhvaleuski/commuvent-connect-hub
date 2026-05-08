@@ -1,78 +1,54 @@
 ## Goal
+Tighten gallery uploads, paginate the gallery using the existing data hook, add a zoom viewer, and let users delete their own pending uploads to free up their 5-slot quota.
 
-Refactor `src/pages/HostDashboard.tsx` so the host header doesn't flicker when events refetch, events use a proper paginated `useAsyncResource` with all states covered, and tab/sort/page are reflected in the URL.
+## What's already in place
+- Dedicated `gallery` storage bucket (public).
+- `gallery_photos` table with `force_pending_gallery` trigger (`status='pending'` on insert).
+- Upload UI in `src/components/event-gallery.tsx` (8 MB cap, no cropping).
+- `useAsyncResource` hook and `ListPagination` component.
+- Host moderation queue in `src/pages/Moderation.tsx`.
 
 ## Changes
 
-### 1. Split into two independent resources
+### 1. Bucket hardening (migration)
+Update the existing `gallery` bucket so limits are enforced server-side:
+- `file_size_limit = 5 * 1024 * 1024` (5 MB)
+- `allowed_mime_types = ['image/jpeg','image/png','image/webp','image/gif','image/heic']`
 
-Two `useAsyncResource` calls in `HostDashboard`:
+### 2. Per-user pending cap of 5 (migration)
+`BEFORE INSERT` trigger on `public.gallery_photos`: if the user already has ≥ 5 rows for the same `event_id` with `status='pending'`, raise an exception ("You already have 5 photos awaiting approval for this event"). Approved/rejected don't count.
 
-- `**headerResource**` — fetches host (`hosts`) + current user's `role` from `host_members`. Deps: `[ready, hostId, user?.id]`. Drives the header (avatar, name, action buttons, "checker" badge). Once loaded, it stays mounted and is unaffected by event filter/sort/page changes.
-- `**eventsResource**` — fetches a single page of events plus their stats. Deps: `[ready, hostId, user?.id, role, tab, sortDir, page]`. The list should show loader indicator.
+### 3. Allow users to delete their own pending uploads (migration + UI)
+**DB:**
+- Add RLS policy `gallery_delete_own_pending` on `public.gallery_photos`: `DELETE` allowed when `auth.uid() = user_id AND status = 'pending'`. (Hosts can already moderate via `gallery_update_host`; explicit delete by owner is intentionally limited to pending so approved photos require host action.)
+- Add a storage trigger or follow-up cleanup: when a row is deleted from `gallery_photos`, also delete the corresponding object from the `gallery` bucket. Implemented as an `AFTER DELETE` trigger that calls `storage.delete_object('gallery', OLD.storage_path)` (wrapped via a `SECURITY DEFINER` function in the `public` schema, since we don't modify the `storage` schema).
 
-### 2. Server-side filtering, sorting, pagination
+**UI (`event-gallery.tsx`):**
+- On each thumbnail owned by the current user **and** still pending, show a small Trash button (top-right, mirroring the Flag button).
+- Click → confirm dialog ("Delete this pending upload?") → delete the row; toast on success and `refetch()`.
 
-In the events fetcher:
+### 4. Gallery list: paginate via `useAsyncResource` + `ListPagination`
+Refactor `src/components/event-gallery.tsx`:
+- Replace ad-hoc state with `useAsyncResource` keyed on `[eventId, user?.id, page]`, `keepPreviousData: true`.
+- Fetcher: Supabase `.range(from, to)` + `{ count: 'exact' }` to get rows + total.
+- Render `ListPagination` below the grid (12 per page).
+- Reset to page 1 after upload; `refetch()` after upload, delete, or report.
 
-- Apply tab filter on the server: `upcoming` → `.gte("end_at", now)`, `past` → `.lt("end_at", now)`.
-- Apply sort on the server: `.order("start_at", { ascending: sortDir === "asc" })`.
-- Page with `.range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)` and `select(..., { count: "exact" })` to get `total`.
-- Keep checker restriction (`status = 'published'`).
-- Fetch `event_stats` once per page (same RPC) and build the `statsMap` for the returned event ids only.
-- Return `{ events, total }`.
+### 5. Upload constraints in the UI
+- Lower client-side size guard 8 MB → 5 MB; update toast wording.
+- Restrict `<input accept>` to the bucket mime types.
+- Helper line: "Up to 5 pending uploads per event · max 5 MB · JPG/PNG/WebP/GIF/HEIC."
+- Surface trigger error verbatim when the cap is hit.
 
-`PAGE_SIZE` constant (e.g. 10).
-
-### 3. URL persistence
-
-Reads/writes via `useSearchParams`:
-
-- `tab` — `upcoming` (default, omitted) | `past`
-- `sort` — `asc` (default, omitted) | `desc`
-- `page` — `1`-based, omitted when 1
-
-Changing any control resets `page` to 1 (except page changes themselves). All updates use `replace: true` to avoid polluting history.
-
-### 4. All states covered for the events section
-
-Inside the events panel (header always renders independently as long as `headerResource` succeeded):
-
-- **Loading (initial)** — skeleton list (a few placeholder cards). Only when `eventsResource.loading && !data`.
-- **Refetching** — show a `Spinner` using existing component.
-- **Error** — `ErrorState` with `onRetry={refetch}`.
-- **Empty** — existing `EmptyState` with tab-appropriate copy.
-- **Success** — list of `EventManagementCard` + pagination footer.
-
-Header section gets its own loading skeleton + error state, separate from events.
-
-### 5. Tab counts
-
-`EventListControls` currently shows `(upcoming.length)` / `(past.length)`. With server-side pagination we no longer have both lists in memory. Two options handled in plan:
-
-- Add two small `head: true, count: "exact"` count queries inside `headerResource` (one for upcoming, one for past) so counts load with the header and stay stable across page navigation. This keeps the existing `EventListControls` API intact.
-
-### 6. Pagination UI
-
-A simple footer below the list:
-
-```text
-[ Prev ]   Page X of Y   [ Next ]   (N total)
-```
-
-Buttons disabled at bounds; hidden entirely when `total <= PAGE_SIZE`. Use existing pagination approach on all other pages.
-
-### 7. Realtime
-
-Keep the existing realtime channel, but only call `eventsResource.refetch()` (stats live there now). Header counts also benefit, so also call `headerResource.refetch()` on `rsvps` / `check_ins` changes (cheap, just two count queries + host row from cache).
+### 6. Photo viewer with zoom (new component)
+- New `src/components/photo-lightbox.tsx`: shadcn `Dialog` with full-size image, wheel/pinch/button zoom (1×–4×), drag-to-pan, Zoom In / Out / Reset / Close, Esc / +/- / arrows. Prev/Next navigates the current page.
+- Clicking a thumbnail opens it. Flag and Trash buttons stay on the thumbnail.
 
 ## Files touched
-
-- `src/pages/HostDashboard.tsx` — main refactor.
-- `src/components/event-list-controls.tsx` — no API change needed; counts still passed in from header resource.
-- (new) small inline `Pagination` controls inside `HostDashboard.tsx`, or a tiny `src/components/pagination-controls.tsx` if it stays clean.
+- New migration (bucket limits + pending-cap trigger + owner delete policy + storage cleanup trigger).
+- `src/components/event-gallery.tsx` — pagination via `useAsyncResource`, new limits, delete-own-pending button + confirm, click-to-open lightbox.
+- `src/components/photo-lightbox.tsx` — new viewer.
 
 ## Out of scope
-
-- No DB schema or RPC changes.
-- No changes to `EventManagementCard` or other pages.
+- Image compression / EXIF stripping on upload.
+- Paginating the host moderation queue.
