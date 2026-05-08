@@ -356,7 +356,7 @@ export default function EventPage() {
               disabled={reporting}
               onClick={async () => {
                 if (!user || !event) return;
-                if (reportReason.trim().length < 5) { toast.error("Please describe the issue"); return; }
+                if (reportReason.trim().length < 5) { toast.error("Please add at least 5 characters describing the issue"); return; }
                 setReporting(true);
                 const { error } = await supabase.from("reports").insert({
                   target_type: "event", target_id: event.id, reason: reportReason.trim(), reporter_id: user.id,
