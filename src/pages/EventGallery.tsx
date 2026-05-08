@@ -289,10 +289,11 @@ export default function EventGalleryPage() {
             return (
               <>
                 {/* Mobile: dropdown */}
-                <div className="sm:hidden">
+                <div className="sm:hidden space-y-1.5">
+                  <Label htmlFor="gallery-filter" className="text-xs text-muted-foreground">Show</Label>
                   <Select value={filter} onValueChange={(v) => setFilter(v as Filter)}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
+                    <SelectTrigger id="gallery-filter" className="w-full">
+                      {options.find((o) => o.value === filter)?.label ?? "Select…"}
                     </SelectTrigger>
                     <SelectContent>
                       {options.map((o) => (
