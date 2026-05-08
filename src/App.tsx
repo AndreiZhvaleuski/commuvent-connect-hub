@@ -15,6 +15,7 @@ import EventEditor from "./pages/EventEditor.tsx";
 import HostPublic from "./pages/HostPublic.tsx";
 import Explore from "./pages/Explore.tsx";
 import EventPage from "./pages/EventPage.tsx";
+import EventGalleryPage from "./pages/EventGallery.tsx";
 import Tickets from "./pages/Tickets.tsx";
 import CheckIn from "./pages/CheckIn.tsx";
 import EventRsvps from "./pages/EventRsvps.tsx";
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/explore" element={<Explore />} />
               <Route path="/e/:eventId" element={<EventPage />} />
+              <Route path="/e/:eventId/gallery" element={<EventGalleryPage />} />
               <Route path="/h/:id" element={<HostPublic />} />
               <Route path="/sign-in" element={<SignIn mode="signin" />} />
               <Route path="/sign-up" element={<SignIn mode="signup" />} />
