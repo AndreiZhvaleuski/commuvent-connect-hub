@@ -216,7 +216,7 @@ export default function MyEvents() {
         </Tabs>
 
         {rowsLoading ? (
-          <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>
+          <PageSpinner />
         ) : error ? (
           <ErrorState
             title="Couldn't load your events"
