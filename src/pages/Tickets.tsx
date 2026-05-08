@@ -22,6 +22,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 import { EventListControls, type EventView, type EventSortDir } from "@/components/event-list-controls";
 import { ListPagination } from "@/components/list-pagination";
+import { EmptyState } from "@/components/empty-state";
 
 type Row = {
   id: string;
