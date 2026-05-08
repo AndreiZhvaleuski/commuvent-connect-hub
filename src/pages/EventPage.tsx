@@ -43,6 +43,7 @@ export default function EventPage() {
   const [reportReason, setReportReason] = useState("");
   const [canManage, setCanManage] = useState(false);
   const [canCheckIn, setCanCheckIn] = useState(false);
+  const [checkedIn, setCheckedIn] = useState(false);
   const load = async () => {
     if (!eventId) return;
     setBusy(true);
@@ -59,6 +60,12 @@ export default function EventPage() {
       const { data: r } = await supabase.from("rsvps").select("id,status,position,code,cancelled_at")
         .eq("event_id", eventId).eq("user_id", user.id).maybeSingle();
       setRsvp((r ?? null) as Rsvp | null);
+      if (r?.id) {
+        const { data: ci } = await supabase.from("check_ins").select("id").eq("rsvp_id", r.id).eq("undone", false).maybeSingle();
+        setCheckedIn(!!ci);
+      } else {
+        setCheckedIn(false);
+      }
       const { data: hm } = await supabase.from("host_members").select("role").eq("host_id", ev.host_id).eq("user_id", user.id).maybeSingle();
       setCanManage(hm?.role === "host");
       setCanCheckIn(!!hm);
@@ -66,6 +73,7 @@ export default function EventPage() {
       setRsvp(null);
       setCanManage(false);
       setCanCheckIn(false);
+      setCheckedIn(false);
     }
     setBusy(false);
   };
