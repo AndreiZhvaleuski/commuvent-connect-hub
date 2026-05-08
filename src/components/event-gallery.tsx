@@ -89,7 +89,7 @@ export function EventGallery({ eventId }: { eventId: string }) {
       </CardHeader>
       <CardContent>
         {photos.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No photos yet. Be the first to share!</p>
+          <EmptyState title="No photos yet" description="Be the first to share!" />
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {photos.map((p) => (
