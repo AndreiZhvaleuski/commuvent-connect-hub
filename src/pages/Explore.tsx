@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { MapPinIcon as MapPin } from "@phosphor-icons/react";
-import { MagnifyingGlassIcon as Search, GlobeIcon, SparkleIcon } from "@phosphor-icons/react";
+import { MagnifyingGlassIcon as Search, GlobeIcon, SparkleIcon, CalendarBlankIcon } from "@phosphor-icons/react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/app-layout";
@@ -14,6 +13,10 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import { PublicEventCard } from "@/components/public-event-card";
+import { EmptyState } from "@/components/empty-state";
+import { ErrorState } from "@/components/error-state";
+import { SkeletonGrid } from "@/components/skeleton-grid";
+import { useAsyncResource } from "@/hooks/use-async-resource";
 
 type LocationMode = "any" | "in_person" | "online";
 
@@ -46,13 +49,8 @@ export default function Explore() {
   const setMode = (v: LocationMode) => updateParam("type", v === "any" ? null : v);
   const clearAll = () => setSearchParams({}, { replace: true });
 
-  const [events, setEvents] = useState<Ev[]>([]);
-  const [busy, setBusy] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    const t = setTimeout(async () => {
-      setBusy(true);
+  const { data: events, loading: busy, error, refetch } = useAsyncResource<Ev[]>(
+    async (signal) => {
       let qb = supabase.from("events")
         .select("id,title,description,cover_image_url,start_at,end_at,time_zone,venue_address,online_url")
         .eq("status", "published").eq("visibility", "public")
@@ -73,13 +71,16 @@ export default function Explore() {
       if (mode === "online") qb = qb.not("online_url", "is", null);
       else if (mode === "in_person") qb = qb.not("venue_address", "is", null);
 
-      const { data } = await qb;
-      if (!cancelled) { setEvents((data ?? []) as Ev[]); setBusy(false); }
-    }, 250);
-    return () => { cancelled = true; clearTimeout(t); };
-  }, [q, from, to, includePast, mode]);
+      const { data, error } = await qb.abortSignal(signal);
+      if (error) throw new Error(error.message);
+      return (data ?? []) as Ev[];
+    },
+    [q, from, to, includePast, mode],
+    { debounceMs: 250, keepPreviousData: true }
+  );
 
-  
+  const list = events ?? [];
+  const hasFilter = !!(q || from || to || includePast || mode !== "any");
 
   return (
     <AppLayout>
@@ -172,15 +173,24 @@ export default function Explore() {
           </CardContent>
         </Card>
 
-        {busy ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => <Card key={i} className="animate-pulse"><CardContent className="h-48" /></Card>)}
-          </div>
-        ) : events.length === 0 ? (
-          <Card><CardContent className="py-16 text-center text-muted-foreground">No events match your filters.</CardContent></Card>
+        {busy && !events ? (
+          <SkeletonGrid count={6} />
+        ) : error ? (
+          <ErrorState
+            title="Couldn't load events"
+            description={error.message}
+            onRetry={refetch}
+          />
+        ) : list.length === 0 ? (
+          <EmptyState
+            icon={<CalendarBlankIcon className="h-8 w-8" />}
+            title={hasFilter ? "No events match your filters" : "No published events yet"}
+            description={hasFilter ? "Try clearing the search or expanding the date range." : "Check back soon for new events."}
+            action={hasFilter ? <Button variant="outline" size="sm" onClick={clearAll}>Clear filters</Button> : undefined}
+          />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {events.map((e) => (
+          <div className={cn("grid gap-4 sm:grid-cols-2 lg:grid-cols-3", busy && "opacity-60 transition-opacity")}>
+            {list.map((e) => (
               <PublicEventCard key={e.id} event={e} showStatusBadge={includePast} />
             ))}
           </div>

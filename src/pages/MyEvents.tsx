@@ -6,6 +6,7 @@ import {
   CheckCircleIcon as CheckCircle2,
   MagnifyingGlassIcon as Search,
   XIcon as X,
+  CalendarBlankIcon,
 } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -20,6 +21,11 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { DatePicker } from "@/components/date-picker";
 import { EventDateTime } from "@/components/event-datetime";
 import { StatBox } from "@/components/stat-box";
+import { EmptyState } from "@/components/empty-state";
+import { ErrorState } from "@/components/error-state";
+import { SkeletonGrid } from "@/components/skeleton-grid";
+import { useAsyncResource } from "@/hooks/use-async-resource";
+import { cn } from "@/lib/utils";
 
 type HostOpt = { id: string; name: string; logo_url: string | null };
 type Row = {
@@ -58,9 +64,6 @@ export default function MyEvents() {
   const page = Math.max(1, parseInt(params.get("page") || "1", 10));
 
   const [hosts, setHosts] = useState<HostOpt[]>([]);
-  const [rows, setRows] = useState<Row[]>([]);
-  const [total, setTotal] = useState(0);
-  const [busy, setBusy] = useState(true);
   const [searchInput, setSearchInput] = useState(search);
 
   // Debounce search input -> URL
@@ -103,32 +106,31 @@ export default function MyEvents() {
     })();
   }, [user, loading, navigate]);
 
-  // Load events whenever filters change
-  useEffect(() => {
-    if (loading || !user) return;
-    (async () => {
-      setBusy(true);
-      const { data, error } = await supabase.rpc("my_events", {
-        p_host_ids: hostId ? [hostId] : undefined,
-        p_from: fromStr ? new Date(fromStr).toISOString() : undefined,
-        p_to: toStr ? new Date(toStr).toISOString() : undefined,
-        p_search: search || undefined,
-        p_time_filter: time,
-        p_limit: PAGE_SIZE,
-        p_offset: (page - 1) * PAGE_SIZE,
-      });
-      if (!error) {
-        const list = (data ?? []) as Row[];
-        setRows(list);
-        setTotal(list[0]?.total_count ? Number(list[0].total_count) : 0);
-      } else {
-        setRows([]);
-        setTotal(0);
-      }
-      setBusy(false);
-    })();
-  }, [user, loading, hostId, fromStr, toStr, search, time, page]);
+  // Load events whenever filters change (with cancellation)
+  const ready = !loading && !!user;
+  const { data: rows, loading: rowsLoading, error, refetch } = useAsyncResource<Row[]>(
+    async (signal) => {
+      if (!ready) return [];
+      const { data, error } = await supabase
+        .rpc("my_events", {
+          p_host_ids: hostId ? [hostId] : undefined,
+          p_from: fromStr ? new Date(fromStr).toISOString() : undefined,
+          p_to: toStr ? new Date(toStr).toISOString() : undefined,
+          p_search: search || undefined,
+          p_time_filter: time,
+          p_limit: PAGE_SIZE,
+          p_offset: (page - 1) * PAGE_SIZE,
+        })
+        .abortSignal(signal);
+      if (error) throw new Error(error.message);
+      return (data ?? []) as Row[];
+    },
+    [ready, hostId, fromStr, toStr, search, time, page],
+    { keepPreviousData: true }
+  );
 
+  const list = rows ?? [];
+  const total = list[0]?.total_count ? Number(list[0].total_count) : 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   function update(patch: Record<string, string | null>) {
@@ -139,6 +141,11 @@ export default function MyEvents() {
     }
     if (!("page" in patch)) next.delete("page");
     setParams(next, { replace: true });
+  }
+
+  function resetFilters() {
+    setSearchInput("");
+    setParams(new URLSearchParams(), { replace: true });
   }
 
   const fromDate = useMemo(() => (fromStr ? new Date(fromStr) : null), [fromStr]);
@@ -195,14 +202,7 @@ export default function MyEvents() {
               />
             </div>
             {hasFilter && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSearchInput("");
-                  setParams(new URLSearchParams(), { replace: true });
-                }}
-              >
+              <Button variant="ghost" size="sm" onClick={resetFilters}>
                 <X className="mr-1 h-3 w-3" />
                 Reset
               </Button>
@@ -218,23 +218,28 @@ export default function MyEvents() {
           </TabsList>
         </Tabs>
 
-        {busy ? (
-          <div className="grid gap-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="h-28" />
-              </Card>
-            ))}
-          </div>
-        ) : rows.length === 0 ? (
-          <Card>
-            <CardContent className="py-16 text-center text-muted-foreground">
-              No events match your filters.
-            </CardContent>
-          </Card>
+        {rowsLoading && !rows ? (
+          <SkeletonGrid count={3} className="grid gap-3" itemHeightClass="h-28" />
+        ) : error ? (
+          <ErrorState
+            title="Couldn't load your events"
+            description={error.message}
+            onRetry={refetch}
+          />
+        ) : list.length === 0 ? (
+          <EmptyState
+            icon={<CalendarBlankIcon className="h-8 w-8" />}
+            title={hasFilter ? "No events match your filters" : "You don't have any events yet"}
+            description={
+              hasFilter
+                ? "Try clearing the search or expanding the date range."
+                : "Events from hosts where you're a host or checker will show up here."
+            }
+            action={hasFilter ? <Button variant="outline" size="sm" onClick={resetFilters}>Clear filters</Button> : undefined}
+          />
         ) : (
-          <div className="grid gap-3">
-            {rows.map((r) => (
+          <div className={cn("grid gap-3", rowsLoading && "opacity-60 transition-opacity")}>
+            {list.map((r) => (
               <MyEventRow key={r.event_id} row={r} />
             ))}
           </div>
