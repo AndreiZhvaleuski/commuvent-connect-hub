@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
 import { CalendarIcon as CalIcon, ClockIcon as Clock, DownloadSimpleIcon as Download, EyeIcon as Eye, EyeSlashIcon as EyeOff, ArrowSquareOutIcon as ExternalLink, MapPinIcon as MapPin, MagnifyingGlassPlusIcon as ZoomIn, TicketIcon as Ticket } from "@phosphor-icons/react";
