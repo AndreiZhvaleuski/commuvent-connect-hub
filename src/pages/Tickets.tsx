@@ -241,7 +241,7 @@ export default function Tickets() {
 
             <div className="pt-4 space-y-4">
               {busy ? (
-                <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>
+                <PageSpinner />
               ) : rows.length === 0 ? (
                 <EmptyState title={view === "upcoming" ? "No upcoming tickets." : "No past tickets."} />
               ) : (
