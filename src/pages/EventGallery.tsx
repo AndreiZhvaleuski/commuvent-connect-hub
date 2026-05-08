@@ -222,8 +222,14 @@ export default function EventGalleryPage() {
         </p>
       )}
 
-      {loading && photos.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+      {error ? (
+        <ErrorState title="Couldn't load photos" description={error.message} onRetry={refetch} />
+      ) : loading && photos.length === 0 ? (
+        <SkeletonGrid
+          count={8}
+          className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"
+          itemHeightClass="aspect-square h-auto"
+        />
       ) : photos.length === 0 ? (
         <EmptyState
           title="No photos yet"
