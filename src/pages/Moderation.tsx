@@ -130,6 +130,7 @@ export default function Moderation() {
   const reports = data?.reports ?? [];
   const reporters = data?.reporters ?? {};
   const events = data?.events ?? {};
+  const photos = data?.photos ?? {};
 
   const confirmResolve = async () => {
     if (!pending) return;
