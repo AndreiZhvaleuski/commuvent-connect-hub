@@ -18,6 +18,7 @@ export function EventGallery({ eventId }: { eventId: string }) {
         .from("gallery_photos")
         .select("id,storage_path", { count: "exact" })
         .eq("event_id", eventId)
+        .eq("status", "approved")
         .order("created_at", { ascending: false })
         .limit(PREVIEW_COUNT);
       return { photos: (rows ?? []) as Photo[], total: count ?? 0 };
