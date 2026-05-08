@@ -16,6 +16,10 @@ import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
 import { Spinner } from "@/components/ui/spinner";
 import { useAsyncResource } from "@/hooks/use-async-resource";
+import { ListPagination } from "@/components/list-pagination";
+import { useEffect, useState } from "react";
+
+const PAGE_SIZE = 12;
 
 type LocationMode = "any" | "in_person" | "online";
 
@@ -48,13 +52,19 @@ export default function Explore() {
   const setMode = (v: LocationMode) => updateParam("type", v === "any" ? null : v);
   const clearAll = () => setSearchParams({}, { replace: true });
 
-  const { data: events, loading: busy, error, refetch } = useAsyncResource<Ev[]>(
+  const [page, setPage] = useState(1);
+  // Reset to page 1 whenever filters change
+  useEffect(() => { setPage(1); }, [q, from, to, includePast, mode]);
+
+  const { data, loading: busy, error, refetch } = useAsyncResource<{ rows: Ev[]; total: number }>(
     async (signal) => {
+      const fromIdx = (page - 1) * PAGE_SIZE;
+      const toIdx = fromIdx + PAGE_SIZE - 1;
       let qb = supabase.from("events")
-        .select("id,title,description,cover_image_url,start_at,end_at,time_zone,venue_address,online_url")
+        .select("id,title,description,cover_image_url,start_at,end_at,time_zone,venue_address,online_url", { count: "exact" })
         .eq("status", "published").eq("visibility", "public")
         .order("start_at", { ascending: true })
-        .limit(60);
+        .range(fromIdx, toIdx);
 
       if (!includePast) qb = qb.gte("end_at", new Date().toISOString());
       const parseLocal = (s: string, endOfDay = false) => {
@@ -70,15 +80,19 @@ export default function Explore() {
       if (mode === "online") qb = qb.not("online_url", "is", null);
       else if (mode === "in_person") qb = qb.not("venue_address", "is", null);
 
-      const { data, error } = await qb.abortSignal(signal);
+      const { data, error, count } = await qb.abortSignal(signal);
       if (error) throw new Error(error.message);
-      return (data ?? []) as Ev[];
+      return { rows: (data ?? []) as Ev[], total: count ?? 0 };
     },
-    [q, from, to, includePast, mode],
+    [q, from, to, includePast, mode, page],
     { debounceMs: 250, keepPreviousData: true }
   );
 
-  const list = events ?? [];
+  const list = data?.rows ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  useEffect(() => { if (page !== safePage) setPage(safePage); }, [page, safePage]);
   const hasFilter = !!(q || from || to || includePast || mode !== "any");
 
   return (
@@ -193,6 +207,7 @@ export default function Explore() {
             ))}
           </div>
         )}
+        <ListPagination page={safePage} totalPages={totalPages} onPageChange={setPage} />
       </section>
     </>
   );
