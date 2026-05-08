@@ -215,11 +215,10 @@ export default function Moderation() {
                   </div>
 
                   {photo && (
-                    <a
-                      href={PUBLIC_BASE + photo.storage_path}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block overflow-hidden rounded-md border bg-muted"
+                    <button
+                      type="button"
+                      onClick={() => setLightboxSrc(PUBLIC_BASE + photo.storage_path)}
+                      className="block w-full overflow-hidden rounded-md border bg-muted text-left"
                     >
                       <img
                         src={PUBLIC_BASE + photo.storage_path}
@@ -227,7 +226,7 @@ export default function Moderation() {
                         className="max-h-64 w-full object-contain bg-black/5"
                         loading="lazy"
                       />
-                    </a>
+                    </button>
                   )}
 
                   {ev && (
