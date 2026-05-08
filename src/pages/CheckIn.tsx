@@ -264,3 +264,27 @@ function Counter({ label, value, highlight }: { label: string; value: number; hi
     </Card>
   );
 }
+
+function formatDuration(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const d = Math.floor(total / 86400);
+  const h = Math.floor((total % 86400) / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s.toString().padStart(2, "0")}s`;
+  return `${s}s`;
+}
+
+function EventTiming({ startAt, endAt, now }: { startAt: string; endAt: string; now: number }) {
+  const start = new Date(startAt).getTime();
+  const end = new Date(endAt).getTime();
+  if (now < start) {
+    return <span>Starts in <strong className="text-foreground">{formatDuration(start - now)}</strong></span>;
+  }
+  if (now < end) {
+    return <span>Live · running for <strong className="text-foreground">{formatDuration(now - start)}</strong></span>;
+  }
+  return <span>Ended <strong className="text-foreground">{formatDuration(now - end)}</strong> ago</span>;
+}
