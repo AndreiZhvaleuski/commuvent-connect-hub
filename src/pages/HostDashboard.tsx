@@ -163,21 +163,23 @@ export default function HostDashboard() {
           )}
         </div>
 
-        <Tabs
-          value={tab}
-          onValueChange={(v) => setSearchParams(v === "upcoming" ? {} : { tab: v }, { replace: true })}
-        >
-          <TabsList>
-            <TabsTrigger value="upcoming">Upcoming ({upcoming.length})</TabsTrigger>
-            <TabsTrigger value="past">Past ({past.length})</TabsTrigger>
-          </TabsList>
-          <TabsContent value="upcoming" className="pt-4">
-            <EventList events={upcoming} stats={stats} hostId={host.id} role={role ?? "checker"} emptyText="No upcoming events." />
-          </TabsContent>
-          <TabsContent value="past" className="pt-4">
-            <EventList events={past} stats={stats} hostId={host.id} role={role ?? "checker"} emptyText="No past events yet." />
-          </TabsContent>
-        </Tabs>
+        <EventListControls
+          view={tab}
+          onViewChange={setTab}
+          sortDir={sortDir}
+          onSortChange={setSortDir}
+          upcomingCount={upcoming.length}
+          pastCount={past.length}
+        />
+        <div className="pt-4">
+          <EventList
+            events={tab === "upcoming" ? upcoming : past}
+            stats={stats}
+            hostId={host.id}
+            role={role ?? "checker"}
+            emptyText={tab === "upcoming" ? "No upcoming events." : "No past events yet."}
+          />
+        </div>
       </div>
     </>
   );
