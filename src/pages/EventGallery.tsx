@@ -289,7 +289,7 @@ export default function EventGalleryPage() {
                       {p.status}
                     </Badge>
                   )}
-                  {filter === "published" && isOwner && (
+                  {filter === "published" && isOwner && p.status === "approved" && (
                     <Badge className="absolute left-1 top-1 px-1.5 py-0 text-[10px] uppercase">
                       By you
                     </Badge>
