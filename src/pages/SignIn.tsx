@@ -77,19 +77,25 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {mode === "signup" && (
-              <div className="grid grid-cols-2 gap-3 pb-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First name</Label>
-                  <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!busy) handlePassword();
+              }}
+            >
+              {mode === "signup" && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First name</Label>
+                    <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last name</Label>
+                    <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last name</Label>
-                  <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                </div>
-              </div>
-            )}
-            <div className="space-y-4">
+              )}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -98,10 +104,10 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
                 <Label htmlFor="password">Password</Label>
                 <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
-              <Button className="w-full" onClick={handlePassword} disabled={busy}>
+              <Button type="submit" className="w-full" disabled={busy}>
                 {mode === "signin" ? "Sign in" : "Create account"}
               </Button>
-            </div>
+            </form>
             <p className="mt-6 text-center text-sm text-muted-foreground">
               {mode === "signin" ? (
                 <>No account? <Link to={`/sign-up?redirect=${encodeURIComponent(redirect)}`} className="text-foreground underline">Sign up</Link></>
