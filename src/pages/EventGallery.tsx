@@ -317,7 +317,7 @@ export default function EventGalleryPage() {
               );
             })}
           </div>
-          <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          
         </>
       )}
 
