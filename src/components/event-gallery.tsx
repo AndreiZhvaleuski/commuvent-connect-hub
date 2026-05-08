@@ -18,7 +18,11 @@ import { EmptyState } from "@/components/empty-state";
 import { Label } from "@/components/ui/label";
 import { ListPagination } from "@/components/list-pagination";
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { PhotoLightbox } from "@/components/photo-lightbox";
+import Lightbox from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import Counter from "yet-another-react-lightbox/plugins/counter";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/counter.css";
 
 type Photo = { id: string; storage_path: string; user_id: string; status: string; created_at: string };
 
@@ -220,12 +224,14 @@ export function EventGallery({ eventId }: { eventId: string }) {
         onConfirm={confirmDelete}
       />
 
-      <PhotoLightbox
-        images={lightboxImages}
-        index={lightboxIndex ?? 0}
+      <Lightbox
         open={lightboxIndex !== null}
-        onOpenChange={(o) => !o && setLightboxIndex(null)}
-        onIndexChange={setLightboxIndex}
+        index={lightboxIndex ?? 0}
+        close={() => setLightboxIndex(null)}
+        slides={lightboxImages}
+        plugins={[Zoom, Counter]}
+        on={{ view: ({ index }) => setLightboxIndex(index) }}
+        zoom={{ maxZoomPixelRatio: 4, scrollToZoom: true }}
       />
     </Card>
   );
