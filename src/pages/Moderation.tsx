@@ -34,12 +34,16 @@ type ReportRow = {
 
 type Reporter = { id: string; display_name: string | null; avatar_url: string | null; email: string | null };
 type EventInfo = { id: string; title: string; start_at: string; description: string | null };
+type PhotoInfo = { id: string; storage_path: string; event_id: string; status: string };
 
 type Data = {
   reports: ReportRow[];
   reporters: Record<string, Reporter>;
   events: Record<string, EventInfo>;
+  photos: Record<string, PhotoInfo>;
 };
+
+const PUBLIC_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/gallery/`;
 
 export default function Moderation() {
   const { hostId } = useParams<{ hostId: string }>();
@@ -56,7 +60,7 @@ export default function Moderation() {
 
   const { data, loading, error, refetch } = useAsyncResource<Data>(
     async (signal) => {
-      if (!ready) return { reports: [], reporters: {}, events: {} };
+      if (!ready) return { reports: [], reporters: {}, events: {}, photos: {} };
       const { data: rep, error: repErr } = await supabase
         .from("reports")
         .select("id,target_type,target_id,reason,status,created_at,reporter_id")
@@ -67,24 +71,37 @@ export default function Moderation() {
       const reports = (rep ?? []) as ReportRow[];
 
       const reporterIds = Array.from(new Set(reports.map((r) => r.reporter_id).filter(Boolean) as string[]));
-      const eventIds = Array.from(
-        new Set(reports.filter((r) => r.target_type === "event").map((r) => r.target_id))
+      const photoIds = Array.from(
+        new Set(reports.filter((r) => r.target_type === "photo").map((r) => r.target_id))
       );
       const reportIds = reports.map((r) => r.id);
 
-      const [profilesRes, emailsRes, eventsRes] = await Promise.all([
+      const [profilesRes, emailsRes, photosRes] = await Promise.all([
         reporterIds.length > 0
           ? supabase.from("profiles").select("id,display_name,avatar_url").in("id", reporterIds).abortSignal(signal)
           : Promise.resolve({ data: [] as { id: string; display_name: string | null; avatar_url: string | null }[], error: null }),
         reportIds.length > 0
           ? supabase.rpc("report_reporter_emails", { p_report_ids: reportIds }).abortSignal(signal)
           : Promise.resolve({ data: [] as { report_id: string; email: string }[], error: null }),
-        eventIds.length > 0
-          ? supabase.from("events").select("id,title,start_at,description").in("id", eventIds).abortSignal(signal)
-          : Promise.resolve({ data: [] as EventInfo[], error: null }),
+        photoIds.length > 0
+          ? supabase.from("gallery_photos").select("id,storage_path,event_id,status").in("id", photoIds).abortSignal(signal)
+          : Promise.resolve({ data: [] as PhotoInfo[], error: null }),
       ]);
       if (profilesRes.error) throw new Error(profilesRes.error.message);
       if (emailsRes.error) throw new Error(emailsRes.error.message);
+      if (photosRes.error) throw new Error(photosRes.error.message);
+
+      const photos: Record<string, PhotoInfo> = {};
+      ((photosRes.data ?? []) as PhotoInfo[]).forEach((p) => { photos[p.id] = p; });
+
+      const eventIds = Array.from(new Set([
+        ...reports.filter((r) => r.target_type === "event").map((r) => r.target_id),
+        ...Object.values(photos).map((p) => p.event_id),
+      ]));
+
+      const eventsRes = eventIds.length > 0
+        ? await supabase.from("events").select("id,title,start_at,description").in("id", eventIds).abortSignal(signal)
+        : { data: [] as EventInfo[], error: null };
       if (eventsRes.error) throw new Error(eventsRes.error.message);
 
       const emailByReportId = new Map<string, string>();
@@ -103,11 +120,9 @@ export default function Moderation() {
       });
 
       const events: Record<string, EventInfo> = {};
-      ((eventsRes.data ?? []) as EventInfo[]).forEach((e) => {
-        events[e.id] = e;
-      });
+      ((eventsRes.data ?? []) as EventInfo[]).forEach((e) => { events[e.id] = e; });
 
-      return { reports, reporters, events };
+      return { reports, reporters, events, photos };
     },
     [ready, hostId, user?.id]
   );
@@ -115,6 +130,7 @@ export default function Moderation() {
   const reports = data?.reports ?? [];
   const reporters = data?.reporters ?? {};
   const events = data?.events ?? {};
+  const photos = data?.photos ?? {};
 
   const confirmResolve = async () => {
     if (!pending) return;
@@ -163,7 +179,10 @@ export default function Moderation() {
         <div className="space-y-3">
           {reports.map((r) => {
             const reporter = r.reporter_id ? reporters[r.reporter_id] : undefined;
-            const ev = r.target_type === "event" ? events[r.target_id] : undefined;
+            const photo = r.target_type === "photo" ? photos[r.target_id] : undefined;
+            const ev = r.target_type === "event"
+              ? events[r.target_id]
+              : photo ? events[photo.event_id] : undefined;
             const initials = (reporter?.display_name ?? reporter?.email ?? "?").slice(0, 2).toUpperCase();
             return (
               <Card key={r.id}>
@@ -190,6 +209,22 @@ export default function Moderation() {
                       </div>
                     </div>
                   </div>
+
+                  {photo && (
+                    <a
+                      href={PUBLIC_BASE + photo.storage_path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block overflow-hidden rounded-md border bg-muted"
+                    >
+                      <img
+                        src={PUBLIC_BASE + photo.storage_path}
+                        alt="Reported photo"
+                        className="max-h-64 w-full object-contain bg-black/5"
+                        loading="lazy"
+                      />
+                    </a>
+                  )}
 
                   {ev && (
                     <Link
