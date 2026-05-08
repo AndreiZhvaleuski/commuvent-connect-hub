@@ -218,23 +218,28 @@ export default function MyEvents() {
           </TabsList>
         </Tabs>
 
-        {busy ? (
-          <div className="grid gap-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="h-28" />
-              </Card>
-            ))}
-          </div>
-        ) : rows.length === 0 ? (
-          <Card>
-            <CardContent className="py-16 text-center text-muted-foreground">
-              No events match your filters.
-            </CardContent>
-          </Card>
+        {rowsLoading && !rows ? (
+          <SkeletonGrid count={3} className="grid gap-3" itemHeightClass="h-28" />
+        ) : error ? (
+          <ErrorState
+            title="Couldn't load your events"
+            description={error.message}
+            onRetry={refetch}
+          />
+        ) : list.length === 0 ? (
+          <EmptyState
+            icon={<CalendarBlankIcon className="h-8 w-8" />}
+            title={hasFilter ? "No events match your filters" : "You don't have any events yet"}
+            description={
+              hasFilter
+                ? "Try clearing the search or expanding the date range."
+                : "Events from hosts where you're a host or checker will show up here."
+            }
+            action={hasFilter ? <Button variant="outline" size="sm" onClick={resetFilters}>Clear filters</Button> : undefined}
+          />
         ) : (
-          <div className="grid gap-3">
-            {rows.map((r) => (
+          <div className={cn("grid gap-3", rowsLoading && "opacity-60 transition-opacity")}>
+            {list.map((r) => (
               <MyEventRow key={r.event_id} row={r} />
             ))}
           </div>
