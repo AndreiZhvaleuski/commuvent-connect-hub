@@ -89,7 +89,7 @@ export default function Dashboard() {
                     </Avatar>
                     <div>
                       <CardTitle className="text-base">{h.name}</CardTitle>
-                      <p className="text-xs text-muted-foreground">Manage events</p>
+                      <p className="text-xs text-muted-foreground capitalize">{h.role === "checker" ? "Checker · Check-in events" : "Manage events"}</p>
                     </div>
                   </CardHeader>
                   {h.bio && <CardContent className="text-sm text-muted-foreground line-clamp-2">{stripMarkdown(h.bio)}</CardContent>}
