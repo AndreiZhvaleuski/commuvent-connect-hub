@@ -263,14 +263,17 @@ export default function CheckIn() {
   );
 }
 
-function Counter({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
+function Counter({ label, value, icon, suffix, highlight }: { label: string; value: number; icon: React.ReactNode; suffix?: string; highlight?: boolean }) {
   return (
-    <Card className={highlight ? "border-primary" : undefined}>
-      <CardContent className="p-3 sm:p-4 text-center">
-        <div className="text-[10px] sm:text-xs uppercase tracking-wide text-muted-foreground">{label}</div>
-        <div className={`text-2xl sm:text-3xl font-bold ${highlight ? "text-primary" : ""}`}>{value}</div>
-      </CardContent>
-    </Card>
+    <div className={`rounded-lg border bg-card p-3 ${highlight ? "border-primary" : ""}`}>
+      <div className="text-xs text-muted-foreground flex items-center gap-1">
+        <span className="shrink-0">{icon}</span>
+        <span className="truncate">{label}</span>
+      </div>
+      <div className={`mt-1 text-xl font-semibold tabular-nums ${highlight ? "text-primary" : ""}`}>
+        {value}{suffix && <span className="text-sm font-normal text-muted-foreground ml-1">{suffix}</span>}
+      </div>
+    </div>
   );
 }
 
