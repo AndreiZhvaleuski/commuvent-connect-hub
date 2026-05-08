@@ -101,7 +101,7 @@ export default function EventEditor() {
   const [persistedSlug, setPersistedSlug] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("draft");
   const [busy, setBusy] = useState(false);
-  const [bootstrapping, setBootstrapping] = useState(isEdit);
+  const [bootstrapping, setBootstrapping] = useState(true);
   const [, forceTick] = useState(0);
 
   const tzs = useMemo(() => listTimezones(), []);
@@ -137,8 +137,21 @@ export default function EventEditor() {
       navigate(`/sign-in?redirect=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
-    if (!isEdit) return;
     (async () => {
+      if (hostId) {
+        const { data: hm } = await supabase
+          .from("host_members")
+          .select("role")
+          .eq("host_id", hostId)
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (!hm || hm.role !== "host") {
+          toast.error("You don't have permission to edit events for this host");
+          navigate(`/dashboard/${hostId}`);
+          return;
+        }
+      }
+      if (!isEdit) { setBootstrapping(false); return; }
       const { data, error } = await supabase.from("events").select("*").eq("id", eventId!).maybeSingle();
       if (error || !data) {
         toast.error("Event not found");
