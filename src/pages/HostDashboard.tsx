@@ -104,10 +104,10 @@ export default function HostDashboard() {
             <TabsTrigger value="past">Past ({past.length})</TabsTrigger>
           </TabsList>
           <TabsContent value="upcoming" className="pt-4">
-            <EventList events={upcoming} stats={stats} hostId={host.id} emptyText="No upcoming events." />
+            <EventList events={upcoming} stats={stats} hostId={host.id} role={role ?? "checker"} emptyText="No upcoming events." />
           </TabsContent>
           <TabsContent value="past" className="pt-4">
-            <EventList events={past} stats={stats} hostId={host.id} emptyText="No past events yet." />
+            <EventList events={past} stats={stats} hostId={host.id} role={role ?? "checker"} emptyText="No past events yet." />
           </TabsContent>
         </Tabs>
       </div>
@@ -115,14 +115,14 @@ export default function HostDashboard() {
   );
 }
 
-function EventList({ events, stats, hostId, emptyText }: { events: Ev[]; stats: Record<string, Stat>; hostId: string; emptyText: string }) {
+function EventList({ events, stats, hostId, role, emptyText }: { events: Ev[]; stats: Record<string, Stat>; hostId: string; role: "host" | "checker"; emptyText: string }) {
   if (events.length === 0) {
     return <Card><CardContent className="py-12 text-center text-muted-foreground">{emptyText}</CardContent></Card>;
   }
   return (
     <div className="grid gap-3">
       {events.map((e) => (
-        <EventManagementCard key={e.id} event={e} stat={stats[e.id]} hostId={hostId} />
+        <EventManagementCard key={e.id} event={e} stat={stats[e.id]} hostId={hostId} role={role} />
       ))}
     </div>
   );
