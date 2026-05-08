@@ -42,17 +42,17 @@ const PAGE_SIZE = 24;
 const ACCEPT = "image/jpeg,image/png,image/webp,image/gif,image/heic";
 const MAX_BYTES = 5 * 1024 * 1024;
 
-type Filter = "all" | "mine" | "pending";
+type Filter = "published" | "mine" | "pending";
 
 export default function EventGalleryPage() {
   const { eventId = "" } = useParams<{ eventId: string }>();
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const filterParam = searchParams.get("filter");
-  const filter: Filter = filterParam === "mine" || filterParam === "pending" ? filterParam : "all";
+  const filter: Filter = filterParam === "mine" || filterParam === "pending" ? filterParam : "published";
   const setFilter = (next: Filter) => {
     const sp = new URLSearchParams(searchParams);
-    if (next === "all") sp.delete("filter");
+    if (next === "published") sp.delete("filter");
     else sp.set("filter", next);
     sp.delete("page");
     setSearchParams(sp, { replace: true });
