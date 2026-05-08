@@ -19,6 +19,7 @@ export default function HostDashboard() {
   const [host, setHost] = useState<Host | null>(null);
   const [events, setEvents] = useState<Ev[]>([]);
   const [stats, setStats] = useState<Record<string, Stat>>({});
+  const [role, setRole] = useState<"host" | "checker" | null>(null);
   const [busy, setBusy] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = searchParams.get("tab") === "past" ? "past" : "upcoming";
@@ -28,17 +29,28 @@ export default function HostDashboard() {
     if (!hostId) return;
     (async () => {
       setBusy(true);
-      const [{ data: h }, { data: ev }, { data: st }] = await Promise.all([
+      const { data: member } = await supabase
+        .from("host_members")
+        .select("role")
+        .eq("host_id", hostId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const r = (member?.role as "host" | "checker" | undefined) ?? null;
+      setRole(r);
+      const isChecker = r === "checker";
+      const eventsQuery = supabase.from("events")
+        .select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url,time_zone")
+        .eq("host_id", hostId).order("start_at", { ascending: false });
+      if (isChecker) eventsQuery.eq("status", "published");
+      const [{ data: h }, { data: ev }, statsRes] = await Promise.all([
         supabase.from("hosts").select("id,name,logo_url,bio").eq("id", hostId).maybeSingle(),
-        supabase.from("events")
-          .select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url,time_zone")
-          .eq("host_id", hostId).order("start_at", { ascending: false }),
-        supabase.rpc("event_stats", { p_host_id: hostId }),
+        eventsQuery,
+        isChecker ? Promise.resolve({ data: [] as Stat[] }) : supabase.rpc("event_stats", { p_host_id: hostId }),
       ]);
       setHost((h ?? null) as Host | null);
       setEvents((ev ?? []) as Ev[]);
       const map: Record<string, Stat> = {};
-      ((st ?? []) as Stat[]).forEach((s) => { map[s.event_id] = s; });
+      ((statsRes.data ?? []) as Stat[]).forEach((s) => { map[s.event_id] = s; });
       setStats(map);
       setBusy(false);
     })();
