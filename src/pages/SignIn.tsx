@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -67,8 +66,7 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
 
 
   return (
-    <AppLayout>
-      <div className="container mx-auto px-4 py-20 max-w-md">
+    <><div className="container mx-auto px-4 py-20 max-w-md">
         <Card>
           <CardHeader>
             <CardTitle>{mode === "signin" ? "Welcome back" : "Join Commuvent"}</CardTitle>
@@ -118,6 +116,6 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
           </CardContent>
         </Card>
       </div>
-    </AppLayout>
+    </>
   );
 }

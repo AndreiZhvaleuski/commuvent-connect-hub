@@ -1,5 +1,4 @@
 import { DownloadSimpleIcon as Download } from "@phosphor-icons/react";
-import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buildCsv, downloadBlob, EXAMPLE_RSVP_ROWS } from "@/lib/csv";
@@ -11,8 +10,7 @@ export default function About() {
   }
 
   return (
-    <AppLayout>
-      <main className="container max-w-3xl py-12 space-y-8">
+    <><main className="container max-w-3xl py-12 space-y-8">
         <header>
           <h1 className="text-4xl font-bold tracking-tight">About Commuvent</h1>
           <p className="mt-3 text-lg text-muted-foreground">
@@ -47,6 +45,6 @@ María José Núñez,mj.nunez@example.com,going,
           </CardContent>
         </Card>
       </main>
-    </AppLayout>
+    </>
   );
 }

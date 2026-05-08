@@ -3,7 +3,6 @@ import { MapPinIcon as MapPin } from "@phosphor-icons/react";
 import { MagnifyingGlassIcon as Search, GlobeIcon, SparkleIcon, CalendarBlankIcon } from "@phosphor-icons/react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
-import { AppLayout } from "@/components/app-layout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -83,8 +82,7 @@ export default function Explore() {
   const hasFilter = !!(q || from || to || includePast || mode !== "any");
 
   return (
-    <AppLayout>
-      <section className="border-b">
+    <><section className="border-b">
         <div className="container mx-auto max-w-6xl px-4 py-10">
           <h1 className="text-3xl font-semibold tracking-tight">Explore events</h1>
           <p className="mt-1 text-muted-foreground">Free community events from hosts on Commuvent.</p>
@@ -196,6 +194,6 @@ export default function Explore() {
           </div>
         )}
       </section>
-    </AppLayout>
+    </>
   );
 }

@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { PlusIcon as Plus, ArrowSquareOutIcon as ExternalLink } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -99,34 +98,31 @@ export default function HostDashboard() {
 
   if (busy) {
     return (
-      <AppLayout>
-        <div className="container mx-auto max-w-6xl px-4 py-12">
+      <><div className="container mx-auto max-w-6xl px-4 py-12">
           <div className="mb-8 h-14 w-64 animate-pulse rounded bg-muted" />
           <SkeletonGrid count={3} className="grid gap-3" itemHeightClass="h-28" />
         </div>
-      </AppLayout>
+      </>
     );
   }
   if (error) {
     return (
-      <AppLayout>
-        <div className="container mx-auto max-w-6xl px-4 py-12">
+      <><div className="container mx-auto max-w-6xl px-4 py-12">
           <ErrorState
             title="Couldn't load dashboard"
             description={error.message}
             onRetry={refetch}
           />
         </div>
-      </AppLayout>
+      </>
     );
   }
   if (!host) {
-    return <AppLayout><div className="container mx-auto px-4 py-12"><p>Host not found.</p></div></AppLayout>;
+    return <><div className="container mx-auto px-4 py-12"><p>Host not found.</p></div></>;
   }
 
   return (
-    <AppLayout>
-      <div className="container mx-auto max-w-6xl px-4 py-12">
+    <><div className="container mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Avatar className="h-14 w-14">
@@ -168,7 +164,7 @@ export default function HostDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-    </AppLayout>
+    </>
   );
 }
 

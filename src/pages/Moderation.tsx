@@ -4,7 +4,6 @@ import { ArrowLeftIcon as ArrowLeft, CheckIcon as Check, EyeSlashIcon as EyeOff,
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -82,8 +81,7 @@ export default function Moderation() {
   };
 
   return (
-    <AppLayout>
-      <main className="container max-w-5xl py-8 space-y-6">
+    <><main className="container max-w-5xl py-8 space-y-6">
         <Link to={`/dashboard/${hostId}`} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to dashboard
         </Link>
@@ -157,6 +155,6 @@ export default function Moderation() {
           </TabsContent>
         </Tabs>
       </main>
-    </AppLayout>
+    </>
   );
 }

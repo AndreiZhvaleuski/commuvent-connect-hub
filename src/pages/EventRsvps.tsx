@@ -3,7 +3,6 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { ArrowLeftIcon as ArrowLeft, DownloadSimpleIcon as Download } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -117,8 +116,7 @@ export default function EventRsvps() {
   }
 
   return (
-    <AppLayout>
-      <main className="container max-w-5xl py-8 space-y-6">
+    <><main className="container max-w-5xl py-8 space-y-6">
         <Link to={`/dashboard/${hostId}`} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to dashboard
         </Link>
@@ -178,6 +176,6 @@ export default function EventRsvps() {
           </CardContent>
         </Card>
       </main>
-    </AppLayout>
+    </>
   );
 }

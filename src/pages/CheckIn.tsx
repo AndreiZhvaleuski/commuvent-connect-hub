@@ -14,7 +14,6 @@ import {
 } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { AppLayout } from "@/components/app-layout";
 import { StatBox } from "@/components/stat-box";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -107,9 +106,8 @@ export default function CheckIn() {
 
   if (loading || evLoading) {
     return (
-      <AppLayout>
-        <div className="container mx-auto px-4 py-12 text-muted-foreground">Loading…</div>
-      </AppLayout>
+      <><div className="container mx-auto px-4 py-12 text-muted-foreground">Loading…</div>
+      </>
     );
   }
 
@@ -117,12 +115,11 @@ export default function CheckIn() {
   if (!event) return <Navigate to="/dashboard" replace />;
   if (!access) {
     return (
-      <AppLayout>
-        <div className="container mx-auto px-4 py-12">
+      <><div className="container mx-auto px-4 py-12">
           <h1 className="text-2xl font-bold mb-2">Not authorized</h1>
           <p className="text-muted-foreground">You must be a host or checker for this event.</p>
         </div>
-      </AppLayout>
+      </>
     );
   }
 
@@ -169,8 +166,7 @@ export default function CheckIn() {
   }
 
   return (
-    <AppLayout>
-      <div className="container mx-auto max-w-2xl px-4 py-6 sm:py-12 space-y-5">
+    <><div className="container mx-auto max-w-2xl px-4 py-6 sm:py-12 space-y-5">
         <Link
           to={`/dashboard/${event.host_id}`}
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground min-h-11"
@@ -262,7 +258,7 @@ export default function CheckIn() {
           </CardContent>
         </Card>
       </div>
-    </AppLayout>
+    </>
   );
 }
 

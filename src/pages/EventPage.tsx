@@ -4,7 +4,6 @@ import { ArrowSquareOutIcon as ExternalLink, FlagIcon as Flag, GlobeIcon as Glob
 import { EventDateTime } from "@/components/event-datetime";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { AppLayout } from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -100,8 +99,8 @@ export default function EventPage() {
     const next = new URLSearchParams(params); next.delete("intent"); setParams(next, { replace: true });
   }, [event, user, rsvp, params, setParams]);
 
-  if (notFound) return <AppLayout><div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Event not found.</p></div></AppLayout>;
-  if (busy || !event) return <AppLayout><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></AppLayout>;
+  if (notFound) return <><div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Event not found.</p></div></>;
+  if (busy || !event) return <><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></>;
 
   const ended = new Date(event.end_at).getTime() < Date.now();
 
@@ -158,8 +157,7 @@ export default function EventPage() {
   };
 
   return (
-    <AppLayout>
-      {event.cover_image_url && (
+    <>{event.cover_image_url && (
         <div className="relative w-full overflow-hidden">
           <img
             src={event.cover_image_url}
@@ -341,6 +339,6 @@ export default function EventPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </AppLayout>
+    </>
   );
 }
