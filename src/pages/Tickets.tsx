@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
-import { CalendarIcon as CalIcon, ClockIcon as Clock, DownloadSimpleIcon as Download, ArrowSquareOutIcon as ExternalLink, MapPinIcon as MapPin, TicketIcon as Ticket } from "@phosphor-icons/react";
+import { CalendarIcon as CalIcon, ClockIcon as Clock, DownloadSimpleIcon as Download, ArrowSquareOutIcon as ExternalLink, MapPinIcon as MapPin, MagnifyingGlassPlusIcon as ZoomIn, TicketIcon as Ticket } from "@phosphor-icons/react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EventDateTime } from "@/components/event-datetime";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -190,7 +191,17 @@ function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; on
         <div className="grid gap-4 sm:grid-cols-[160px_1fr] items-center">
           {row.status === "going" ? (
             qr ? (
-              <img src={qr} alt={`QR code ${row.code}`} className="h-40 w-40 rounded-md border bg-card p-2" />
+              <button
+                type="button"
+                onClick={() => setZoomed(true)}
+                aria-label="Enlarge QR code"
+                className="group relative h-40 w-40 rounded-md border bg-card p-2 transition hover:border-primary hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <img src={qr} alt={`QR code ${row.code}`} className="h-full w-full" />
+                <span className="pointer-events-none absolute bottom-1 right-1 inline-flex items-center gap-1 rounded bg-background/90 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground shadow-sm ring-1 ring-border group-hover:text-foreground">
+                  <ZoomIn className="h-3 w-3" /> Tap to enlarge
+                </span>
+              </button>
             ) : (
               <div className="h-40 w-40 animate-pulse rounded-md bg-muted" />
             )
