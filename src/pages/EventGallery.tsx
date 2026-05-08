@@ -269,8 +269,21 @@ export default function EventGalleryPage() {
             <TabsTrigger value="published">Published</TabsTrigger>
             <TabsTrigger value="mine">Uploaded by me</TabsTrigger>
             <TabsTrigger value="pending">My pending</TabsTrigger>
+            {isHost && <TabsTrigger value="review">Pending review</TabsTrigger>}
           </TabsList>
         </Tabs>
+      )}
+
+      {user && filter === "pending" && (
+        <p className="mb-4 text-xs text-muted-foreground">
+          Up to 5 pending uploads per event · max 5 MB · JPG, PNG, WebP, GIF, HEIC
+        </p>
+      )}
+
+      {isHost && filter === "review" && (
+        <p className="mb-4 text-xs text-muted-foreground">
+          Photos awaiting your approval. Approved photos appear in the Published tab.
+        </p>
       )}
 
       {user && filter === "pending" && (
