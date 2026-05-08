@@ -232,15 +232,14 @@ export default function Moderation() {
                   {ev && (
                     <Link
                       to={`/e/${ev.id}`}
-                      className="block rounded-md border bg-muted/30 p-3 hover:bg-muted/60 transition-colors"
+                      className="flex items-center gap-3 rounded-md border bg-muted/30 p-2 hover:bg-muted/60 transition-colors"
                     >
-                      <div className="text-sm font-medium truncate">{ev.title}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {new Date(ev.start_at).toLocaleString()}
+                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded bg-muted">
+                        {ev.cover_image_url && (
+                          <img src={ev.cover_image_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                        )}
                       </div>
-                      {ev.description && (
-                        <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{ev.description}</p>
-                      )}
+                      <div className="text-sm font-medium truncate">{ev.title}</div>
                     </Link>
                   )}
 
