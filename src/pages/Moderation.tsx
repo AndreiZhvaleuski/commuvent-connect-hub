@@ -293,6 +293,13 @@ export default function Moderation() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Lightbox
+        open={lightboxSrc !== null}
+        close={() => setLightboxSrc(null)}
+        slides={lightboxSrc ? [{ src: lightboxSrc, alt: "Reported photo" }] : []}
+        plugins={[Zoom]}
+      />
     </main>
   );
 }
