@@ -21,12 +21,17 @@ export default function Moderation() {
   const navigate = useNavigate();
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
+  const [eventsById, setEventsById] = useState<Record<string, EventLite>>({});
   const [busy, setBusy] = useState(true);
   const load = async () => {
     setBusy(true);
-    // Events for this host, then pending photos and open reports limited to those events
-    const { data: evs } = await supabase.from("events").select("id").eq("host_id", hostId!);
-    const eventIds = (evs ?? []).map((e: any) => e.id);
+    const { data: evs } = await supabase
+      .from("events")
+      .select("id,title,start_at")
+      .eq("host_id", hostId!);
+    const events = (evs ?? []) as EventLite[];
+    const eventIds = events.map((e) => e.id);
+    setEventsById(Object.fromEntries(events.map((e) => [e.id, e])));
     if (eventIds.length === 0) { setPhotos([]); setReports([]); setBusy(false); return; }
 
     const [{ data: ph }, { data: rep }] = await Promise.all([
