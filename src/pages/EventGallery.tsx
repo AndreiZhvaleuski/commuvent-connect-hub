@@ -252,6 +252,7 @@ export default function EventGalleryPage() {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-semibold">Photos{total > 0 ? ` · ${total}` : ""}</h2>
+          {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
         </div>
         <div className="flex items-center gap-2">
           {user ? (
