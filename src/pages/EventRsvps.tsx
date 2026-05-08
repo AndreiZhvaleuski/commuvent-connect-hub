@@ -8,7 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { buildCsv, downloadBlob, toIsoInTz, type RsvpExportRow } from "@/lib/csv";
+import { buildCsv, downloadBlob, toUtcIso, type RsvpExportRow } from "@/lib/csv";
+
+function formatLocal(iso: string | null): string {
+  if (!iso) return "";
+  try {
+    return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso));
+  } catch {
+    return "";
+  }
+}
 import { toast } from "sonner";
 
 type Row = {
@@ -99,7 +108,7 @@ export default function EventRsvps() {
       name: r.display_name || "",
       email: r.email || "",
       rsvp_status: r.status,
-      check_in_time: toIsoInTz(r.check_in_time, event.time_zone),
+      check_in_time: toUtcIso(r.check_in_time),
     }));
     const blob = buildCsv(data);
     const safeTitle = event.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase().slice(0, 40);
@@ -119,9 +128,12 @@ export default function EventRsvps() {
             <h1 className="text-3xl font-bold">{event?.title ?? "Event"}</h1>
             <p className="text-muted-foreground">RSVPs · {rows.length} total</p>
           </div>
-          <Button onClick={exportCsv} disabled={!event || rows.length === 0}>
-            <Download className="w-4 h-4 mr-2" /> Export CSV
-          </Button>
+          <div className="flex flex-col items-end gap-1">
+            <Button onClick={exportCsv} disabled={!event || rows.length === 0}>
+              <Download className="w-4 h-4 mr-2" /> Export CSV
+            </Button>
+            <p className="text-xs text-muted-foreground">CSV uses UTC timestamps.</p>
+          </div>
         </div>
 
         <Card>
@@ -140,7 +152,7 @@ export default function EventRsvps() {
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Check-in</TableHead>
+                    <TableHead>Check-in (your time)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -155,7 +167,7 @@ export default function EventRsvps() {
                       </TableCell>
                       <TableCell>
                         {r.check_in_time
-                          ? toIsoInTz(r.check_in_time, event?.time_zone || "UTC")
+                          ? formatLocal(r.check_in_time)
                           : <span className="text-muted-foreground">—</span>}
                       </TableCell>
                     </TableRow>
