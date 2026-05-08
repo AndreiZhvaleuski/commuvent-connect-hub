@@ -161,7 +161,7 @@ export default function EventRsvps() {
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <h1 className="truncate text-2xl font-bold sm:text-3xl">{event?.title ?? "Event"}</h1>
+            <h1 className="text-2xl font-bold break-words sm:text-3xl">{event?.title ?? "Event"}</h1>
             <p className="text-sm text-muted-foreground">RSVPs · {rows.length} total</p>
           </div>
           <div className="flex items-center gap-2">
