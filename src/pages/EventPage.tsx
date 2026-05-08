@@ -247,7 +247,7 @@ export default function EventPage() {
             </div>
 
             <EventGallery eventId={event.id} />
-            {ended && <EventFeedback eventId={event.id} />}
+            {ended && <EventFeedback eventId={event.id} eventEnded={ended} />}
           </div>
 
           <aside>

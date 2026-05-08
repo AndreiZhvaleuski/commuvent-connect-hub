@@ -9,10 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 
 type Feedback = { id: string; rating: number; comment: string | null; user_id: string; created_at: string };
 
-export function EventFeedback({ eventId }: { eventId: string }) {
+export function EventFeedback({ eventId, eventEnded }: { eventId: string; eventEnded: boolean }) {
   const { user } = useAuth();
   const [items, setItems] = useState<Feedback[]>([]);
   const [mine, setMine] = useState<Feedback | null>(null);
+  const [attended, setAttended] = useState(false);
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
@@ -27,6 +28,19 @@ export function EventFeedback({ eventId }: { eventId: string }) {
     const all = (data ?? []) as Feedback[];
     setItems(all);
     setMine(user ? all.find((f) => f.user_id === user.id) ?? null : null);
+
+    if (user) {
+      const { data: ci } = await supabase
+        .from("check_ins")
+        .select("id, rsvps!inner(user_id)")
+        .eq("event_id", eventId)
+        .eq("undone", false)
+        .eq("rsvps.user_id", user.id)
+        .limit(1);
+      setAttended((ci ?? []).length > 0);
+    } else {
+      setAttended(false);
+    }
   };
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [eventId, user?.id]);
 
@@ -57,6 +71,10 @@ export function EventFeedback({ eventId }: { eventId: string }) {
       <CardContent className="space-y-4">
         {!user ? (
           <p className="text-sm text-muted-foreground">Sign in to leave feedback.</p>
+        ) : !eventEnded ? (
+          <p className="text-sm text-muted-foreground">Feedback opens after the event ends.</p>
+        ) : !attended ? (
+          <p className="text-sm text-muted-foreground">Only attendees who checked in can leave feedback.</p>
         ) : mine ? (
           <div className="rounded-md border bg-muted/40 p-3 text-sm">
             <div className="flex items-center gap-1">
