@@ -89,7 +89,7 @@ export default function About() {
             const Icon = s.icon;
             return (
               <Card key={s.label}>
-                <CardContent className="py-6">
+                <CardContent>
                   <Icon className="h-6 w-6 text-primary" />
                   <div className="mt-3 text-3xl font-semibold tracking-tight">{s.value}</div>
                   <div className="text-sm text-muted-foreground">{s.label}</div>
@@ -110,7 +110,7 @@ export default function About() {
             const Icon = v.icon;
             return (
               <Card key={v.title}>
-                <CardContent className="py-6">
+                <CardContent>
                   <div className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
                     <Icon className="h-5 w-5" />
                   </div>
@@ -148,7 +148,7 @@ export default function About() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {team.map((m) => (
             <Card key={m.name}>
-              <CardContent className="flex items-center gap-3 py-4">
+              <CardContent className="flex items-center gap-3">
                 <img
                   src={`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${m.seed}`}
                   alt={m.name}
