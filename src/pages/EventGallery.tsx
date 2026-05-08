@@ -5,6 +5,7 @@ import {
   CalendarIcon,
   FlagIcon as Flag,
   ImageSquareIcon as ImagePlus,
+  ShieldCheckIcon,
   SpinnerIcon as Loader2,
   TrashIcon,
 } from "@phosphor-icons/react";
@@ -85,6 +86,22 @@ export default function EventGalleryPage() {
       return data as EventInfo | null;
     },
     [eventId]
+  );
+
+  const { data: isHost } = useAsyncResource<boolean>(
+    async (signal) => {
+      if (!user || !event?.host_id) return false;
+      const { data, error } = await supabase
+        .from("host_members")
+        .select("role")
+        .eq("host_id", event.host_id)
+        .eq("user_id", user.id)
+        .abortSignal(signal)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return !!data;
+    },
+    [user?.id, event?.host_id]
   );
 
   const { data, loading, error, refetch } = useAsyncResource<{ photos: Photo[]; total: number }>(
@@ -218,17 +235,29 @@ export default function EventGalleryPage() {
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-semibold">Photos{total > 0 ? ` · ${total}` : ""}</h2>
         </div>
-        {user ? (
-          <>
-            <input ref={fileRef} type="file" accept={ACCEPT} onChange={onFile} className="hidden" />
-            <Button size="sm" onClick={onPick} disabled={uploading}>
-              {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
-              Upload photo
+        <div className="flex items-center gap-2">
+          {isHost && event && (
+            <Button
+              render={<Link to={`/dashboard/${event.host_id}/moderation`} />}
+              size="sm"
+              variant="outline"
+            >
+              <ShieldCheckIcon className="mr-2 h-4 w-4" />
+              Moderate
             </Button>
-          </>
-        ) : (
-          <Button render={<Link to="/sign-in" />} size="sm" variant="outline">Sign in to upload</Button>
-        )}
+          )}
+          {user ? (
+            <>
+              <input ref={fileRef} type="file" accept={ACCEPT} onChange={onFile} className="hidden" />
+              <Button size="sm" onClick={onPick} disabled={uploading}>
+                {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
+                Upload photo
+              </Button>
+            </>
+          ) : (
+            <Button render={<Link to="/sign-in" />} size="sm" variant="outline">Sign in to upload</Button>
+          )}
+        </div>
       </div>
 
       {user && (
