@@ -53,9 +53,7 @@ export function buildCsv(rows: RsvpExportRow[]): Blob {
     { quotes: true, newline: "\r\n" }
   );
   // UTF-8 BOM ensures Excel + Sheets read non-ASCII correctly.
-  // "sep=," directive forces Excel to use comma as delimiter even in locales
-  // (e.g. fr/de) where it defaults to semicolon. Google Sheets ignores it.
-  return new Blob(["\uFEFF" + "sep=,\r\n" + csv], { type: "text/csv;charset=utf-8" });
+  return new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
 }
 
 export function downloadBlob(blob: Blob, filename: string) {
