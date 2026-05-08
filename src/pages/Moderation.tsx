@@ -104,7 +104,7 @@ export default function Moderation() {
       ]));
 
       const eventsRes = eventIds.length > 0
-        ? await supabase.from("events").select("id,title,start_at,description").in("id", eventIds).abortSignal(signal)
+        ? await supabase.from("events").select("id,title,cover_image_url").in("id", eventIds).abortSignal(signal)
         : { data: [] as EventInfo[], error: null };
       if (eventsRes.error) throw new Error(eventsRes.error.message);
 
