@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ArrowSquareOutIcon as ExternalLink, FlagIcon as Flag, GlobeIcon as Globe, MapPinIcon as MapPin, ShareIcon, UsersIcon as Users } from "@phosphor-icons/react";
+import { ArrowSquareOutIcon as ExternalLink, GlobeIcon as Globe, MapPinIcon as MapPin, ShareIcon, UsersIcon as Users } from "@phosphor-icons/react";
 import { EventDateTime } from "@/components/event-datetime";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -10,9 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { EventGallery } from "@/components/event-gallery";
 import { MarkdownView } from "@/components/markdown-view";
