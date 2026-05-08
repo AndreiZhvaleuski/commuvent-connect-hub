@@ -9,6 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import Lightbox from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import Counter from "yet-another-react-lightbox/plugins/counter";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/counter.css";
 
 const PUBLIC_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/gallery/`;
 
@@ -25,6 +30,7 @@ export default function Moderation() {
   const [eventsById, setEventsById] = useState<Record<string, EventLite>>({});
   const [busy, setBusy] = useState(true);
   const [rejectFor, setRejectFor] = useState<Photo | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const load = async () => {
     setBusy(true);
     const { data: evs } = await supabase
@@ -143,7 +149,14 @@ export default function Moderation() {
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                       {group.map((p) => (
                         <Card key={p.id} className="overflow-hidden">
-                          <img src={PUBLIC_BASE + p.storage_path} alt="Pending submission" className="aspect-square w-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setLightboxIndex(photos.findIndex((x) => x.id === p.id))}
+                            className="block w-full"
+                            aria-label="Open photo"
+                          >
+                            <img src={PUBLIC_BASE + p.storage_path} alt="Pending submission" className="aspect-square w-full object-cover transition hover:scale-[1.02]" />
+                          </button>
                           <CardContent className="flex gap-2 p-3">
                             <Button size="sm" className="flex-1" onClick={() => setPhotoStatus(p.id, "approved")}>
                               <Check className="w-4 h-4 mr-1" /> Approve
@@ -207,6 +220,16 @@ export default function Moderation() {
           await setPhotoStatus(rejectFor.id, "rejected");
           setRejectFor(null);
         }}
+      />
+
+      <Lightbox
+        open={lightboxIndex !== null}
+        index={lightboxIndex ?? 0}
+        close={() => setLightboxIndex(null)}
+        slides={photos.map((p) => ({ src: PUBLIC_BASE + p.storage_path, alt: "Pending submission" }))}
+        plugins={[Zoom, Counter]}
+        on={{ view: ({ index }) => setLightboxIndex(index) }}
+        zoom={{ maxZoomPixelRatio: 4, scrollToZoom: true }}
       />
     </main>
   );
