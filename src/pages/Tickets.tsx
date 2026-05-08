@@ -12,10 +12,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { buildICS, downloadICS, googleCalendarUrl } from "@/lib/calendar";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ErrorState } from "@/components/error-state";
+import { SkeletonGrid } from "@/components/skeleton-grid";
 
 type Row = {
   id: string;
@@ -32,14 +43,24 @@ type Row = {
   } | null;
 };
 
+const PAGE_SIZE = 5;
+type View = "upcoming" | "past";
+type SortDir = "asc" | "desc";
+
 export default function Tickets() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [qrs, setQrs] = useState<Record<string, string>>({});
   const [hideAll, setHideAll] = useState<boolean>(true);
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+
+  const [view, setView] = useState<View>("upcoming");
+  // Default: upcoming → nearest first (asc); past → most recent first (desc)
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     if (hideAll) setRevealed({});
@@ -47,12 +68,18 @@ export default function Tickets() {
 
   const load = async () => {
     if (!user) return;
-    const { data } = await supabase
+    setError(null);
+    const { data, error: err } = await supabase
       .from("rsvps")
       .select("id,status,position,code,cancelled_at,event_id, events(id,title,start_at,end_at,time_zone,venue_address,online_url,description,cover_image_url), check_ins(id,undone)")
       .eq("user_id", user.id)
       .neq("status", "cancelled")
       .order("created_at", { ascending: false });
+    if (err) {
+      setError(err.message);
+      setBusy(false);
+      return;
+    }
     setRows(((data ?? []) as unknown) as Row[]);
     setBusy(false);
   };
@@ -93,8 +120,39 @@ export default function Tickets() {
   }, [user?.id]);
 
   const now = useMemo(() => Date.now(), [rows]);
-  const upcoming = rows.filter((r) => r.events && new Date(r.events.end_at).getTime() >= now);
-  const past = rows.filter((r) => r.events && new Date(r.events.end_at).getTime() < now);
+  const upcomingAll = useMemo(
+    () => rows.filter((r) => r.events && new Date(r.events.end_at).getTime() >= now),
+    [rows, now]
+  );
+  const pastAll = useMemo(
+    () => rows.filter((r) => r.events && new Date(r.events.end_at).getTime() < now),
+    [rows, now]
+  );
+
+  // When switching tabs, set sensible default sort + reset page.
+  const changeView = (v: View) => {
+    setView(v);
+    setSortDir(v === "upcoming" ? "asc" : "desc");
+    setPage(1);
+  };
+
+  const filtered = view === "upcoming" ? upcomingAll : pastAll;
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    arr.sort((a, b) => {
+      const ax = new Date(a.events!.start_at).getTime();
+      const bx = new Date(b.events!.start_at).getTime();
+      return sortDir === "asc" ? ax - bx : bx - ax;
+    });
+    return arr;
+  }, [filtered, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  useEffect(() => {
+    if (page !== safePage) setPage(safePage);
+  }, [page, safePage]);
+  const pageRows = sorted.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   const [confirmCancelEventId, setConfirmCancelEventId] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
@@ -122,8 +180,6 @@ export default function Tickets() {
     }
   };
 
-  if (busy) return <><div className="container mx-auto px-4 py-12"><div className="h-8 w-64 animate-pulse rounded bg-muted" /></div></>;
-
   return (
     <><div className="container mx-auto max-w-4xl px-4 py-12">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
@@ -131,7 +187,7 @@ export default function Tickets() {
             <h1 className="text-3xl font-semibold tracking-tight">My Tickets</h1>
             <p className="text-muted-foreground mt-1">Your RSVPs and waitlist positions.</p>
           </div>
-          {rows.length > 0 && (
+          {!busy && !error && rows.length > 0 && (
             <div className="flex items-center gap-2 rounded-md border bg-card px-3 py-2">
               <Switch id="hide-sensitive" checked={hideAll} onCheckedChange={setHideAll} />
               <Label htmlFor="hide-sensitive" className="cursor-pointer text-sm inline-flex items-center gap-1.5">
@@ -142,7 +198,15 @@ export default function Tickets() {
           )}
         </div>
 
-        {rows.length === 0 ? (
+        {busy ? (
+          <SkeletonGrid count={3} className="space-y-4" itemHeightClass="h-48" />
+        ) : error ? (
+          <ErrorState
+            title="Couldn't load tickets"
+            description={error}
+            onRetry={() => { setBusy(true); load(); }}
+          />
+        ) : rows.length === 0 ? (
           <Card>
             <CardContent className="py-16 text-center">
               <Ticket className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
@@ -152,39 +216,85 @@ export default function Tickets() {
             </CardContent>
           </Card>
         ) : (
-          <Tabs defaultValue="upcoming">
-            <TabsList>
-              <TabsTrigger value="upcoming">Upcoming ({upcoming.length})</TabsTrigger>
-              <TabsTrigger value="past">Past ({past.length})</TabsTrigger>
-            </TabsList>
-            <TabsContent value="upcoming" className="pt-4 space-y-4">
-              {upcoming.length === 0 && <Card><CardContent className="py-12 text-center text-muted-foreground">No upcoming tickets.</CardContent></Card>}
-              {upcoming.map((r) => (
-                <TicketCard
-                  key={r.id}
-                  row={r}
-                  qr={qrs[r.id]}
-                  onCancel={() => setConfirmCancelEventId(r.event_id)}
-                  hidden={hideAll && !revealed[r.id]}
-                  onToggleHidden={hideAll ? () => setRevealed((p) => ({ ...p, [r.id]: !p[r.id] })) : undefined}
-                />
-              ))}
-            </TabsContent>
-            <TabsContent value="past" className="pt-4 space-y-4">
-              {past.length === 0 && <Card><CardContent className="py-12 text-center text-muted-foreground">No past tickets.</CardContent></Card>}
-              {past.map((r) => (
-                <TicketCard
-                  key={r.id}
-                  row={r}
-                  qr={qrs[r.id]}
-                  onCancel={() => setConfirmCancelEventId(r.event_id)}
-                  hidden={hideAll && !revealed[r.id]}
-                  onToggleHidden={hideAll ? () => setRevealed((p) => ({ ...p, [r.id]: !p[r.id] })) : undefined}
-                  pastView
-                />
-              ))}
-            </TabsContent>
-          </Tabs>
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <Tabs value={view} onValueChange={(v) => changeView(v as View)}>
+                <TabsList>
+                  <TabsTrigger value="upcoming">Upcoming ({upcomingAll.length})</TabsTrigger>
+                  <TabsTrigger value="past">Past ({pastAll.length})</TabsTrigger>
+                </TabsList>
+              </Tabs>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="sort-dir" className="text-xs text-muted-foreground">Sort</Label>
+                <Select value={sortDir} onValueChange={(v) => { setSortDir(v as SortDir); setPage(1); }}>
+                  <SelectTrigger id="sort-dir" className="h-9 w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="asc">{view === "upcoming" ? "Nearest first" : "Oldest first"}</SelectItem>
+                    <SelectItem value="desc">{view === "upcoming" ? "Furthest first" : "Newest first"}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="pt-4 space-y-4">
+              {sorted.length === 0 ? (
+                <Card><CardContent className="py-12 text-center text-muted-foreground">
+                  {view === "upcoming" ? "No upcoming tickets." : "No past tickets."}
+                </CardContent></Card>
+              ) : (
+                pageRows.map((r) => (
+                  <TicketCard
+                    key={r.id}
+                    row={r}
+                    qr={qrs[r.id]}
+                    onCancel={() => setConfirmCancelEventId(r.event_id)}
+                    hidden={hideAll && !revealed[r.id]}
+                    onToggleHidden={hideAll ? () => setRevealed((p) => ({ ...p, [r.id]: !p[r.id] })) : undefined}
+                    pastView={view === "past"}
+                  />
+                ))
+              )}
+            </div>
+
+            {totalPages > 1 && (
+              <Pagination className="mt-6">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => { e.preventDefault(); if (safePage > 1) setPage(safePage - 1); }}
+                      aria-disabled={safePage === 1}
+                      className={safePage === 1 ? "pointer-events-none opacity-50" : undefined}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }).map((_, i) => {
+                    const p = i + 1;
+                    return (
+                      <PaginationItem key={p}>
+                        <PaginationLink
+                          href="#"
+                          isActive={p === safePage}
+                          onClick={(e) => { e.preventDefault(); setPage(p); }}
+                        >
+                          {p}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => { e.preventDefault(); if (safePage < totalPages) setPage(safePage + 1); }}
+                      aria-disabled={safePage === totalPages}
+                      className={safePage === totalPages ? "pointer-events-none opacity-50" : undefined}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </>
         )}
       </div>
       <ConfirmDialog
