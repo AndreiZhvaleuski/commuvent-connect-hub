@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { EventGallery } from "@/components/event-gallery";
 import { MarkdownView } from "@/components/markdown-view";
 import { EventFeedback } from "@/components/event-feedback";
-import { Spinner } from "@/components/ui/spinner";
+import { PageSpinner } from "@/components/page-spinner";
 import { ErrorState } from "@/components/error-state";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 
