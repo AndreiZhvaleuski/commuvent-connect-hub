@@ -114,8 +114,8 @@ export default function EventGalleryPage() {
         throw insErr;
       }
       toast.success("Photo uploaded — pending host approval");
-      setPage(1);
-      if (filter !== "pending") setFilter("pending");
+      setFilter("pending");
+      if (page !== 1) setPage(1);
       else refetch();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");
