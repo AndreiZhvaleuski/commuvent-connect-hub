@@ -17,6 +17,8 @@ Deno.serve(async (req) => {
     const { data: rsvp } = await db.from("rsvps").select("*").eq("code", code.toUpperCase()).maybeSingle();
     if (!rsvp) return json({ status: "not_found" });
     if (rsvp.event_id !== event_id) return json({ status: "wrong_event" });
+    if (rsvp.cancelled_at) return json({ status: "cancelled", rsvp });
+    if (rsvp.status !== "going") return json({ status: "not_going", rsvp });
 
     const { data: existing } = await db.from("check_ins").select("id, undone").eq("rsvp_id", rsvp.id).maybeSingle();
     if (existing && !existing.undone) return json({ status: "duplicate", rsvp });

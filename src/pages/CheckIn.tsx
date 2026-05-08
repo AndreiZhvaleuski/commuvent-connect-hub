@@ -143,6 +143,8 @@ export default function CheckIn() {
       else if (status === "duplicate") toast.warning("Already checked in");
       else if (status === "wrong_event") toast.error("Code is for a different event");
       else if (status === "not_found") toast.error("Code not found");
+      else if (status === "cancelled") toast.error("RSVP was cancelled");
+      else if (status === "not_going") toast.error("Ticket is on the waitlist — not allowed");
       else toast.error("Check-in failed");
       setCode("");
       inputRef.current?.focus();
