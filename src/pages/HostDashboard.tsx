@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EventManagementCard, type ManagedEvent as Ev, type EventStat as Stat } from "@/components/event-management-card";
 import { ErrorState } from "@/components/error-state";
 import { Spinner } from "@/components/ui/spinner";
+import { PageSpinner } from "@/components/page-spinner";
 import { ListPagination } from "@/components/list-pagination";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 
