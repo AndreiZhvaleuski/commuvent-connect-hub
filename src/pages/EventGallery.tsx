@@ -3,11 +3,12 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   ArrowLeftIcon,
   CalendarIcon,
+  CheckIcon,
   FlagIcon as Flag,
   ImageSquareIcon as ImagePlus,
-  ShieldCheckIcon,
   SpinnerIcon as Loader2,
   TrashIcon,
+  XIcon,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import Lightbox from "yet-another-react-lightbox";
@@ -43,14 +44,17 @@ const PUBLIC_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/publ
 const ACCEPT = "image/jpeg,image/png,image/webp,image/gif,image/heic";
 const MAX_BYTES = 5 * 1024 * 1024;
 
-type Filter = "published" | "mine" | "pending";
+type Filter = "published" | "mine" | "pending" | "review";
 
 export default function EventGalleryPage() {
   const { eventId = "" } = useParams<{ eventId: string }>();
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const filterParam = searchParams.get("filter");
-  const filter: Filter = filterParam === "mine" || filterParam === "pending" ? filterParam : "published";
+  const filter: Filter =
+    filterParam === "mine" || filterParam === "pending" || filterParam === "review"
+      ? filterParam
+      : "published";
   const setFilter = (next: Filter) => {
     const sp = new URLSearchParams(searchParams);
     if (next === "published") sp.delete("filter");
@@ -71,6 +75,7 @@ export default function EventGalleryPage() {
   const [reason, setReason] = useState("");
   const [deleteFor, setDeleteFor] = useState<Photo | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [rejectFor, setRejectFor] = useState<Photo | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const { data: event, loading: evLoading, error: evError } = useAsyncResource<EventInfo | null>(
@@ -113,6 +118,7 @@ export default function EventGalleryPage() {
       if (filter === "published") q = q.eq("status", "approved");
       if (filter === "mine" && user) q = q.eq("user_id", user.id);
       if (filter === "pending" && user) q = q.eq("user_id", user.id).eq("status", "pending");
+      if (filter === "review") q = q.eq("status", "pending");
       const { data: rows, count, error } = await q
         .order("created_at", { ascending: true })
         .abortSignal(signal);
@@ -176,6 +182,13 @@ export default function EventGalleryPage() {
     refetch();
   };
 
+  const setPhotoStatus = async (id: string, status: "approved" | "rejected") => {
+    const { error } = await supabase.from("gallery_photos").update({ status }).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success(status === "approved" ? "Photo approved" : "Photo rejected");
+    refetch();
+  };
+
   const lightboxImages = photos.map((p) => ({ src: PUBLIC_BASE + p.storage_path, alt: "Event photo" }));
 
   if (evError) return (
@@ -236,16 +249,6 @@ export default function EventGalleryPage() {
           <h2 className="text-lg font-semibold">Photos{total > 0 ? ` · ${total}` : ""}</h2>
         </div>
         <div className="flex items-center gap-2">
-          {isHost && event && (
-            <Button
-              render={<Link to={`/dashboard/${event.host_id}/moderation`} />}
-              size="sm"
-              variant="outline"
-            >
-              <ShieldCheckIcon className="mr-2 h-4 w-4" />
-              Moderate
-            </Button>
-          )}
           {user ? (
             <>
               <input ref={fileRef} type="file" accept={ACCEPT} onChange={onFile} className="hidden" />
@@ -266,8 +269,21 @@ export default function EventGalleryPage() {
             <TabsTrigger value="published">Published</TabsTrigger>
             <TabsTrigger value="mine">Uploaded by me</TabsTrigger>
             <TabsTrigger value="pending">My pending</TabsTrigger>
+            {isHost && <TabsTrigger value="review">Pending review</TabsTrigger>}
           </TabsList>
         </Tabs>
+      )}
+
+      {user && filter === "pending" && (
+        <p className="mb-4 text-xs text-muted-foreground">
+          Up to 5 pending uploads per event · max 5 MB · JPG, PNG, WebP, GIF, HEIC
+        </p>
+      )}
+
+      {isHost && filter === "review" && (
+        <p className="mb-4 text-xs text-muted-foreground">
+          Photos awaiting your approval. Approved photos appear in the Published tab.
+        </p>
       )}
 
       {user && filter === "pending" && (
@@ -323,6 +339,25 @@ export default function EventGalleryPage() {
                       By you
                     </Badge>
                   )}
+                  {isHost && p.status === "pending" ? (
+                    <div className="absolute inset-x-1 bottom-1 flex gap-1 opacity-0 transition group-hover:opacity-100">
+                      <Button
+                        size="sm"
+                        className="h-7 flex-1 px-2 text-xs"
+                        onClick={() => setPhotoStatus(p.id, "approved")}
+                      >
+                        <CheckIcon className="mr-1 h-3.5 w-3.5" /> Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 flex-1 px-2 text-xs"
+                        onClick={() => setRejectFor(p)}
+                      >
+                        <XIcon className="mr-1 h-3.5 w-3.5" /> Reject
+                      </Button>
+                    </div>
+                  ) : null}
                   {canDelete ? (
                     <button
                       type="button"
@@ -332,7 +367,7 @@ export default function EventGalleryPage() {
                     >
                       <TrashIcon className="h-3.5 w-3.5" />
                     </button>
-                  ) : user && !isOwner ? (
+                  ) : user && !isOwner && !isHost ? (
                     <button
                       type="button"
                       onClick={() => setReportFor(p.id)}
@@ -375,6 +410,20 @@ export default function EventGalleryPage() {
         confirmLabel="Delete"
         destructive
         onConfirm={confirmDelete}
+      />
+
+      <ConfirmDialog
+        open={!!rejectFor}
+        onOpenChange={(o) => !o && setRejectFor(null)}
+        title="Reject this photo?"
+        description="The photo will be hidden from the gallery."
+        confirmLabel="Reject"
+        destructive
+        onConfirm={async () => {
+          if (!rejectFor) return;
+          await setPhotoStatus(rejectFor.id, "rejected");
+          setRejectFor(null);
+        }}
       />
 
       <Lightbox
