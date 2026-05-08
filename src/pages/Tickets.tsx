@@ -37,6 +37,16 @@ export default function Tickets() {
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState(true);
   const [qrs, setQrs] = useState<Record<string, string>>({});
+  const [hideAll, setHideAll] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("tickets:hideSensitive") === "1";
+  });
+  const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    localStorage.setItem("tickets:hideSensitive", hideAll ? "1" : "0");
+    if (hideAll) setRevealed({});
+  }, [hideAll]);
 
   const load = async () => {
     if (!user) return;
@@ -119,9 +129,20 @@ export default function Tickets() {
 
   return (
     <><div className="container mx-auto max-w-4xl px-4 py-12">
-        <div className="mb-6">
-          <h1 className="text-3xl font-semibold tracking-tight">My Tickets</h1>
-          <p className="text-muted-foreground mt-1">Your RSVPs and waitlist positions.</p>
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight">My Tickets</h1>
+            <p className="text-muted-foreground mt-1">Your RSVPs and waitlist positions.</p>
+          </div>
+          {rows.length > 0 && (
+            <div className="flex items-center gap-2 rounded-md border bg-card px-3 py-2">
+              <Switch id="hide-sensitive" checked={hideAll} onCheckedChange={setHideAll} />
+              <Label htmlFor="hide-sensitive" className="cursor-pointer text-sm inline-flex items-center gap-1.5">
+                {hideAll ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                Hide ticket codes
+              </Label>
+            </div>
+          )}
         </div>
 
         {rows.length === 0 ? (
