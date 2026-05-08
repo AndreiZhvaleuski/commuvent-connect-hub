@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   ArrowLeftIcon,
   CalendarIcon,
@@ -47,8 +47,24 @@ type Filter = "all" | "mine" | "pending";
 export default function EventGalleryPage() {
   const { eventId = "" } = useParams<{ eventId: string }>();
   const { user } = useAuth();
-  const [filter, setFilter] = useState<Filter>("all");
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filterParam = searchParams.get("filter");
+  const filter: Filter = filterParam === "mine" || filterParam === "pending" ? filterParam : "all";
+  const setFilter = (next: Filter) => {
+    const sp = new URLSearchParams(searchParams);
+    if (next === "all") sp.delete("filter");
+    else sp.set("filter", next);
+    sp.delete("page");
+    setSearchParams(sp, { replace: true });
+  };
+  const pageParam = Number(searchParams.get("page") ?? "1");
+  const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
+  const setPage = (next: number) => {
+    const sp = new URLSearchParams(searchParams);
+    if (next <= 1) sp.delete("page");
+    else sp.set("page", String(next));
+    setSearchParams(sp, { replace: true });
+  };
   const [uploading, setUploading] = useState(false);
   const [reportFor, setReportFor] = useState<string | null>(null);
   const [reason, setReason] = useState("");
