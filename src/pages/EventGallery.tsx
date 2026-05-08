@@ -151,8 +151,13 @@ export default function EventGalleryPage() {
         await supabase.storage.from("gallery").remove([path]);
         throw insErr;
       }
-      toast.success("Photo uploaded — pending host approval");
-      setFilter("pending");
+      if (isHost) {
+        toast.success("Photo uploaded");
+        setFilter("published");
+      } else {
+        toast.success("Photo uploaded — pending host approval");
+        setFilter("pending");
+      }
       if (page !== 1) setPage(1);
       else refetch();
     } catch (err) {
