@@ -64,9 +64,6 @@ export default function MyEvents() {
   const page = Math.max(1, parseInt(params.get("page") || "1", 10));
 
   const [hosts, setHosts] = useState<HostOpt[]>([]);
-  const [rows, setRows] = useState<Row[]>([]);
-  const [total, setTotal] = useState(0);
-  const [busy, setBusy] = useState(true);
   const [searchInput, setSearchInput] = useState(search);
 
   // Debounce search input -> URL
@@ -109,32 +106,31 @@ export default function MyEvents() {
     })();
   }, [user, loading, navigate]);
 
-  // Load events whenever filters change
-  useEffect(() => {
-    if (loading || !user) return;
-    (async () => {
-      setBusy(true);
-      const { data, error } = await supabase.rpc("my_events", {
-        p_host_ids: hostId ? [hostId] : undefined,
-        p_from: fromStr ? new Date(fromStr).toISOString() : undefined,
-        p_to: toStr ? new Date(toStr).toISOString() : undefined,
-        p_search: search || undefined,
-        p_time_filter: time,
-        p_limit: PAGE_SIZE,
-        p_offset: (page - 1) * PAGE_SIZE,
-      });
-      if (!error) {
-        const list = (data ?? []) as Row[];
-        setRows(list);
-        setTotal(list[0]?.total_count ? Number(list[0].total_count) : 0);
-      } else {
-        setRows([]);
-        setTotal(0);
-      }
-      setBusy(false);
-    })();
-  }, [user, loading, hostId, fromStr, toStr, search, time, page]);
+  // Load events whenever filters change (with cancellation)
+  const ready = !loading && !!user;
+  const { data: rows, loading: rowsLoading, error, refetch } = useAsyncResource<Row[]>(
+    async (signal) => {
+      if (!ready) return [];
+      const { data, error } = await supabase
+        .rpc("my_events", {
+          p_host_ids: hostId ? [hostId] : undefined,
+          p_from: fromStr ? new Date(fromStr).toISOString() : undefined,
+          p_to: toStr ? new Date(toStr).toISOString() : undefined,
+          p_search: search || undefined,
+          p_time_filter: time,
+          p_limit: PAGE_SIZE,
+          p_offset: (page - 1) * PAGE_SIZE,
+        })
+        .abortSignal(signal);
+      if (error) throw new Error(error.message);
+      return (data ?? []) as Row[];
+    },
+    [ready, hostId, fromStr, toStr, search, time, page],
+    { keepPreviousData: true }
+  );
 
+  const list = rows ?? [];
+  const total = list[0]?.total_count ? Number(list[0].total_count) : 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   function update(patch: Record<string, string | null>) {
@@ -145,6 +141,11 @@ export default function MyEvents() {
     }
     if (!("page" in patch)) next.delete("page");
     setParams(next, { replace: true });
+  }
+
+  function resetFilters() {
+    setSearchInput("");
+    setParams(new URLSearchParams(), { replace: true });
   }
 
   const fromDate = useMemo(() => (fromStr ? new Date(fromStr) : null), [fromStr]);
