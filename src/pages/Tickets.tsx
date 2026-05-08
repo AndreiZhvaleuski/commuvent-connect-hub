@@ -227,6 +227,7 @@ export default function Tickets() {
             description="RSVP to an event to see it here."
             action={<Button render={<Link to="/explore" />}>Explore events</Button>}
           />
+        ) : (
           <>
             <EventListControls
               view={view}
