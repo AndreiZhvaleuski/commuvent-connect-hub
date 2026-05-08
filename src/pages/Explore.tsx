@@ -171,35 +171,28 @@ export default function Explore() {
           </CardContent>
         </Card>
 
-        <div className="relative">
-          {busy && events !== null && (
-            <div className="absolute right-0 -top-8 inline-flex items-center gap-2 text-xs text-muted-foreground">
-              <Spinner className="size-4" /> Updating…
-            </div>
-          )}
-          {error ? (
-            <ErrorState
-              title="Couldn't load events"
-              description={error.message}
-              onRetry={refetch}
-            />
-          ) : events === null ? (
-            <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
-          ) : list.length === 0 ? (
-            <EmptyState
-              icon={<CalendarBlankIcon className="h-8 w-8" />}
-              title={hasFilter ? "No events match your filters" : "No published events yet"}
-              description={hasFilter ? "Try clearing the search or expanding the date range." : "Check back soon for new events."}
-              action={hasFilter ? <Button variant="outline" size="sm" onClick={clearAll}>Clear filters</Button> : undefined}
-            />
-          ) : (
-            <div className={`grid gap-4 sm:grid-cols-2 lg:grid-cols-3 transition-opacity ${busy ? "opacity-60" : ""}`}>
-              {list.map((e) => (
-                <PublicEventCard key={e.id} event={e} showStatusBadge={includePast} />
-              ))}
-            </div>
-          )}
-        </div>
+        {error ? (
+          <ErrorState
+            title="Couldn't load events"
+            description={error.message}
+            onRetry={refetch}
+          />
+        ) : busy ? (
+          <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
+        ) : list.length === 0 ? (
+          <EmptyState
+            icon={<CalendarBlankIcon className="h-8 w-8" />}
+            title={hasFilter ? "No events match your filters" : "No published events yet"}
+            description={hasFilter ? "Try clearing the search or expanding the date range." : "Check back soon for new events."}
+            action={hasFilter ? <Button variant="outline" size="sm" onClick={clearAll}>Clear filters</Button> : undefined}
+          />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {list.map((e) => (
+              <PublicEventCard key={e.id} event={e} showStatusBadge={includePast} />
+            ))}
+          </div>
+        )}
       </section>
     </>
   );
