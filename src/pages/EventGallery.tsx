@@ -3,11 +3,12 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   ArrowLeftIcon,
   CalendarIcon,
+  CheckIcon,
   FlagIcon as Flag,
   ImageSquareIcon as ImagePlus,
-  ShieldCheckIcon,
   SpinnerIcon as Loader2,
   TrashIcon,
+  XIcon,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import Lightbox from "yet-another-react-lightbox";
