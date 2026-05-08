@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { EmptyState } from "@/components/empty-state";
 import { Label } from "@/components/ui/label";
 
 type Photo = { id: string; storage_path: string; user_id: string; status: string; created_at: string };
@@ -88,7 +89,7 @@ export function EventGallery({ eventId }: { eventId: string }) {
       </CardHeader>
       <CardContent>
         {photos.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No photos yet. Be the first to share!</p>
+          <EmptyState title="No photos yet" description="Be the first to share!" />
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {photos.map((p) => (
