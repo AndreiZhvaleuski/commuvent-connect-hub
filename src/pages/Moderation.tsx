@@ -212,11 +212,6 @@ export default function Moderation() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {r.target_type === "event" && (
-                      <Button size="sm" variant="outline" render={<Link to={`/e/${r.target_id}`} />}>
-                        View event
-                      </Button>
-                    )}
                     <Button size="sm" variant="destructive" onClick={() => setPending({ report: r, action: "hide" })}>
                       <EyeOff className="w-4 h-4 mr-1" /> Hide
                     </Button>
