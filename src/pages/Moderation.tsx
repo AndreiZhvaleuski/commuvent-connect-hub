@@ -150,7 +150,7 @@ export default function Moderation() {
         {reports.length > 0 && <Badge variant="secondary">{reports.length} open</Badge>}
       </div>
       <p className="text-sm text-muted-foreground">
-        Reports submitted by attendees, oldest first. Hiding a photo rejects it; hiding an event reverts it to a private draft.
+        Reports submitted by attendees, oldest first. Hiding a photo rejects it; hiding an event reverts it to a draft.
       </p>
 
       {loading && !data ? (
