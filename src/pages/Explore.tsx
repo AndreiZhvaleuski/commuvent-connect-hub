@@ -210,8 +210,8 @@ export default function Explore() {
         ) : list.length === 0 ? (
           <EmptyState
             icon={<CalendarBlankIcon className="h-8 w-8" />}
-            title={hasFilter ? "No events match your filters" : "No published events yet"}
-            description={hasFilter ? "Try clearing the search or expanding the date range." : "Check back soon for new events."}
+            title="No events match your filters"
+            description="Try clearing the search or expanding the date range."
             action={hasFilter ? <Button variant="outline" size="sm" onClick={clearAll}>Clear filters</Button> : undefined}
           />
         ) : (
