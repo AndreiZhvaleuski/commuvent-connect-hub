@@ -89,8 +89,6 @@ export default function EventGalleryPage() {
 
   const { data, loading, error, refetch } = useAsyncResource<{ photos: Photo[]; total: number }>(
     async (signal) => {
-      const from = (page - 1) * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
       let q = supabase
         .from("gallery_photos")
         .select("id,storage_path,user_id,status,created_at", { count: "exact" })
@@ -100,18 +98,16 @@ export default function EventGalleryPage() {
       if (filter === "pending" && user) q = q.eq("user_id", user.id).eq("status", "pending");
       const { data: rows, count, error } = await q
         .order("created_at", { ascending: true })
-        .abortSignal(signal)
-        .range(from, to);
+        .abortSignal(signal);
       if (error) throw new Error(error.message);
       return { photos: (rows ?? []) as Photo[], total: count ?? 0 };
     },
-    [eventId, user?.id, page, filter],
+    [eventId, user?.id, filter],
     { keepPreviousData: true }
   );
 
   const photos = data?.photos ?? [];
   const total = data?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const onPick = () => fileRef.current?.click();
   const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
