@@ -183,7 +183,7 @@ export default function HostPublic() {
 
         <div className="pt-4">
           {busy ? (
-            <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>
+            <PageSpinner />
           ) : events.length === 0 ? (
             <EmptyState title={view === "upcoming" ? "No upcoming events." : "No past events."} />
           ) : (
