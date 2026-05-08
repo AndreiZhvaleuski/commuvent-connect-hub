@@ -44,7 +44,7 @@ const PUBLIC_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/publ
 const ACCEPT = "image/jpeg,image/png,image/webp,image/gif,image/heic";
 const MAX_BYTES = 5 * 1024 * 1024;
 
-type Filter = "published" | "mine" | "pending";
+type Filter = "published" | "mine" | "pending" | "review";
 
 export default function EventGalleryPage() {
   const { eventId = "" } = useParams<{ eventId: string }>();
