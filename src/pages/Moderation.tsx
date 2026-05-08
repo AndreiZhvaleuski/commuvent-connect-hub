@@ -54,6 +54,7 @@ export default function Moderation() {
   const navigate = useNavigate();
   const [pending, setPending] = useState<{ report: ReportRow; action: "hide" | "dismiss" } | null>(null);
   const [resolving, setResolving] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
   if (!authLoading && !user) {
     navigate(`/sign-in?redirect=/dashboard/${hostId}/moderation`);
