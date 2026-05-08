@@ -257,7 +257,7 @@ export default function Tickets() {
 
             <div className="pt-4 space-y-4">
               {busy ? (
-                <SkeletonGrid count={3} className="space-y-4" itemHeightClass="h-48" />
+                <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>
               ) : rows.length === 0 ? (
                 <Card><CardContent className="py-12 text-center text-muted-foreground">
                   {view === "upcoming" ? "No upcoming tickets." : "No past tickets."}
