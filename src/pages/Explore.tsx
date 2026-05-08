@@ -39,6 +39,7 @@ export default function Explore() {
   const to = searchParams.get("to") ?? "";
   const includePast = searchParams.get("past") === "1";
   const mode = (searchParams.get("type") as LocationMode) || "any";
+  const sortDir = (searchParams.get("sort") as SortDir) === "desc" ? "desc" : "asc";
 
   const updateParam = (key: string, value: string | null) => {
     setSearchParams((prev) => {
