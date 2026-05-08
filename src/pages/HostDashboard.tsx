@@ -108,8 +108,13 @@ export default function HostDashboard() {
   }, [hostId, role, refetch]);
 
   const now = new Date().toISOString();
-  const upcoming = useMemo(() => events.filter((e) => e.end_at >= now), [events, now]);
-  const past = useMemo(() => events.filter((e) => e.end_at < now), [events, now]);
+  const sorted = useMemo(() => {
+    const copy = [...events];
+    copy.sort((a, b) => sortDir === "asc" ? a.start_at.localeCompare(b.start_at) : b.start_at.localeCompare(a.start_at));
+    return copy;
+  }, [events, sortDir]);
+  const upcoming = useMemo(() => sorted.filter((e) => e.end_at >= now), [sorted, now]);
+  const past = useMemo(() => sorted.filter((e) => e.end_at < now), [sorted, now]);
 
   if (busy) {
     return (
