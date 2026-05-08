@@ -208,9 +208,9 @@ export default function EventRsvps() {
           </CardHeader>
           <CardContent>
             {busy ? (
-              <p className="text-muted-foreground">Loading…</p>
+              <PageSpinner />
             ) : rows.length === 0 ? (
-              <p className="text-muted-foreground">No RSVPs yet.</p>
+              <EmptyState title="No RSVPs yet" />
             ) : (
               <>
                 {/* Mobile: stacked cards */}
