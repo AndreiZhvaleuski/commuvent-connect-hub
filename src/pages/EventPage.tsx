@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ArrowSquareOutIcon as ExternalLink, GlobeIcon as Globe, MapPinIcon as MapPin, ShareIcon, UsersIcon as Users } from "@phosphor-icons/react";
+import { ArrowSquareOutIcon as ExternalLink, FlagIcon, GlobeIcon as Globe, MapPinIcon as MapPin, ShareIcon, UsersIcon as Users } from "@phosphor-icons/react";
 import { EventDateTime } from "@/components/event-datetime";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -11,6 +11,8 @@ import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { EventGallery } from "@/components/event-gallery";
 import { MarkdownView } from "@/components/markdown-view";
@@ -43,6 +45,9 @@ export default function EventPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [acting, setActing] = useState(false);
   const [liveGoing, setLiveGoing] = useState<number | null>(null);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reporting, setReporting] = useState(false);
 
   const userId = user?.id ?? null;
   const { data, loading: busy, error, refetch } = useAsyncResource<LoadResult>(
@@ -236,7 +241,7 @@ export default function EventPage() {
               </Card>
             )}
 
-            <div className="mt-8 flex items-center justify-between gap-2">
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-2">
               <Button variant="outline" size="sm" onClick={async () => {
                 const shareUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-preview?type=event&id=${event.id}`;
                 await navigator.clipboard.writeText(shareUrl);
@@ -244,6 +249,11 @@ export default function EventPage() {
               }}>
                 <ShareIcon className="mr-1 h-4 w-4" />Share this event
               </Button>
+              {user && !canCheckIn && (
+                <Button variant="ghost" size="sm" onClick={() => setReportOpen(true)}>
+                  <FlagIcon className="mr-1 h-4 w-4" />Report event
+                </Button>
+              )}
             </div>
 
             <EventGallery eventId={event.id} />
@@ -323,6 +333,45 @@ export default function EventPage() {
           </aside>
         </div>
       </div>
+
+      <Dialog open={reportOpen} onOpenChange={(o) => { setReportOpen(o); if (!o) setReportReason(""); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Report this event</DialogTitle>
+            <DialogDescription>The host will review your report.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="event-report-reason">Reason</Label>
+            <Textarea
+              id="event-report-reason"
+              rows={4}
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              placeholder="What's wrong with this event?"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReportOpen(false)}>Cancel</Button>
+            <Button
+              disabled={reporting}
+              onClick={async () => {
+                if (!user || !event) return;
+                if (reportReason.trim().length < 5) { toast.error("Please describe the issue"); return; }
+                setReporting(true);
+                const { error } = await supabase.from("reports").insert({
+                  target_type: "event", target_id: event.id, reason: reportReason.trim(), reporter_id: user.id,
+                });
+                setReporting(false);
+                if (error) { toast.error(error.message); return; }
+                toast.success("Report submitted");
+                setReportOpen(false); setReportReason("");
+              }}
+            >
+              {reporting ? "Submitting…" : "Submit report"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
