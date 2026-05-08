@@ -75,6 +75,7 @@ export default function EventGalleryPage() {
   const [reason, setReason] = useState("");
   const [deleteFor, setDeleteFor] = useState<Photo | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [rejectFor, setRejectFor] = useState<Photo | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const { data: event, loading: evLoading, error: evError } = useAsyncResource<EventInfo | null>(
