@@ -83,8 +83,8 @@ export default function HostPublic() {
             .select("role")
             .eq("host_id", h.id)
             .eq("user_id", userId)
-            .maybeSingle()
             .abortSignal(signal)
+            .maybeSingle()
         : Promise.resolve({ data: null, error: null });
 
       const [pageRes, upRes, pastRes, memRes] = await Promise.all([
