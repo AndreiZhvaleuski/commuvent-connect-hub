@@ -23,6 +23,17 @@ export default function HostDashboard() {
   const [busy, setBusy] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = searchParams.get("tab") === "past" ? "past" : "upcoming";
+  const loadStats = useMemo(
+    () => async () => {
+      if (!hostId) return;
+      const { data } = await supabase.rpc("event_stats", { p_host_id: hostId });
+      const map: Record<string, Stat> = {};
+      ((data ?? []) as Stat[]).forEach((s) => { map[s.event_id] = s; });
+      setStats(map);
+    },
+    [hostId]
+  );
+
   useEffect(() => {
     if (loading) return;
     if (!user) { navigate(`/sign-in?redirect=${encodeURIComponent(`/dashboard/${hostId}`)}`); return; }
@@ -42,19 +53,27 @@ export default function HostDashboard() {
         .select("id,title,status,visibility,start_at,end_at,capacity,cover_image_url,time_zone")
         .eq("host_id", hostId).order("start_at", { ascending: false });
       if (isChecker) eventsQuery.eq("status", "published");
-      const [{ data: h }, { data: ev }, statsRes] = await Promise.all([
+      const [{ data: h }, { data: ev }] = await Promise.all([
         supabase.from("hosts").select("id,name,logo_url,bio").eq("id", hostId).maybeSingle(),
         eventsQuery,
-        isChecker ? Promise.resolve({ data: [] as Stat[] }) : supabase.rpc("event_stats", { p_host_id: hostId }),
       ]);
       setHost((h ?? null) as Host | null);
       setEvents((ev ?? []) as Ev[]);
-      const map: Record<string, Stat> = {};
-      ((statsRes.data ?? []) as Stat[]).forEach((s) => { map[s.event_id] = s; });
-      setStats(map);
+      await loadStats();
       setBusy(false);
     })();
-  }, [hostId, user, loading, navigate]);
+  }, [hostId, user, loading, navigate, loadStats]);
+
+  // Realtime: refresh stats when check-ins or RSVPs change for any event in this host
+  useEffect(() => {
+    if (!hostId || !role) return;
+    const ch = supabase
+      .channel(`host-stats-${hostId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "check_ins" }, loadStats)
+      .on("postgres_changes", { event: "*", schema: "public", table: "rsvps" }, loadStats)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [hostId, role, loadStats]);
 
   const now = new Date().toISOString();
   const upcoming = useMemo(() => events.filter((e) => e.end_at >= now), [events, now]);
