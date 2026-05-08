@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+
 import { buildCsv, downloadBlob, toUtcIso, type RsvpExportRow } from "@/lib/csv";
 
 const CSV_HELP_HIDE_KEY = "commuvent.rsvp-csv-help.hide";
