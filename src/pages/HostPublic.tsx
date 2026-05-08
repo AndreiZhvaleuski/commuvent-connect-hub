@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { EnvelopeIcon as Mail, ShareIcon, GearIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
@@ -7,59 +7,133 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PublicEventCard, type PublicEvent } from "@/components/public-event-card";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useAsyncResource } from "@/hooks/use-async-resource";
+import { Spinner } from "@/components/ui/spinner";
+import { ErrorState } from "@/components/error-state";
+import { EventListControls, type EventView, type EventSortDir } from "@/components/event-list-controls";
+import { ListPagination } from "@/components/list-pagination";
 
 type Host = { id: string; name: string; bio: string | null; logo_url: string | null; contact_email: string | null };
 type Ev = PublicEvent;
 
+const PAGE_SIZE = 6;
+
+type LoadResult = {
+  host: Host | null;
+  events: Ev[];
+  total: number;
+  counts: { upcoming: number; past: number };
+  canManage: boolean;
+};
+
 export default function HostPublic() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const [host, setHost] = useState<Host | null>(null);
-  const [events, setEvents] = useState<Ev[]>([]);
-  const [busy, setBusy] = useState(true);
-  const [notFound, setNotFound] = useState(false);
-  const [canManage, setCanManage] = useState(false);
-  useEffect(() => {
-    if (!id) return;
-    (async () => {
-      setBusy(true);
-      const { data: h } = await supabase.from("hosts").select("id,name,bio,logo_url,contact_email").eq("id", id).maybeSingle();
-      if (!h) { setNotFound(true); setBusy(false); return; }
-      setHost(h as Host);
-      const { data: ev } = await supabase
-        .from("events")
-        .select("id,title,cover_image_url,start_at,end_at,time_zone,venue_address,online_url")
-        .eq("host_id", h.id).eq("status", "published").eq("visibility", "public")
-        .order("start_at", { ascending: true });
-      setEvents((ev ?? []) as Ev[]);
-      if (user) {
-        const { data: hm } = await supabase
-          .from("host_members")
-          .select("role")
-          .eq("host_id", h.id)
-          .eq("user_id", user.id)
-          .maybeSingle();
-        setCanManage(hm?.role === "host");
-      } else {
-        setCanManage(false);
-      }
-      setBusy(false);
-    })();
-  }, [id, user]);
 
-  const now = new Date().toISOString();
-  const upcoming = useMemo(() => events.filter((e) => e.end_at >= now), [events, now]);
-  const past = useMemo(() => events.filter((e) => e.end_at < now).reverse(), [events, now]);
+  const [view, setView] = useState<EventView>("upcoming");
+  const [sortDir, setSortDir] = useState<EventSortDir>("asc");
+  const [page, setPage] = useState(1);
 
-  if (notFound) return <><div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Host not found.</p></div></>;
-  if (busy || !host) return <><div className="container mx-auto px-4 py-12"><div className="h-24 animate-pulse rounded bg-muted" /></div></>;
+  const userId = user?.id ?? null;
+
+  const { data, loading: busy, error, refetch } = useAsyncResource<LoadResult>(
+    async (signal) => {
+      const empty: LoadResult = { host: null, events: [], total: 0, counts: { upcoming: 0, past: 0 }, canManage: false };
+      if (!id) return empty;
+
+      const { data: h, error: hErr } = await supabase
+        .from("hosts")
+        .select("id,name,bio,logo_url,contact_email")
+        .eq("id", id)
+        .maybeSingle()
+        .abortSignal(signal);
+      if (hErr) throw new Error(hErr.message);
+      if (!h) return empty;
+
+      const nowIso = new Date().toISOString();
+      const from = (page - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
+      const baseSelect = "id,title,cover_image_url,start_at,end_at,time_zone,venue_address,online_url";
+      const baseFilters = (q: ReturnType<typeof supabase.from>) =>
+        q.eq("host_id", h.id).eq("status", "published").eq("visibility", "public");
+
+      const pageQuery = baseFilters(
+        supabase.from("events").select(baseSelect, { count: "exact" }),
+      )
+        .filter("end_at", view === "upcoming" ? "gte" : "lt", nowIso)
+        .order("start_at", { ascending: sortDir === "asc" })
+        .range(from, to)
+        .abortSignal(signal);
+
+      const upcomingCount = baseFilters(
+        supabase.from("events").select("id", { count: "exact", head: true }),
+      ).filter("end_at", "gte", nowIso).abortSignal(signal);
+
+      const pastCount = baseFilters(
+        supabase.from("events").select("id", { count: "exact", head: true }),
+      ).filter("end_at", "lt", nowIso).abortSignal(signal);
+
+      const memberQuery = userId
+        ? supabase
+            .from("host_members")
+            .select("role")
+            .eq("host_id", h.id)
+            .eq("user_id", userId)
+            .maybeSingle()
+            .abortSignal(signal)
+        : Promise.resolve({ data: null, error: null });
+
+      const [pageRes, upRes, pastRes, memRes] = await Promise.all([
+        pageQuery,
+        upcomingCount,
+        pastCount,
+        memberQuery,
+      ]);
+      if (pageRes.error) throw new Error(pageRes.error.message);
+      if (upRes.error) throw new Error(upRes.error.message);
+      if (pastRes.error) throw new Error(pastRes.error.message);
+
+      return {
+        host: h as Host,
+        events: ((pageRes.data ?? []) as unknown) as Ev[],
+        total: pageRes.count ?? 0,
+        counts: { upcoming: upRes.count ?? 0, past: pastRes.count ?? 0 },
+        canManage: (memRes as { data: { role: string } | null }).data?.role === "host",
+      };
+    },
+    [id, userId, view, sortDir, page],
+    { keepPreviousData: true },
+  );
+
+  const host = data?.host ?? null;
+  const events = data?.events ?? [];
+  const total = data?.total ?? 0;
+  const counts = data?.counts ?? { upcoming: 0, past: 0 };
+  const canManage = !!data?.canManage;
+  const notFound = !busy && !error && data !== null && data.host === null;
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  useEffect(() => { if (page !== safePage) setPage(safePage); }, [page, safePage]);
+
+  const changeView = (v: EventView) => { setView(v); setPage(1); };
+  const changeSort = (s: EventSortDir) => { setSortDir(s); setPage(1); };
+
+  if (error) return (
+    <div className="container mx-auto max-w-2xl px-4 py-12">
+      <ErrorState description={error.message} onRetry={refetch} />
+    </div>
+  );
+  if (notFound) return <div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Host not found.</p></div>;
+  if ((busy && !data) || !host) return <div className="container mx-auto flex justify-center px-4 py-20"><Spinner className="size-8 text-muted-foreground" /></div>;
 
   return (
-    <><section className="border-b">
+    <>
+      <section className="border-b">
         <div className="container mx-auto px-4 py-12 max-w-4xl">
           <div className="flex flex-wrap items-start gap-6">
             <Avatar className="h-20 w-20">
@@ -98,26 +172,35 @@ export default function HostPublic() {
       </section>
 
       <section className="container mx-auto px-4 py-10 max-w-4xl">
-        <Tabs defaultValue="upcoming">
-          <TabsList>
-            <TabsTrigger value="upcoming">Upcoming ({upcoming.length})</TabsTrigger>
-            <TabsTrigger value="past">Past ({past.length})</TabsTrigger>
-          </TabsList>
-          <TabsContent value="upcoming" className="pt-4"><EventGrid events={upcoming} empty="No upcoming events." /></TabsContent>
-          <TabsContent value="past" className="pt-4"><EventGrid events={past} empty="No past events." pastBadge /></TabsContent>
-        </Tabs>
+        <EventListControls
+          view={view}
+          onViewChange={changeView}
+          sortDir={sortDir}
+          onSortChange={changeSort}
+          upcomingCount={counts.upcoming}
+          pastCount={counts.past}
+        />
+
+        <div className="pt-4">
+          {busy ? (
+            <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>
+          ) : events.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center text-muted-foreground">
+                {view === "upcoming" ? "No upcoming events." : "No past events."}
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {events.map((e) => (
+                <PublicEventCard key={e.id} event={e} showStatusBadge={view === "past"} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <ListPagination page={safePage} totalPages={totalPages} onPageChange={setPage} />
       </section>
     </>
-  );
-}
-
-function EventGrid({ events, empty, pastBadge }: { events: Ev[]; empty: string; pastBadge?: boolean }) {
-  if (events.length === 0) return <Card><CardContent className="py-12 text-center text-muted-foreground">{empty}</CardContent></Card>;
-  return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      {events.map((e) => (
-        <PublicEventCard key={e.id} event={e} showStatusBadge={pastBadge} />
-      ))}
-    </div>
   );
 }
