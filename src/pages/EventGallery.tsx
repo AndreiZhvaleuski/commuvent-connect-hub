@@ -252,6 +252,7 @@ export default function EventGalleryPage() {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-semibold">Photos{total > 0 ? ` · ${total}` : ""}</h2>
+          {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
         </div>
         <div className="flex items-center gap-2">
           {user ? (
@@ -305,7 +306,7 @@ export default function EventGalleryPage() {
         />
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+          <div className={`grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 ${loading ? "opacity-50 transition-opacity" : ""}`}>
             {photos.map((p, i) => {
               const isOwner = user?.id === p.user_id;
               const canDelete = isOwner && p.status === "pending";
