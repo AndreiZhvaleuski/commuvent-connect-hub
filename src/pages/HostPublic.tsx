@@ -129,7 +129,7 @@ export default function HostPublic() {
     </div>
   );
   if (notFound) return <div className="container mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Host not found.</p></div>;
-  if ((busy && !data) || !host) return <div className="container mx-auto flex justify-center px-4 py-20"><Spinner className="size-8 text-muted-foreground" /></div>;
+  if ((busy && !data) || !host) return <PageSpinner py={20} container />;
 
   return (
     <>
