@@ -196,10 +196,12 @@ function TicketCard({ row, qr, onCancel, pastView }: { row: Row; qr?: string; on
                 type="button"
                 onClick={() => setZoomed(true)}
                 aria-label="Enlarge QR code"
-                className="group relative h-40 w-40 rounded-md border bg-card p-2 transition hover:border-primary hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="group flex flex-col items-center gap-1 focus:outline-none"
               >
-                <img src={qr} alt={`QR code ${row.code}`} className="h-full w-full" />
-                <span className="pointer-events-none absolute bottom-1 right-1 inline-flex items-center gap-1 rounded bg-background/90 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground shadow-sm ring-1 ring-border group-hover:text-foreground">
+                <div className="relative h-40 w-40 rounded-md border bg-card p-2 transition group-hover:border-primary group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
+                  <img src={qr} alt={`QR code ${row.code}`} className="h-full w-full" />
+                </div>
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground group-hover:text-foreground">
                   <ZoomIn className="h-3 w-3" /> Tap to enlarge
                 </span>
               </button>
