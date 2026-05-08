@@ -292,11 +292,13 @@ function TicketCard({ row, qr, onCancel, pastView, hidden, onToggleHidden }: { r
                 <p className="text-xs text-muted-foreground">Ticket code</p>
                 {onToggleHidden && row.status === "going" && (
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button size="sm" variant="ghost" className="h-7 px-2" onClick={onToggleHidden} aria-label={hidden ? "Show ticket details" : "Hide ticket details"}>
-                        {hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                      </Button>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <Button size="sm" variant="ghost" className="h-7 px-2" onClick={onToggleHidden} aria-label={hidden ? "Show ticket details" : "Hide ticket details"}>
+                          {hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                        </Button>
+                      }
+                    />
                     <TooltipContent>{hidden ? "Show ticket code & QR" : "Hide ticket code & QR"}</TooltipContent>
                   </Tooltip>
                 )}
