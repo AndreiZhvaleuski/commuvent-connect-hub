@@ -110,7 +110,7 @@ export default function About() {
             const Icon = v.icon;
             return (
               <Card key={v.title}>
-                <CardContent className="py-6">
+                <CardContent>
                   <div className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
                     <Icon className="h-5 w-5" />
                   </div>
