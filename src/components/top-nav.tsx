@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { UsersIcon as Users, ListIcon as Menu } from "@phosphor-icons/react";
+import { ListIcon as Menu } from "@phosphor-icons/react";
+import logo from "@/assets/logo.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,9 +53,7 @@ export function TopNav() {
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <Users className="h-4 w-4" />
-          </span>
+          <img src={logo} alt="Commuvent" className="h-8 w-8" width={32} height={32} />
           <span className="font-heading text-lg">Commuvent</span>
         </Link>
 
