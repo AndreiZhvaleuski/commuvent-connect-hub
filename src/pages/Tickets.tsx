@@ -221,15 +221,12 @@ export default function Tickets() {
         ) : busy && hasAny === null ? (
           <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
         ) : hasAny === false ? (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <Ticket className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
-              <p className="text-lg font-medium">No tickets yet</p>
-              <p className="text-muted-foreground mt-1">RSVP to an event to see it here.</p>
-              <Button render={<Link to="/explore" />} className="mt-6">Explore events</Button>
-            </CardContent>
-          </Card>
-        ) : (
+          <EmptyState
+            icon={<Ticket className="h-10 w-10" />}
+            title="No tickets yet"
+            description="RSVP to an event to see it here."
+            action={<Button render={<Link to="/explore" />}>Explore events</Button>}
+          />
           <>
             <EventListControls
               view={view}
