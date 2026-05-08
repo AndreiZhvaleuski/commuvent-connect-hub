@@ -71,6 +71,10 @@ export function EventFeedback({ eventId, eventEnded }: { eventId: string; eventE
       <CardContent className="space-y-4">
         {!user ? (
           <p className="text-sm text-muted-foreground">Sign in to leave feedback.</p>
+        ) : !eventEnded ? (
+          <p className="text-sm text-muted-foreground">Feedback opens after the event ends.</p>
+        ) : !attended ? (
+          <p className="text-sm text-muted-foreground">Only attendees who checked in can leave feedback.</p>
         ) : mine ? (
           <div className="rounded-md border bg-muted/40 p-3 text-sm">
             <div className="flex items-center gap-1">
