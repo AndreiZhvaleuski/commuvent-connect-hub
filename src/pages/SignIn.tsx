@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { InfoIcon, SpinnerIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { DEMO_HOSTS, DEMO_CHECKERS, DEMO_ATTENDEES, DEMO_PASSWORD, type DemoAccount } from "@/lib/demoAccounts";
@@ -87,21 +88,23 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
     }
   };
 
-  const Section = ({ title, accounts }: { title: string; accounts: DemoAccount[] }) => (
-    <div className="space-y-2">
-      <h4 className="text-sm font-semibold">{title}</h4>
-      <div className="space-y-1">
-        {accounts.map((a) => (
-          <div key={a.email} className="flex items-center justify-between gap-2 rounded-md border bg-muted/30 px-2 py-1.5 text-sm">
-            <div className="min-w-0">
-              <div className="truncate font-medium">{a.name}{a.detail ? <span className="text-muted-foreground"> · {a.detail}</span> : null}</div>
-              <div className="truncate text-xs text-muted-foreground">{a.email}</div>
+  const Section = ({ value, title, accounts }: { value: string; title: string; accounts: DemoAccount[] }) => (
+    <AccordionItem value={value}>
+      <AccordionTrigger>{title} <span className="ml-2 text-xs font-normal text-muted-foreground">({accounts.length})</span></AccordionTrigger>
+      <AccordionContent>
+        <div className="space-y-1">
+          {accounts.map((a) => (
+            <div key={a.email} className="flex items-center justify-between gap-2 rounded-md border bg-muted/30 px-2 py-1.5 text-sm">
+              <div className="min-w-0">
+                <div className="truncate font-medium">{a.name}{a.detail ? <span className="text-muted-foreground"> · {a.detail}</span> : null}</div>
+                <div className="truncate text-xs text-muted-foreground">{a.email}</div>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => useAccount(a)}>Use</Button>
             </div>
-            <Button size="sm" variant="outline" onClick={() => useAccount(a)}>Use</Button>
-          </div>
-        ))}
-      </div>
-    </div>
+          ))}
+        </div>
+      </AccordionContent>
+    </AccordionItem>
   );
 
   return (
@@ -127,9 +130,11 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
-                  <Section title="Hosts" accounts={DEMO_HOSTS} />
-                  <Section title="Checkers" accounts={DEMO_CHECKERS} />
-                  <Section title="Attendees" accounts={DEMO_ATTENDEES} />
+                  <Accordion defaultValue={["hosts"]}>
+                    <Section value="hosts" title="Hosts" accounts={DEMO_HOSTS} />
+                    <Section value="checkers" title="Checkers" accounts={DEMO_CHECKERS} />
+                    <Section value="attendees" title="Attendees" accounts={DEMO_ATTENDEES} />
+                  </Accordion>
                   <div className="space-y-2 rounded-md border p-3">
                     <h4 className="text-sm font-semibold">Re-seed demo data</h4>
                     <p className="text-xs text-muted-foreground">
