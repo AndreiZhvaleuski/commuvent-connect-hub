@@ -419,6 +419,7 @@ export type Database = {
     }
     Functions: {
       accept_host_invite: { Args: { p_token: string }; Returns: string }
+      can_view_profile: { Args: { p_user_id: string }; Returns: boolean }
       event_going_count: { Args: { p_event_id: string }; Returns: number }
       event_page_load: { Args: { p_event_id: string }; Returns: Json }
       event_rsvp_emails: {
