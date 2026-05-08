@@ -25,6 +25,7 @@ import HostMembers from "./pages/HostMembers.tsx";
 import InviteAccept from "./pages/InviteAccept.tsx";
 import ScrollToTop from "./components/scroll-to-top";
 import MyEvents from "./pages/MyEvents.tsx";
+import { AppLayout } from "./components/app-layout";
 
 const queryClient = new QueryClient();
 
@@ -37,28 +38,30 @@ const App = () => (
         <AuthProvider>
           <ScrollToTop />
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/explore" element={<Explore />} />
-            <Route path="/e/:eventId" element={<EventPage />} />
-            <Route path="/h/:id" element={<HostPublic />} />
-            <Route path="/sign-in" element={<SignIn mode="signin" />} />
-            <Route path="/sign-up" element={<SignIn mode="signup" />} />
-            <Route path="/tickets" element={<Tickets />} />
-            <Route path="/my-events" element={<MyEvents />} />
-            <Route path="/become-a-host" element={<HostEditor mode="create" />} />
-            <Route path="/dashboard/:hostId/edit" element={<HostEditor mode="edit" />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/:hostId" element={<HostDashboard />} />
-            <Route path="/dashboard/:hostId/events/new" element={<EventEditor />} />
-            <Route path="/dashboard/:hostId/events/:eventId" element={<EventManage />} />
-            <Route path="/dashboard/:hostId/events/:eventId/edit" element={<EventEditor />} />
-            <Route path="/dashboard/:hostId/events/:eventId/rsvps" element={<EventRsvps />} />
-            <Route path="/dashboard/:hostId/members" element={<HostMembers />} />
-            <Route path="/dashboard/:hostId/moderation" element={<Moderation />} />
-            <Route path="/checkin/:eventId" element={<CheckIn />} />
-            <Route path="/invite/:token" element={<InviteAccept />} />
-            <Route path="/about" element={<About />} />
-            <Route path="*" element={<NotFound />} />
+            <Route element={<AppLayout />}>
+              <Route path="/" element={<Index />} />
+              <Route path="/explore" element={<Explore />} />
+              <Route path="/e/:eventId" element={<EventPage />} />
+              <Route path="/h/:id" element={<HostPublic />} />
+              <Route path="/sign-in" element={<SignIn mode="signin" />} />
+              <Route path="/sign-up" element={<SignIn mode="signup" />} />
+              <Route path="/tickets" element={<Tickets />} />
+              <Route path="/my-events" element={<MyEvents />} />
+              <Route path="/become-a-host" element={<HostEditor mode="create" />} />
+              <Route path="/dashboard/:hostId/edit" element={<HostEditor mode="edit" />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/:hostId" element={<HostDashboard />} />
+              <Route path="/dashboard/:hostId/events/new" element={<EventEditor />} />
+              <Route path="/dashboard/:hostId/events/:eventId" element={<EventManage />} />
+              <Route path="/dashboard/:hostId/events/:eventId/edit" element={<EventEditor />} />
+              <Route path="/dashboard/:hostId/events/:eventId/rsvps" element={<EventRsvps />} />
+              <Route path="/dashboard/:hostId/members" element={<HostMembers />} />
+              <Route path="/dashboard/:hostId/moderation" element={<Moderation />} />
+              <Route path="/checkin/:eventId" element={<CheckIn />} />
+              <Route path="/invite/:token" element={<InviteAccept />} />
+              <Route path="/about" element={<About />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
           </Routes>
         </AuthProvider>
       </BrowserRouter>
