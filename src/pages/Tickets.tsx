@@ -37,14 +37,10 @@ export default function Tickets() {
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState(true);
   const [qrs, setQrs] = useState<Record<string, string>>({});
-  const [hideAll, setHideAll] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem("tickets:hideSensitive") === "1";
-  });
+  const [hideAll, setHideAll] = useState<boolean>(true);
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    localStorage.setItem("tickets:hideSensitive", hideAll ? "1" : "0");
     if (hideAll) setRevealed({});
   }, [hideAll]);
 
