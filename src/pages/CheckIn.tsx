@@ -64,7 +64,7 @@ export default function CheckIn() {
   const refreshCounters = useMemo(
     () => async () => {
       if (!eventId) return;
-      const [{ count: going }, { count: checkedIn }] = await Promise.all([
+      const [{ count: going }, { count: waitlist }, { count: checkedIn }] = await Promise.all([
         supabase
           .from("rsvps")
           .select("id", { count: "exact", head: true })
@@ -72,12 +72,18 @@ export default function CheckIn() {
           .eq("status", "going")
           .is("cancelled_at", null),
         supabase
+          .from("rsvps")
+          .select("id", { count: "exact", head: true })
+          .eq("event_id", eventId)
+          .eq("status", "waitlist")
+          .is("cancelled_at", null),
+        supabase
           .from("check_ins")
           .select("id", { count: "exact", head: true })
           .eq("event_id", eventId)
           .eq("undone", false),
       ]);
-      setCounters({ going: going ?? 0, checkedIn: checkedIn ?? 0 });
+      setCounters({ going: going ?? 0, waitlist: waitlist ?? 0, checkedIn: checkedIn ?? 0 });
     },
     [eventId]
   );
