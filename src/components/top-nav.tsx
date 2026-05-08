@@ -53,7 +53,7 @@ export function TopNav() {
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <img src={logo} alt="Commuvent" className="h-10 w-10 -my-1" width={40} height={40} />
+          <img src={logo} alt="Commuvent" className="h-16 w-16 -my-4" width={64} height={64} />
           <span className="font-heading text-lg">Commuvent</span>
         </Link>
 
