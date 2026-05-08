@@ -326,21 +326,18 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
-          email: string | null
           id: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
-          email?: string | null
           id: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
-          email?: string | null
           id?: string
         }
         Relationships: []
@@ -424,6 +421,13 @@ export type Database = {
       accept_host_invite: { Args: { p_token: string }; Returns: string }
       event_going_count: { Args: { p_event_id: string }; Returns: number }
       event_page_load: { Args: { p_event_id: string }; Returns: Json }
+      event_rsvp_emails: {
+        Args: { p_event_id: string }
+        Returns: {
+          email: string
+          user_id: string
+        }[]
+      }
       event_stats: {
         Args: { p_host_id: string }
         Returns: {
