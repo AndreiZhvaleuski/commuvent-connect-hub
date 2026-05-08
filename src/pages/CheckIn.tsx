@@ -241,8 +241,8 @@ export default function CheckIn() {
             </Button>
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
 
