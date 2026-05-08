@@ -19,6 +19,7 @@ type Row = {
   code: string;
   cancelled_at: string | null;
   event_id: string;
+  check_ins: { id: string; undone: boolean }[] | null;
   events: {
     id: string; title: string; start_at: string; end_at: string; time_zone: string;
     venue_address: string | null; online_url: string | null; description: string | null;
@@ -37,7 +38,7 @@ export default function Tickets() {
     if (!user) return;
     const { data } = await supabase
       .from("rsvps")
-      .select("id,status,position,code,cancelled_at,event_id, events(id,title,start_at,end_at,time_zone,venue_address,online_url,description,cover_image_url)")
+      .select("id,status,position,code,cancelled_at,event_id, events(id,title,start_at,end_at,time_zone,venue_address,online_url,description,cover_image_url), check_ins(id,undone)")
       .eq("user_id", user.id)
       .neq("status", "cancelled")
       .order("created_at", { ascending: false });
