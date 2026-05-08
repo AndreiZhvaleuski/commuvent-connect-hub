@@ -220,7 +220,7 @@ export default function Tickets() {
             onRetry={refetch}
           />
         ) : busy && hasAny === null ? (
-          <div className="flex justify-center py-16"><Spinner className="size-8 text-muted-foreground" /></div>
+          <PageSpinner py={16} />
         ) : hasAny === false ? (
           <EmptyState
             icon={<Ticket className="h-10 w-10" />}
