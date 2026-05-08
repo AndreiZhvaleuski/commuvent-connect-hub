@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PublicEventCard } from "@/components/public-event-card";
+import { EmptyState } from "@/components/empty-state";
 type Ev = {
   id: string; title: string; description: string | null;
   cover_image_url: string | null; start_at: string; end_at: string; time_zone: string | null;
