@@ -339,6 +339,25 @@ export default function EventGalleryPage() {
                       By you
                     </Badge>
                   )}
+                  {isHost && p.status === "pending" ? (
+                    <div className="absolute inset-x-1 bottom-1 flex gap-1 opacity-0 transition group-hover:opacity-100">
+                      <Button
+                        size="sm"
+                        className="h-7 flex-1 px-2 text-xs"
+                        onClick={() => setPhotoStatus(p.id, "approved")}
+                      >
+                        <CheckIcon className="mr-1 h-3.5 w-3.5" /> Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 flex-1 px-2 text-xs"
+                        onClick={() => setRejectFor(p)}
+                      >
+                        <XIcon className="mr-1 h-3.5 w-3.5" /> Reject
+                      </Button>
+                    </div>
+                  ) : null}
                   {canDelete ? (
                     <button
                       type="button"
@@ -348,7 +367,7 @@ export default function EventGalleryPage() {
                     >
                       <TrashIcon className="h-3.5 w-3.5" />
                     </button>
-                  ) : user && !isOwner ? (
+                  ) : user && !isOwner && !isHost ? (
                     <button
                       type="button"
                       onClick={() => setReportFor(p.id)}
