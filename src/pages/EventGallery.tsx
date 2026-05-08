@@ -79,6 +79,7 @@ export default function EventGalleryPage() {
         .from("gallery_photos")
         .select("id,storage_path,user_id,status,created_at", { count: "exact" })
         .eq("event_id", eventId);
+      if (filter === "all") q = q.eq("status", "approved");
       if (filter === "mine" && user) q = q.eq("user_id", user.id);
       if (filter === "pending" && user) q = q.eq("user_id", user.id).eq("status", "pending");
       const { data: rows, count, error } = await q
