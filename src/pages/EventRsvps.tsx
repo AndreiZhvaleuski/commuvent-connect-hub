@@ -139,18 +139,18 @@ export default function EventRsvps() {
   );
 
   return (
-    <><main className="container max-w-5xl py-8 space-y-6">
+    <main className="container mx-auto max-w-5xl px-4 py-8 space-y-6">
         <Link to={`/dashboard/${hostId}`} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to dashboard
         </Link>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-bold">{event?.title ?? "Event"}</h1>
-            <p className="text-muted-foreground">RSVPs · {rows.length} total</p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="truncate text-2xl font-bold sm:text-3xl">{event?.title ?? "Event"}</h1>
+            <p className="text-sm text-muted-foreground">RSVPs · {rows.length} total</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={exportCsv} disabled={!event || rows.length === 0}>
+            <Button onClick={exportCsv} disabled={!event || rows.length === 0} className="flex-1 sm:flex-initial">
               <Download className="w-4 h-4 mr-2" /> Export CSV
             </Button>
             <Dialog open={infoOpen} onOpenChange={setInfoOpen}>
@@ -186,38 +186,61 @@ export default function EventRsvps() {
             ) : rows.length === 0 ? (
               <p className="text-muted-foreground">No RSVPs yet.</p>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Check-in (your time)</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <>
+                {/* Mobile: stacked cards */}
+                <ul className="space-y-3 md:hidden">
                   {rows.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell>{r.display_name || <span className="text-muted-foreground">—</span>}</TableCell>
-                      <TableCell>{r.email || <span className="text-muted-foreground">—</span>}</TableCell>
-                      <TableCell>
-                        <Badge variant={r.status === "going" ? "default" : "secondary"}>
+                    <li key={r.id} className="rounded-md border p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="truncate font-medium">{r.display_name || "—"}</p>
+                          <p className="truncate text-xs text-muted-foreground">{r.email || "—"}</p>
+                        </div>
+                        <Badge variant={r.status === "going" ? "default" : "secondary"} className="shrink-0">
                           {r.status}{r.position ? ` · #${r.position}` : ""}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {r.check_in_time
-                          ? formatLocal(r.check_in_time)
-                          : <span className="text-muted-foreground">—</span>}
-                      </TableCell>
-                    </TableRow>
+                      </div>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        {r.check_in_time ? `Checked in · ${formatLocal(r.check_in_time)}` : "Not checked in"}
+                      </p>
+                    </li>
                   ))}
-                </TableBody>
-              </Table>
+                </ul>
+                {/* Desktop/tablet: table */}
+                <div className="hidden md:block">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Check-in (your time)</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {rows.map((r) => (
+                        <TableRow key={r.id}>
+                          <TableCell>{r.display_name || <span className="text-muted-foreground">—</span>}</TableCell>
+                          <TableCell className="break-all">{r.email || <span className="text-muted-foreground">—</span>}</TableCell>
+                          <TableCell>
+                            <Badge variant={r.status === "going" ? "default" : "secondary"}>
+                              {r.status}{r.position ? ` · #${r.position}` : ""}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {r.check_in_time
+                              ? formatLocal(r.check_in_time)
+                              : <span className="text-muted-foreground">—</span>}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
       </main>
-    </>
   );
 }
