@@ -168,7 +168,9 @@ export default function CheckIn() {
 
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold leading-tight">{event.title}</h1>
-          <p className="text-sm text-muted-foreground">Check-in</p>
+          <p className="text-sm text-muted-foreground">
+            Check-in · <EventTiming startAt={event.start_at} endAt={event.end_at} now={now} />
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
