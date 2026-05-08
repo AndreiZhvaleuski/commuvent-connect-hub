@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { PublicEventCard } from "@/components/public-event-card";
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
-import { Spinner } from "@/components/ui/spinner";
+import { PageSpinner } from "@/components/page-spinner";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 import { ListPagination } from "@/components/list-pagination";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
