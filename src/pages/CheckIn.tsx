@@ -190,7 +190,7 @@ export default function CheckIn() {
             size="sm"
             variant="outline"
             className="min-h-11"
-            render={<a href={`/e/${event.id}`} target="_blank" rel="noopener noreferrer" />}
+            render={<Link to={`/e/${event.id}`} />}
           >
             <ExternalLink className="w-4 h-4 mr-2" /> Public page
           </Button>
