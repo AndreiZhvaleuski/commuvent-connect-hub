@@ -46,13 +46,14 @@ export function useAsyncResource<T>(
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    controllerRef.current?.abort();
+    setLoading(true);
+    setError(null);
+    if (!keepPreviousData) setData(null);
+
     const run = () => {
-      controllerRef.current?.abort();
       const controller = new AbortController();
       controllerRef.current = controller;
-      setLoading(true);
-      setError(null);
-      if (!keepPreviousData) setData(null);
       fetcherRef
         .current(controller.signal)
         .then((result) => {
