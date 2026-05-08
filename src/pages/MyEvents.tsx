@@ -202,14 +202,7 @@ export default function MyEvents() {
               />
             </div>
             {hasFilter && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSearchInput("");
-                  setParams(new URLSearchParams(), { replace: true });
-                }}
-              >
+              <Button variant="ghost" size="sm" onClick={resetFilters}>
                 <X className="mr-1 h-3 w-3" />
                 Reset
               </Button>
