@@ -266,7 +266,7 @@ function EventsSection({
   emptyText: string;
 }) {
   if (loading) {
-    return <div className="flex justify-center py-12"><Spinner className="size-8 text-muted-foreground" /></div>;
+    return <PageSpinner />;
   }
   if (error) {
     return <ErrorState title="Couldn't load events" description={error.message} onRetry={onRetry} />;
