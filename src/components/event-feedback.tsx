@@ -16,37 +16,70 @@ const PAGE_SIZE = 5;
 export function EventFeedback({ eventId, eventEnded }: { eventId: string; eventEnded: boolean }) {
   const { user } = useAuth();
   const [items, setItems] = useState<Feedback[]>([]);
+  const [total, setTotal] = useState(0);
+  const [avg, setAvg] = useState<string | null>(null);
+  const [totalAll, setTotalAll] = useState(0);
   const [mine, setMine] = useState<Feedback | null>(null);
   const [attended, setAttended] = useState(false);
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
+  const [sort, setSort] = useState<"newest" | "oldest">("newest");
+  const [page, setPage] = useState(1);
 
-  const load = async () => {
+  const loadStats = async () => {
+    // Aggregate average + count across all feedback for the event
     const { data } = await supabase
+      .from("feedback")
+      .select("rating", { count: "exact" })
+      .eq("event_id", eventId);
+    const rows = (data ?? []) as { rating: number }[];
+    setTotalAll(rows.length);
+    setAvg(rows.length ? (rows.reduce((s, r) => s + r.rating, 0) / rows.length).toFixed(1) : null);
+  };
+
+  const loadMine = async () => {
+    if (!user) { setMine(null); setAttended(false); return; }
+    const { data: m } = await supabase
       .from("feedback")
       .select("id,rating,comment,user_id,created_at")
       .eq("event_id", eventId)
-      .order("created_at", { ascending: false });
-    const all = (data ?? []) as Feedback[];
-    setItems(all);
-    setMine(user ? all.find((f) => f.user_id === user.id) ?? null : null);
+      .eq("user_id", user.id)
+      .maybeSingle();
+    setMine((m as Feedback | null) ?? null);
 
-    if (user) {
-      const { data: ci } = await supabase
-        .from("check_ins")
-        .select("id, rsvps!inner(user_id)")
-        .eq("event_id", eventId)
-        .eq("undone", false)
-        .eq("rsvps.user_id", user.id)
-        .limit(1);
-      setAttended((ci ?? []).length > 0);
-    } else {
-      setAttended(false);
-    }
+    const { data: ci } = await supabase
+      .from("check_ins")
+      .select("id, rsvps!inner(user_id)")
+      .eq("event_id", eventId)
+      .eq("undone", false)
+      .eq("rsvps.user_id", user.id)
+      .limit(1);
+    setAttended((ci ?? []).length > 0);
   };
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [eventId, user?.id]);
+
+  const loadPage = async () => {
+    // Exclude my own feedback from the list (it's shown separately)
+    let q = supabase
+      .from("feedback")
+      .select("id,rating,comment,user_id,created_at", { count: "exact" })
+      .eq("event_id", eventId);
+    if (user) q = q.neq("user_id", user.id);
+    const from = (page - 1) * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    const { data, count } = await q
+      .order("created_at", { ascending: sort === "oldest" })
+      .range(from, to);
+    setItems((data ?? []) as Feedback[]);
+    setTotal(count ?? 0);
+  };
+
+  const load = async () => {
+    await Promise.all([loadStats(), loadMine(), loadPage()]);
+  };
+
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [eventId, user?.id, sort, page]);
 
   const submit = async () => {
     if (!user) return;
