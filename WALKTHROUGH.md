@@ -204,6 +204,10 @@ https://github.com/user-attachments/assets/543285b0-4ad4-4515-99c4-d1adc87066e4
 
 ## Flow D — Waitlist + automatic FIFO promotion (two windows)
 
+> **Re-seed first** if you've already played this flow once — it
+> consumes the AI Hack Night waitlist baseline and is not idempotent.
+> See [Reset the demo before each session](#reset-the-demo-before-each-session).
+
 The seed already over-subscribes **AI Hack Night** (capacity = 4):
 `att.gina/henry/ivy/jack` are **going**, `att.kate/liam/mia/noah` sit
 on the waitlist. Open a second **private / incognito** window for
