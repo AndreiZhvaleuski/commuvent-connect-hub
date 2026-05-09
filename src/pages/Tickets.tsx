@@ -319,6 +319,8 @@ export default function Tickets() {
                     hidden={hideAll && !revealed[r.id]}
                     onToggleHidden={hideAll ? () => setRevealed((p) => ({ ...p, [r.id]: !p[r.id] })) : undefined}
                     pastView={view === "past"}
+                    promoted={promotedEventIds.has(r.event_id)}
+                    onAcknowledgePromotion={() => acknowledgeForEvent(r.event_id)}
                   />
                 ))
               )}
