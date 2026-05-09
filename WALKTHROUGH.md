@@ -3,6 +3,8 @@
 Click-by-click guide covering every graded flow on the live demo:
 **https://commuvent-connect-hub.lovable.app**
 
+> If the site doesn't load in your region, try using a VPN — the Lovable hosting service may be blocked in some countries.
+
 The deployed app is pre-seeded — no setup required.
 
 ---
