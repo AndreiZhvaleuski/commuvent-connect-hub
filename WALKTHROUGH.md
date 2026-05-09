@@ -8,10 +8,8 @@ Click-by-click guide covering every graded flow on the live demo:
 > If the site doesn't load in your region, try using a VPN — the Lovable
 > hosting service may be blocked in some countries.
 
-> Each flow ends with a **Recording** section embedding a short iPhone
-> screen recording stored in `videos/flow-<letter>.mp4` and served via
-> GitHub raw URLs so it plays inline on GitHub. Convert iPhone `.mov`
-> files to `.mp4` (H.264 + AAC) for inline playback.
+> Some flows end with a **Recording** section embedding a short iPhone
+> screen recording.
 
 > **Demo password (all accounts):** `Password123!`
 
