@@ -126,17 +126,22 @@ so two users stay signed in side-by-side.
 1. **As:** `att.kate@demo.commuvent.app` (private window) → sign in →
    `/tickets`.
    **Expect:** A waitlist card for **AI Hack Night** showing
-   **Waitlist · position 1**. No QR ticket yet. The bell icon in the
-   header already shows an unread notification *"You're on the waitlist
-   for AI Hack Night"*.
+   **Waitlist · position 1**. No QR ticket yet.
 2. **As:** `att.gina@demo.commuvent.app` (other window) → sign in →
    `/tickets` → on the **AI Hack Night** ticket click **Cancel RSVP**
    → confirm.
    **Expect:** Toast `RSVP cancelled`; ticket disappears.
 3. Switch back to **Kate's** window — do **not** reload.
-   **Expect:** The waitlist card flips to a real **Going** ticket with
-   a QR code, automatically (pushed via Realtime). A new unread
-   notification appears in the bell icon.
+   **Expect (realtime, no refresh):**
+   - The top nav grows a numeric **`1`** badge next to **My Tickets**.
+   - The waitlist card flips into a real **Going** ticket with a QR
+     code, prefixed by a highlighted callout *"You were promoted from
+     the waitlist — your seat is confirmed."* and an **Acknowledge**
+     button. A top-of-page banner also offers **Acknowledge all**.
+4. **Do:** Click **Acknowledge** on the ticket (or **Acknowledge all**
+   at the top).
+   **Expect:** The callout disappears, the nav badge clears to zero,
+   and the notification stays acknowledged across reloads.
 
 
 ---

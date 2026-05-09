@@ -1,70 +1,50 @@
 ## Goal
 
-Make the seeded dataset rich enough that a reviewer can exercise every graded flow without preparing data themselves. Wipe + re-seed in one shot, then refine the walkthrough to point at the right pre-existing rows.
+Make waitlist promotions explicit and acknowledgement-based. The user gets a clear, persistent in-app signal until they confirm they've seen it.
 
-## 1. Rewrite `supabase/functions/seed_demo/index.ts`
+Backend already inserts a `notifications` row with `type = 'waitlist_promoted'` whenever a cancel or capacity-increase promotes someone (`rsvp_cancel`, `event_set_capacity`). Today nothing visualises this beyond a transient toast on the Tickets page. We'll wire a count badge in the nav and per-ticket acknowledge UI on the Tickets page, both backed by `notifications.read_at`.
 
-Keep the existing wipe + users + hosts + events + RSVP + check-in + feedback steps. **Add** the following.
+## 1. Top nav — unread badge on "My Tickets"
 
-### 1a. Waitlist demo data (already partially works)
+`src/components/top-nav.tsx`:
 
-- AI Hack Night keeps `capacity = 4`. All 8 attendees RSVP to it via the edge function, so the seed naturally leaves **4 going + 4 waitlist** with deterministic FIFO order.
-- Record the going-list head (`att.gina`) and the waitlist head (`att.kate`) in the response summary so the walkthrough can name them with confidence.
+- When signed in, query `notifications` for the current user filtered to `type = 'waitlist_promoted'` and `read_at is null`. Keep a count in component state.
+- Subscribe to realtime `postgres_changes` on `notifications` (INSERT and UPDATE) filtered by `user_id` so the badge updates live when a promotion arrives or is acknowledged elsewhere.
+- Render a small numeric badge (semantic `bg-primary text-primary-foreground`, rounded pill) next to the **My Tickets** label in both the desktop nav and the mobile sheet. Hide when count is `0`.
 
-### 1b. Gallery in three states, from multiple attendees
+## 2. Tickets page — promotion banner per affected ticket
 
-For each **completed** event, after uploading photos to storage, insert `gallery_photos` rows directly with the service-role client (bypassing the `force_pending_gallery` trigger by using `db.from('gallery_photos').insert(...)` then `update({status})`):
+`src/pages/Tickets.tsx`:
 
-- 2 **approved** photos (current behavior) — different attendees.
-- 2 **pending** photos — different attendees again (so the host moderation queue has real items to approve).
-- 1 **rejected** photo — uploaded by a third attendee, then `update({status: 'rejected'})`.
+- Extend the data fetch to also pull the user's unread `waitlist_promoted` notifications and key them by `payload.event_id` (and/or `payload.rsvp_id`).
+- For every `going` ticket whose event_id has an unacknowledged promotion, prepend a highlighted callout inside the ticket card:
+  > "You were promoted from the waitlist — your seat is confirmed."
+  with a primary **Acknowledge** button.
+- Clicking **Acknowledge** updates the matching notification(s) `read_at = now()` (UPDATE allowed by existing `notifications_update_own` RLS), removes the banner, and triggers the badge count to drop via the realtime subscription.
+- Also add a top-of-page summary banner when `unreadCount > 0`: "N new promotion(s) — scroll down to confirm." with an **Acknowledge all** action that bulk-updates `read_at`.
+- Drop the existing transient toast on `waitlist_promoted` (or downgrade it to a small info toast that says "New promotion — see your tickets") to avoid double-signalling.
 
-Pick the uploader attendees by rotating through `ATTENDEES` so each event has 5 photos from 5 different users.
+## 3. Wire-up details
 
-Also seed **1 pending photo on an in-progress event** so the moderation queue is non-empty even before any completed-event work.
+- No schema changes — `notifications.read_at` already exists and the RLS policies cover both read and update for the owning user.
+- Reuse the existing `useAsyncResource`/`refetch` pattern already used in Tickets for the notifications list.
+- Acknowledgement uses a single `supabase.from('notifications').update({ read_at: new Date().toISOString() }).eq('user_id', uid).eq('type','waitlist_promoted').is('read_at', null).in('id', [...])` (or per-id when only one row).
 
-### 1c. Reports in mixed states
+## 4. Walkthrough update
 
-Insert into `reports` directly via service role:
+Update **Flow D — Waitlist** in `WALKTHROUGH.md` (last two steps) to match the new behaviour:
 
-- 2 **open** event reports against different completed/in-progress events, reporters = `att.henry`, `att.liam` (different reasons: "Spam", "Inappropriate content").
-- 1 **open** photo report against one of the seeded **approved** gallery photos, reporter = `att.mia`.
-- 1 already-actioned event report with `status = 'hidden'` (so the reports tab shows historical state too).
-- 1 already-actioned photo report with `status = 'dismissed'`.
+- After Gina cancels, expect Kate's **My Tickets** nav link to grow a numeric **1** badge (no need to be on the Tickets page).
+- Open `/tickets` → expect the "You were promoted from the waitlist" callout on the AI Hack Night ticket → click **Acknowledge** → callout disappears, nav badge clears.
 
-Reasons rotate from a small list. `reporter_id` is a real attendee user id.
+## 5. Out of scope
 
-### 1d. Notifications for realism
-
-Insert a couple of `notifications` rows for `att.kate` ("You're on the waitlist for AI Hack Night") and `att.gina` ("Thanks for checking in") so the bell icon shows unread state out of the box. Strictly cosmetic.
-
-### 1e. Summary payload
-
-Return counts: `users, hosts, events, rsvps, going, waitlist, checkins, photos_approved, photos_pending, photos_rejected, reports_open, reports_actioned, notifications` — useful when re-running and for the README.
-
-## 2. Re-trigger the seed
-
-Call the deployed `seed_demo` function once with `x-seed-secret` header (using `supabase--curl_edge_functions`) so the live demo reflects the new data immediately. This wipes everything and re-seeds.
-
-## 3. Update `WALKTHROUGH.md`
-
-Adjust only the flows whose preconditions changed:
-
-- **Flow D — Waitlist:** drop the "RSVP four times yourself" setup. Replace with: sign in as `att.kate` (already on waitlist position 1 for AI Hack Night), open `/tickets`, observe **Waitlist · 1**. Then in a private window sign in as `att.gina` (going) and **Cancel RSVP**. Switch back to Kate's tab → status flips to **Going** via realtime; bell icon shows the promotion notification.
-- **Flow G — Gallery approval:** mention that the moderation queue is **already populated** with pending photos from multiple attendees and one rejected photo for context. Reviewer can approve/reject any of them — uploading a new one is now optional.
-- **Flow I — Reports:** mention that the Reports tab already lists open + historical (hidden/dismissed) reports across events and photos; reviewer can act on an open one. Submitting a new report still works as a second demonstration.
-- Add a short note near the top: "If anything looks stale or empty, ask the maintainer to re-run `seed_demo` — it wipes and re-seeds in ~30s."
-
-`README.md` and `report.md` need no changes (they already point at WALKTHROUGH).
-
-## 4. Out of scope
-
-- No schema migrations (gallery `rejected` and report `hidden`/`dismissed` are free-form text columns; existing UI already handles them).
-- No frontend changes.
-- No new edge functions.
+- No bell icon / global notifications drawer (we already have a clear, ticket-scoped surface).
+- No email notifications (already documented as out of scope in `report.md`).
+- No backend changes (`rsvp_cancel` and `event_set_capacity` already insert the right rows).
 
 ## Files touched
 
-- `supabase/functions/seed_demo/index.ts` — extended seed logic.
-- `WALKTHROUGH.md` — flows D, G, I refresh.
-- One `curl_edge_functions` call to actually re-seed the live demo.
+- `src/components/top-nav.tsx` — fetch unread count + realtime + badge.
+- `src/pages/Tickets.tsx` — fetch promotions, render banner + acknowledge buttons, drop/soften toast.
+- `WALKTHROUGH.md` — refresh Flow D expectations.

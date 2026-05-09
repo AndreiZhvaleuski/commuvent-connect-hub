@@ -27,13 +27,18 @@ export function TopNav() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profile, setProfile] = useState<{ id: string; display_name: string | null; avatar_url: string | null } | null>(null);
+  const [unreadPromotions, setUnreadPromotions] = useState(0);
 
   useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
   useEffect(() => {
     let cancelled = false;
 
-    if (!user?.id) return;
+    if (!user?.id) {
+      setProfile(null);
+      setUnreadPromotions(0);
+      return;
+    }
 
     supabase
       .from("profiles")
@@ -44,8 +49,29 @@ export function TopNav() {
         if (!cancelled) setProfile(data ?? null);
       });
 
+    const refreshCount = async () => {
+      const { count } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("type", "waitlist_promoted")
+        .is("read_at", null);
+      if (!cancelled) setUnreadPromotions(count ?? 0);
+    };
+    refreshCount();
+
+    const ch = supabase
+      .channel(`nav-notif-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        refreshCount,
+      )
+      .subscribe();
+
     return () => {
       cancelled = true;
+      supabase.removeChannel(ch);
     };
   }, [user?.id]);
 
@@ -61,12 +87,21 @@ export function TopNav() {
           {links.map((l) => (
             <NavLink key={l.to} to={l.to}
               className={({ isActive }) =>
-                `rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent ${isActive ? "text-foreground" : "text-muted-foreground"}`
+                `relative inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent ${isActive ? "text-foreground" : "text-muted-foreground"}`
               }>
               {l.label}
+              {l.to === "/tickets" && unreadPromotions > 0 && (
+                <span
+                  aria-label={`${unreadPromotions} new waitlist promotion${unreadPromotions === 1 ? "" : "s"}`}
+                  className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground"
+                >
+                  {unreadPromotions}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
+
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
@@ -133,12 +168,17 @@ export function TopNav() {
                     key={l.to}
                     to={l.to}
                     className={({ isActive }) =>
-                      `rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent ${
+                      `flex items-center justify-between rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent ${
                         isActive ? "bg-accent text-foreground" : "text-muted-foreground"
                       }`
                     }
                   >
-                    {l.label}
+                    <span>{l.label}</span>
+                    {l.to === "/tickets" && unreadPromotions > 0 && (
+                      <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
+                        {unreadPromotions}
+                      </span>
+                    )}
                   </NavLink>
                 ))}
               </nav>

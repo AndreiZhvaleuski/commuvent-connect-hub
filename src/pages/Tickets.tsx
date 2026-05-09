@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
-import { CalendarIcon as CalIcon, ClockIcon as Clock, DownloadSimpleIcon as Download, EyeIcon as Eye, EyeSlashIcon as EyeOff, ArrowSquareOutIcon as ExternalLink, MapPinIcon as MapPin, MagnifyingGlassPlusIcon as ZoomIn, TicketIcon as Ticket } from "@phosphor-icons/react";
+import { CalendarIcon as CalIcon, ClockIcon as Clock, DownloadSimpleIcon as Download, EyeIcon as Eye, EyeSlashIcon as EyeOff, ArrowSquareOutIcon as ExternalLink, MapPinIcon as MapPin, MagnifyingGlassPlusIcon as ZoomIn, TicketIcon as Ticket, SparkleIcon as Sparkle } from "@phosphor-icons/react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EventDateTime } from "@/components/event-datetime";
 import { toast } from "sonner";
@@ -138,6 +138,27 @@ export default function Tickets() {
     });
   }, [rows, qrs]);
 
+  // Unread waitlist promotions: notification rows the user hasn't acknowledged.
+  type PromoNotif = { id: string; payload: { event_id?: string } | null };
+  const [promotions, setPromotions] = useState<PromoNotif[]>([]);
+  const promotedEventIds = useMemo(
+    () => new Set(promotions.map((p) => p.payload?.event_id).filter(Boolean) as string[]),
+    [promotions],
+  );
+
+  const refetchPromotions = useCallback(async () => {
+    if (!userId) { setPromotions([]); return; }
+    const { data } = await supabase
+      .from("notifications")
+      .select("id,payload")
+      .eq("user_id", userId)
+      .eq("type", "waitlist_promoted")
+      .is("read_at", null);
+    setPromotions(((data ?? []) as unknown) as PromoNotif[]);
+  }, [userId]);
+
+  useEffect(() => { refetchPromotions(); }, [refetchPromotions]);
+
   // Realtime: react to RSVP changes (waitlist promotion, position changes) and notifications
   useEffect(() => {
     if (!user) return;
@@ -145,10 +166,13 @@ export default function Tickets() {
       .on("postgres_changes", { event: "*", schema: "public", table: "rsvps", filter: `user_id=eq.${user.id}` }, () => {
         refetch();
       })
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, (payload) => {
-        const n = payload.new as { type?: string };
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, (payload) => {
+        const n = (payload.new ?? payload.old) as { type?: string };
         if (n?.type === "waitlist_promoted") {
-          toast.success("You're in! A seat just opened.");
+          if (payload.eventType === "INSERT") {
+            toast.success("New promotion — your seat is confirmed.");
+          }
+          refetchPromotions();
         }
         refetch();
       })
@@ -156,6 +180,26 @@ export default function Tickets() {
     return () => { supabase.removeChannel(ch); };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [user?.id]);
+
+  const acknowledgePromotions = async (ids?: string[]) => {
+    if (!userId) return;
+    const targetIds = ids ?? promotions.map((p) => p.id);
+    if (targetIds.length === 0) return;
+    // Optimistic update so badge clears immediately.
+    setPromotions((prev) => prev.filter((p) => !targetIds.includes(p.id)));
+    const { error } = await supabase
+      .from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .in("id", targetIds);
+    if (error) {
+      toast.error("Couldn't acknowledge — please retry.");
+      refetchPromotions();
+    }
+  };
+  const acknowledgeForEvent = (eventId: string) => {
+    const ids = promotions.filter((p) => p.payload?.event_id === eventId).map((p) => p.id);
+    return acknowledgePromotions(ids);
+  };
 
   const changeView = (v: View) => {
     setView(v);
@@ -213,6 +257,27 @@ export default function Tickets() {
           )}
         </div>
 
+        {promotions.length > 0 && (
+          <div className="mb-6 flex flex-wrap items-start justify-between gap-3 rounded-md border border-primary/40 bg-primary/10 p-4">
+            <div className="flex items-start gap-2">
+              <Sparkle className="mt-0.5 h-5 w-5 text-primary" />
+              <div>
+                <p className="font-medium text-foreground">
+                  {promotions.length === 1
+                    ? "You were promoted from a waitlist."
+                    : `You were promoted from ${promotions.length} waitlists.`}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Open the affected ticket below and acknowledge to clear this notice.
+                </p>
+              </div>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => acknowledgePromotions()}>
+              Acknowledge all
+            </Button>
+          </div>
+        )}
+
         {error ? (
           <ErrorState
             title="Couldn't load tickets"
@@ -254,6 +319,8 @@ export default function Tickets() {
                     hidden={hideAll && !revealed[r.id]}
                     onToggleHidden={hideAll ? () => setRevealed((p) => ({ ...p, [r.id]: !p[r.id] })) : undefined}
                     pastView={view === "past"}
+                    promoted={promotedEventIds.has(r.event_id)}
+                    onAcknowledgePromotion={() => acknowledgeForEvent(r.event_id)}
                   />
                 ))
               )}
@@ -278,7 +345,7 @@ export default function Tickets() {
   );
 }
 
-function TicketCard({ row, qr, onCancel, pastView, hidden, onToggleHidden }: { row: Row; qr?: string; onCancel: () => void; pastView?: boolean; hidden?: boolean; onToggleHidden?: () => void }) {
+function TicketCard({ row, qr, onCancel, pastView, hidden, onToggleHidden, promoted, onAcknowledgePromotion }: { row: Row; qr?: string; onCancel: () => void; pastView?: boolean; hidden?: boolean; onToggleHidden?: () => void; promoted?: boolean; onAcknowledgePromotion?: () => void }) {
   const e = row.events;
   if (!e) return null;
   const checkedIn = (row.check_ins ?? []).some((c) => !c.undone);
@@ -326,7 +393,20 @@ function TicketCard({ row, qr, onCancel, pastView, hidden, onToggleHidden }: { r
         </div>
       </CardHeader>
       <CardContent>
+        {promoted && (
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3 rounded-md border border-primary/40 bg-primary/10 p-3">
+            <div className="flex items-start gap-2">
+              <Sparkle className="mt-0.5 h-5 w-5 text-primary" />
+              <div>
+                <p className="text-sm font-medium text-foreground">You were promoted from the waitlist</p>
+                <p className="text-xs text-muted-foreground">Your seat is confirmed — your QR ticket below is ready to use.</p>
+              </div>
+            </div>
+            <Button size="sm" onClick={onAcknowledgePromotion}>Acknowledge</Button>
+          </div>
+        )}
         <div className="grid gap-4 sm:grid-cols-[160px_1fr] items-center">
+
           {row.status === "going" ? (
             qr ? (
               <div className="flex flex-col items-center gap-1">
