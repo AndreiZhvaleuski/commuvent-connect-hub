@@ -1,39 +1,21 @@
 ## Goal
 
-Correct Flow E in `WALKTHROUGH.md` so the steps match the real UI. No code changes.
+Fix Flow E's "already checked in" error by switching the attendee from `att.gina` to `att.ivy`. Doc-only change to `WALKTHROUGH.md`.
 
-## Issues found
+## Root cause
 
-Comparing Flow E (lines 260–314) against `src/pages/Dashboard.tsx`, `src/pages/HostDashboard.tsx`, `src/components/event-management-card.tsx`, and `src/pages/CheckIn.tsx`:
+`supabase/functions/seed_demo/index.ts` (lines 304–319) pre-seeds check-ins for in-progress events at a 35% ratio, taking the first N RSVPs from the attendee list. For **Live: TypeScript Performance** (8 going, ratio 0.35 → 2 check-ins), that pre-checks **Gina** (index 0) and **Henry** (index 1). Flow E then tries to check Gina in again → "already checked in".
 
-1. **Step 6 expectation** — describes Check-in as if it lives on the host card. The host card on `/dashboard` only opens the host dashboard; **Check-in** is a per-event action on each event card.
-2. **Step 7** — "Click Check-in on the Acme card" is wrong. There is no Check-in button on the host card.
-3. **Step 8** — counters are listed as "Going / Checked-in / Remaining". The real labels are **Going / Waitlist / Checked-in** (Going shows a `/ capacity` suffix).
-4. **Step 17** — field label is **"Enter ticket code"**, not "Ticket code".
-5. **Steps 18–19** — submit button label is **"Check in"**, not "Submit".
-6. **Step 21** — same host-card mistake, and skips navigation. After signing in for check-in, the checker is on `/checkin/<eventId>`; to reach a different event they must go back to `/dashboard`, open the Acme host, switch to the **Past** tab, then click **Check-in** on the past event.
+`att.ivy` is index 2, RSVP'd as going, and not pre-checked-in by the seed.
 
-## Proposed rewrite (Flow E)
+## Edits to `WALKTHROUGH.md` (Flow E only)
 
-Keep the re-seed warning and two-window structure. Apply these edits, preserving every navigation step explicitly:
-
-- **Step 6 expectation**: *"`/dashboard` shows a single Acme host card labelled 'Checker · Check-in events'."*
-- **New step 7**: *"Click the Acme host card."* → lands on `/dashboard/<hostId>`. *Expect:* event cards expose only a **Check-in** action (no Manage / Edit / RSVPs / New event / Moderation).
-- **Step 8**: *"On the **Upcoming** tab, click **Check-in** on the **Live: TypeScript Performance** card (in-progress)."*
-   *Expect:* `/checkin/<eventId>` with three live counters labelled **Going / Waitlist / Checked-in** (Going includes `/ capacity`).
-- **Step 17**: *"Click the **Enter ticket code** field and paste the code."*
-- **Steps 18–19**: rename button to **Check in** (was "Submit").
-- **Step 21** (split into explicit navigation steps):
-   1. Click the **Commuvent** logo (top-left) to go home.
-   2. Click **Dashboard** in the top nav.
-   3. Click the **Acme** host card.
-   4. Switch to the **Past** tab.
-   5. Click **Check-in** on the **Intro to LLM Agents** card.
-   *Expect:* destructive **"Check-in is closed"** alert; the code input and **Check in** button are disabled.
-
-Renumber the rest of the flow to stay sequential.
+- Window 2 header: rename to **Attendee Ivy**.
+- Step 15: replace `att.gina@demo.commuvent.app` with `att.ivy@demo.commuvent.app`.
+- Step 22 ("In both windows… Sign out"): unchanged.
+- Re-seed warning at the top of Flow E: keep, since cancelling/check-ins still mutate state.
 
 ## Out of scope
 
-- No code changes.
-- No edits to other flows.
+- No changes to `seed_demo` or any other code.
+- No changes to other flows (Flow D's Gina dependency is unaffected — Flow D uses AI Hack Night, not Live: TypeScript Performance).

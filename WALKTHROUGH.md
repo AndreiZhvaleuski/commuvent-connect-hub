@@ -290,7 +290,7 @@ Open a second **private / incognito** window for Window 2.
    `/ capacity`).
 10. Leave this window open.
 
-### Window 2 — Attendee Gina (private / incognito window)
+### Window 2 — Attendee Ivy (private / incognito window)
 
 11. Open a private/incognito window and go to
     `https://commuvent-connect-hub.lovable.app`.
@@ -298,7 +298,7 @@ Open a second **private / incognito** window for Window 2.
 13. On the sign-in card, click the **user-icon** button to open the
     **Demo accounts** panel.
 14. Click the **Attendees** tab.
-15. Click the row for `att.gina@demo.commuvent.app` to auto-fill, then
+15. Click the row for `att.ivy@demo.commuvent.app` to auto-fill, then
     click **Sign in**.
 16. Click **My Tickets** in the top nav.
 17. Find the ticket for **Live: TypeScript Performance** and copy its
