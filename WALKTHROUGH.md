@@ -275,8 +275,8 @@ Open a second **private / incognito** window for Window 2.
 5. Click the **Checkers** tab.
 6. Click the row for `checker.dan@demo.commuvent.app` to auto-fill,
    then click **Sign in**.
-   *Expect:* `/dashboard` shows a single Acme card with only a
-   **Check-in** action (no New event / RSVPs / Moderation).
+   *Expect:* `/dashboard` shows a single Acme card, Click on it and see only a
+   **Check-in** action (no New event / RSVPs / Moderation) on all events.
 7. Click **Check-in** on the Acme card.
 8. Click the row for **Live: TypeScript Performance** (in-progress).
    *Expect:* you land on `/checkin/<eventId>` with three live
