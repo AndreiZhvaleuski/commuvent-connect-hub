@@ -257,6 +257,27 @@ export default function Tickets() {
           )}
         </div>
 
+        {promotions.length > 0 && (
+          <div className="mb-6 flex flex-wrap items-start justify-between gap-3 rounded-md border border-primary/40 bg-primary/10 p-4">
+            <div className="flex items-start gap-2">
+              <Sparkle className="mt-0.5 h-5 w-5 text-primary" />
+              <div>
+                <p className="font-medium text-foreground">
+                  {promotions.length === 1
+                    ? "You were promoted from a waitlist."
+                    : `You were promoted from ${promotions.length} waitlists.`}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Open the affected ticket below and acknowledge to clear this notice.
+                </p>
+              </div>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => acknowledgePromotions()}>
+              Acknowledge all
+            </Button>
+          </div>
+        )}
+
         {error ? (
           <ErrorState
             title="Couldn't load tickets"
