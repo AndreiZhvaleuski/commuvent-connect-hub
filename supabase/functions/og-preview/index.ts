@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
 
     if (data) {
       const isPast = new Date(data.end_at) < new Date();
-      const baseDescription = data.description ? truncate(removeMd(data.description), 150) : "Community event on Commuvent.";
+      const baseDescription = data.description ? truncate(data.description, 150) : "Community event on Commuvent.";
 
       const tzForTitle = data.time_zone ?? "UTC";
       let dateLabel = "";
