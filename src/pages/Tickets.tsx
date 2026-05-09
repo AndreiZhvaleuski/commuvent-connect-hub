@@ -138,6 +138,27 @@ export default function Tickets() {
     });
   }, [rows, qrs]);
 
+  // Unread waitlist promotions: notification rows the user hasn't acknowledged.
+  type PromoNotif = { id: string; payload: { event_id?: string } | null };
+  const [promotions, setPromotions] = useState<PromoNotif[]>([]);
+  const promotedEventIds = useMemo(
+    () => new Set(promotions.map((p) => p.payload?.event_id).filter(Boolean) as string[]),
+    [promotions],
+  );
+
+  const refetchPromotions = useCallback(async () => {
+    if (!userId) { setPromotions([]); return; }
+    const { data } = await supabase
+      .from("notifications")
+      .select("id,payload")
+      .eq("user_id", userId)
+      .eq("type", "waitlist_promoted")
+      .is("read_at", null);
+    setPromotions(((data ?? []) as unknown) as PromoNotif[]);
+  }, [userId]);
+
+  useEffect(() => { refetchPromotions(); }, [refetchPromotions]);
+
   // Realtime: react to RSVP changes (waitlist promotion, position changes) and notifications
   useEffect(() => {
     if (!user) return;
@@ -145,10 +166,13 @@ export default function Tickets() {
       .on("postgres_changes", { event: "*", schema: "public", table: "rsvps", filter: `user_id=eq.${user.id}` }, () => {
         refetch();
       })
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, (payload) => {
-        const n = payload.new as { type?: string };
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, (payload) => {
+        const n = (payload.new ?? payload.old) as { type?: string };
         if (n?.type === "waitlist_promoted") {
-          toast.success("You're in! A seat just opened.");
+          if (payload.eventType === "INSERT") {
+            toast.success("New promotion — your seat is confirmed.");
+          }
+          refetchPromotions();
         }
         refetch();
       })
@@ -156,6 +180,26 @@ export default function Tickets() {
     return () => { supabase.removeChannel(ch); };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [user?.id]);
+
+  const acknowledgePromotions = async (ids?: string[]) => {
+    if (!userId) return;
+    const targetIds = ids ?? promotions.map((p) => p.id);
+    if (targetIds.length === 0) return;
+    // Optimistic update so badge clears immediately.
+    setPromotions((prev) => prev.filter((p) => !targetIds.includes(p.id)));
+    const { error } = await supabase
+      .from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .in("id", targetIds);
+    if (error) {
+      toast.error("Couldn't acknowledge — please retry.");
+      refetchPromotions();
+    }
+  };
+  const acknowledgeForEvent = (eventId: string) => {
+    const ids = promotions.filter((p) => p.payload?.event_id === eventId).map((p) => p.id);
+    return acknowledgePromotions(ids);
+  };
 
   const changeView = (v: View) => {
     setView(v);
