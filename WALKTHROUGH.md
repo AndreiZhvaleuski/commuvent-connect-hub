@@ -6,12 +6,10 @@ Click-by-click guide covering every graded flow on the live demo:
 > If the site doesn't load in your region, try using a VPN — the Lovable
 > hosting service may be blocked in some countries.
 
-> Each flow ends with a **Recording** section embedding a short iPhone
-> screen recording served from the deployed site
-> (`https://commuvent-connect-hub.lovable.app/videos/flow-<letter>.mp4`).
-> Files live in `public/videos/` in the repo. Use absolute URLs so the
-> `<video>` tag renders inline on GitHub. Convert iPhone `.mov` to
-> `.mp4` (H.264 + AAC) for inline playback.
+> Each flow ends with a **Recording** section linking to a short iPhone
+> screen recording stored in `videos/flow-<letter>.mp4`. Click the link
+> on GitHub to open the built-in video player. Convert iPhone `.mov`
+> files to `.mp4` (H.264 + AAC) so the player works.
 
 > **Demo password (all accounts):** `Password123!`
 
@@ -94,10 +92,7 @@ in-progress event has 1 pending photo.
 
 ### Recording
 
-<video src="https://commuvent-connect-hub.lovable.app/videos/flow-a.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-a.mp4">Download the recording</a>.
-</video>
+[▶ Watch the flow-a recording](videos/flow-a.mp4) — click to play in GitHub.
 
 ---
 
@@ -138,10 +133,7 @@ in-progress event has 1 pending photo.
 
 ### Recording
 
-<video src="https://commuvent-connect-hub.lovable.app/videos/flow-b.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-b.mp4">Download the recording</a>.
-</video>
+[▶ Watch the flow-b recording](videos/flow-b.mp4) — click to play in GitHub.
 
 ---
 
@@ -181,10 +173,7 @@ Gina's RSVP (needed by Flows D and E) or the AI Hack Night waitlist.
 
 ### Recording
 
-<video src="https://commuvent-connect-hub.lovable.app/videos/flow-c.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-c.mp4">Download the recording</a>.
-</video>
+[▶ Watch the flow-c recording](videos/flow-c.mp4) — click to play in GitHub.
 
 ---
 
@@ -243,10 +232,7 @@ Window 2 so the two sessions don't collide.
 
 ### Recording
 
-<video src="https://commuvent-connect-hub.lovable.app/videos/flow-d.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-d.mp4">Download the recording</a>.
-</video>
+[▶ Watch the flow-d recording](videos/flow-d.mp4) — click to play in GitHub.
 
 ---
 
@@ -304,10 +290,7 @@ Open a second **private / incognito** window for Window 2.
 
 ### Recording
 
-<video src="https://commuvent-connect-hub.lovable.app/videos/flow-e.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-e.mp4">Download the recording</a>.
-</video>
+[▶ Watch the flow-e recording](videos/flow-e.mp4) — click to play in GitHub.
 
 ---
 
@@ -339,10 +322,7 @@ Open a second **private / incognito** window for Window 2.
 
 ### Recording
 
-<video src="https://commuvent-connect-hub.lovable.app/videos/flow-f.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-f.mp4">Download the recording</a>.
-</video>
+[▶ Watch the flow-f recording](videos/flow-f.mp4) — click to play in GitHub.
 
 ---
 
@@ -395,10 +375,7 @@ The gallery + moderation queue is **already populated** by the seed.
 
 ### Recording
 
-<video src="https://commuvent-connect-hub.lovable.app/videos/flow-g.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-g.mp4">Download the recording</a>.
-</video>
+[▶ Watch the flow-g recording](videos/flow-g.mp4) — click to play in GitHub.
 
 ---
 
@@ -433,10 +410,7 @@ The gallery + moderation queue is **already populated** by the seed.
 
 ### Recording
 
-<video src="https://commuvent-connect-hub.lovable.app/videos/flow-h.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-h.mp4">Download the recording</a>.
-</video>
+[▶ Watch the flow-h recording](videos/flow-h.mp4) — click to play in GitHub.
 
 ---
 
@@ -484,10 +458,7 @@ The Reports tab is **already populated** by the seed.
 
 ### Recording
 
-<video src="https://commuvent-connect-hub.lovable.app/videos/flow-i.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-i.mp4">Download the recording</a>.
-</video>
+[▶ Watch the flow-i recording](videos/flow-i.mp4) — click to play in GitHub.
 
 ---
 
@@ -532,10 +503,7 @@ Open a second **private / incognito** window for Window 2.
 
 ### Recording
 
-<video src="https://commuvent-connect-hub.lovable.app/videos/flow-j.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-j.mp4">Download the recording</a>.
-</video>
+[▶ Watch the flow-j recording](videos/flow-j.mp4) — click to play in GitHub.
 
 ---
 
@@ -562,10 +530,7 @@ Open a second **private / incognito** window for Window 2.
 
 ### Recording
 
-<video src="https://commuvent-connect-hub.lovable.app/videos/flow-k.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-k.mp4">Download the recording</a>.
-</video>
+[▶ Watch the flow-k recording](videos/flow-k.mp4) — click to play in GitHub.
 
 ---
 
