@@ -292,28 +292,28 @@ Open a second **private / incognito** window for Window 2.
 
 ### Window 2 — Attendee Gina (private / incognito window)
 
-10. Open a private/incognito window and go to
+11. Open a private/incognito window and go to
     `https://commuvent-connect-hub.lovable.app`.
-11. Click **Sign in** in the top-right.
-12. On the sign-in card, click the **user-icon** button to open the
+12. Click **Sign in** in the top-right.
+13. On the sign-in card, click the **user-icon** button to open the
     **Demo accounts** panel.
-13. Click the **Attendees** tab.
-14. Click the row for `att.gina@demo.commuvent.app` to auto-fill, then
+14. Click the **Attendees** tab.
+15. Click the row for `att.gina@demo.commuvent.app` to auto-fill, then
     click **Sign in**.
-15. Click **My Tickets** in the top nav.
-16. Find the ticket for **Live: TypeScript Performance** and copy its
+16. Click **My Tickets** in the top nav.
+17. Find the ticket for **Live: TypeScript Performance** and copy its
     6-character code.
 
 ### Back to Window 1 — Dan
 
-17. Click the **Enter ticket code** field and paste the code.
-18. Click **Check in**.
+18. Click the **Enter ticket code** field and paste the code.
+19. Click **Check in**.
     *Expect:* success toast; **Checked-in** counter +1.
-19. Click **Check in** again with the same code still in the field.
+20. Click **Check in** again with the same code still in the field.
     *Expect:* warning toast (already checked in); counters unchanged.
-20. Click **Undo last scan**.
+21. Click **Undo last scan**.
     *Expect:* success toast; **Checked-in** counter −1.
-21. Navigate to a completed event to confirm check-in is closed:
+22. Navigate to a completed event to confirm check-in is closed:
     1. Click the **Commuvent** logo (top-left) to go home.
     2. Click **Dashboard** in the top nav.
     3. Click the **Acme** host card.
@@ -321,7 +321,7 @@ Open a second **private / incognito** window for Window 2.
     5. Click **Check-in** on the **Intro to LLM Agents** card.
     *Expect:* a destructive **"Check-in is closed"** alert; the
     code input and **Check in** button are disabled.
-22. In **both** windows, click the avatar (top-right) → **Sign out**.
+23. In **both** windows, click the avatar (top-right) → **Sign out**.
 
 ---
 
