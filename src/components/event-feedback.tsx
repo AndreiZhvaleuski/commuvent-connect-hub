@@ -111,14 +111,14 @@ export function EventFeedback({ eventId, eventEnded }: { eventId: string; eventE
     load();
   };
 
-  const avg = items.length ? (items.reduce((s, f) => s + f.rating, 0) / items.length).toFixed(1) : null;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <Card className="mt-8">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Feedback</span>
-          {avg && <span className="text-sm font-normal text-muted-foreground">★ {avg} · {items.length}</span>}
+          {avg && <span className="text-sm font-normal text-muted-foreground">★ {avg} · {totalAll}</span>}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -172,9 +172,21 @@ export function EventFeedback({ eventId, eventEnded }: { eventId: string; eventE
           </div>
         )}
 
-        {items.length > 0 && (
+        {total > 0 && (
           <div className="space-y-3 pt-2">
-            {items.filter((f) => !mine || f.id !== mine.id).map((f) => (
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs text-muted-foreground">{total} {total === 1 ? "review" : "reviews"} from others</p>
+              <Select value={sort} onValueChange={(v) => { setSort(v as "newest" | "oldest"); setPage(1); }}>
+                <SelectTrigger className="h-8 w-[140px] text-xs">
+                  {sort === "oldest" ? "Oldest first" : "Newest first"}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest first</SelectItem>
+                  <SelectItem value="oldest">Oldest first</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {items.map((f) => (
               <div key={f.id} className="rounded-md border p-3 text-sm">
                 <div className="flex items-center gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
@@ -184,6 +196,7 @@ export function EventFeedback({ eventId, eventEnded }: { eventId: string; eventE
                 {f.comment && <p className="mt-1.5 whitespace-pre-line text-muted-foreground">{f.comment}</p>}
               </div>
             ))}
+            <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-2" />
           </div>
         )}
       </CardContent>
