@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
 
     if (data) {
       title = `${data.name} · Commuvent`;
-      description = data.bio ? truncate(removeMd(data.bio), 160) : description;
+      description = data.bio ? truncate(data.bio, 160) : description;
       image = data.logo_url ?? "";
 
       jsonLd = JSON.stringify({
