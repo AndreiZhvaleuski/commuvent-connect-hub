@@ -1,6 +1,6 @@
 import { useSearchParams } from "react-router-dom";
 import { MapPinIcon as MapPin } from "@phosphor-icons/react";
-import { MagnifyingGlassIcon as Search, GlobeIcon, CalendarBlankIcon } from "@phosphor-icons/react";
+import { MagnifyingGlassIcon as Search, GlobeIcon, SparkleIcon, CalendarBlankIcon } from "@phosphor-icons/react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -126,6 +126,7 @@ export default function Explore() {
                 className="flex flex-wrap gap-2"
               >
                 {([
+                  { v: "any", label: "Any", icon: <SparkleIcon className="h-4 w-4 shrink-0" /> },
                   { v: "offline", label: "Offline", icon: <MapPin className="h-4 w-4 shrink-0" /> },
                   { v: "online", label: "Online", icon: <GlobeIcon className="h-4 w-4 shrink-0" /> },
                 ] as const).map((opt) => {
@@ -133,12 +134,6 @@ export default function Explore() {
                   const content = (
                     <label
                       htmlFor={`mode-${opt.v}`}
-                      onClick={(e) => {
-                        if (selected) {
-                          e.preventDefault();
-                          setMode("any");
-                        }
-                      }}
                       className={cn(
                         "flex h-8 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 text-sm transition-colors whitespace-nowrap",
                         selected ? "border-primary bg-primary/5 flex-1" : "hover:bg-accent"
@@ -146,7 +141,7 @@ export default function Explore() {
                     >
                       <RadioGroupItem value={opt.v} id={`mode-${opt.v}`} className="shrink-0" />
                       {opt.icon}
-                      <span className="truncate">{opt.label}</span>
+                      {selected && <span className="truncate">{opt.label}</span>}
                     </label>
                   );
                   return selected ? (
