@@ -275,12 +275,17 @@ Open a second **private / incognito** window for Window 2.
 5. Click the **Checkers** tab.
 6. Click the row for `checker.dan@demo.commuvent.app` to auto-fill,
    then click **Sign in**.
-   *Expect:* `/dashboard` shows a single Acme card, Click on it and see only a
-   **Check-in** action (no New event / RSVPs / Moderation) on all events.
-7. Click **Check-in** on the Acme card.
-8. Click the row for **Live: TypeScript Performance** (in-progress).
-   *Expect:* you land on `/checkin/<eventId>` with three live
-   counters: **Going / Checked-in / Remaining**.
+   *Expect:* `/dashboard` shows a single Acme host card labelled
+   *"Checker · Check-in events"*.
+7. Click the **Acme** host card.
+   *Expect:* you land on `/dashboard/<hostId>`; each event card exposes
+   only a **Check-in** action (no Manage / Edit / RSVPs / New event /
+   Moderation).
+8. On the **Upcoming** tab, click **Check-in** on the
+   **Live: TypeScript Performance** card (in-progress).
+   *Expect:* you land on `/checkin/<eventId>` with three live counters
+   labelled **Going / Waitlist / Checked-in** (Going includes
+   `/ capacity`).
 9. Leave this window open.
 
 ### Window 2 — Attendee Gina (private / incognito window)
@@ -299,18 +304,21 @@ Open a second **private / incognito** window for Window 2.
 
 ### Back to Window 1 — Dan
 
-17. Click the **Ticket code** field and paste the code.
-18. Click **Submit**.
+17. Click the **Enter ticket code** field and paste the code.
+18. Click **Check in**.
     *Expect:* success toast; **Checked-in** counter +1.
-19. Click **Submit** again with the same code still in the field.
+19. Click **Check in** again with the same code still in the field.
     *Expect:* warning toast (already checked in); counters unchanged.
 20. Click **Undo last scan**.
     *Expect:* success toast; **Checked-in** counter −1.
-21. Click the **Commuvent** header/logo to open the main page, then
-    click **Dashboard** → **Check-in** on the Acme card → click the
-    row for **Intro to LLM Agents** (a completed event).
+21. Navigate to a completed event to confirm check-in is closed:
+    1. Click the **Commuvent** logo (top-left) to go home.
+    2. Click **Dashboard** in the top nav.
+    3. Click the **Acme** host card.
+    4. Switch to the **Past** tab.
+    5. Click **Check-in** on the **Intro to LLM Agents** card.
     *Expect:* a destructive **"Check-in is closed"** alert; the
-    submit button is blocked.
+    code input and **Check in** button are disabled.
 22. In **both** windows, click the avatar (top-right) → **Sign out**.
 
 ---
