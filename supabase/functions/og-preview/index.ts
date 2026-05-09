@@ -1,5 +1,5 @@
 import { escape } from "jsr:@std/html";
-import removeMd from "npm:remove-markdown@0.5.5";
+
 import { admin, corsHeaders } from "../_shared/auth.ts";
 
 const APP_URL = Deno.env.get("APP_URL") ?? "https://commuvent-connect-hub.lovable.app";
