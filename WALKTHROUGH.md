@@ -391,20 +391,23 @@ The gallery + moderation queue is **already populated** by the seed.
 
 ### Part 2 — Attendee uploads (`att.gina`)
 
-15. Click the **Commuvent** header/logo to open the main page.
-16. Click **Sign in** in the top-right.
-17. On the sign-in card, click the **user-icon** button to open the
+16. Click the **Commuvent** header/logo to open the main page.
+17. Click **Sign in** in the top-right.
+18. On the sign-in card, click the **user-icon** button to open the
     **Demo accounts** panel.
-18. Click the **Attendees** tab.
-19. Click the row for `att.gina@demo.commuvent.app` to auto-fill, then
+19. Click the **Attendees** tab.
+20. Click the row for `att.gina@demo.commuvent.app` to auto-fill, then
     click **Sign in**.
-20. Click **Explore** in the top nav.
-21. Toggle **Include past events** ON.
-22. Click the card titled **Intro to LLM Agents**.
-23. Scroll to the **Gallery** section.
-24. Click **Upload photo**, pick any image, then submit.
-    *Expect:* the photo appears in your "Pending" tray; not yet public.
-25. Click your avatar (top-right) → **Sign out**.
+21. Click **Explore** in the top nav.
+22. Toggle **Include past events** ON.
+23. Click the card titled **Intro to LLM Agents**.
+24. Scroll to the **Gallery** section, then click **View all** to open
+    the full gallery page.
+25. Click **Upload photo**, pick any image, then confirm.
+    *Expect:* toast `Photo uploaded — pending host approval`; the
+    filter switches to **My pending** and the photo appears there
+    (not yet on the public **Published** tab).
+26. Click your avatar (top-right) → **Sign out**.
 
 ---
 
