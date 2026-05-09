@@ -159,18 +159,11 @@ Deno.serve(async (req) => {
     console.log("wipe: storage");
     for (const b of ["event-covers", "host-logos", "gallery"]) await emptyBucket(db, b);
 
-    console.log("wipe: tables");
-    const tables = ["check_ins", "feedback", "gallery_photos", "notifications", "reports", "rsvps", "host_invites", "events", "host_members", "hosts", "profiles"];
-    for (const t of tables) {
-      const { error } = await db.from(t).delete().not("created_at", "is", null);
-      // some tables (host_members) have no created_at? all listed do. fallback:
-      if (error) {
-        const { error: e2 } = await db.from(t).delete().gte("created_at", "1970-01-01");
-        if (e2) console.warn("wipe table err", t, e2.message);
-      }
+    console.log("wipe: tables (rpc seed_wipe_all)");
+    {
+      const { error } = await db.rpc("seed_wipe_all");
+      if (error) throw new Error(`seed_wipe_all rpc: ${error.message}`);
     }
-    // host_members: delete all
-    await db.from("host_members").delete().gte("created_at", "1970-01-01");
 
     console.log("wipe: auth users");
     let page = 1;
