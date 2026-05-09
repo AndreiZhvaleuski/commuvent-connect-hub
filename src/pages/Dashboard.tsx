@@ -73,7 +73,7 @@ export default function Dashboard() {
                       <p className="text-xs text-muted-foreground capitalize">{h.role === "checker" ? "Checker · Check-in events" : "Manage events"}</p>
                     </div>
                   </CardHeader>
-                  {h.bio && <CardContent className="text-sm text-muted-foreground line-clamp-2">{stripMarkdown(h.bio)}</CardContent>}
+                  {h.bio && <CardContent className="text-sm text-muted-foreground line-clamp-2">{h.bio}</CardContent>}
                 </Card>
               </Link>
             ))}
