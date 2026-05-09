@@ -335,13 +335,17 @@ Open a second **private / incognito** window for Window 2.
 5. Click the **Hosts** tab.
 6. Click the row for `host.alice@demo.commuvent.app` to auto-fill, then
    click **Sign in**.
+   *Expect:* you land on the home page (no auto-redirect after sign-in).
+7. Click **Dashboard** in the top nav.
+   *Expect:* `/dashboard` shows the Acme host card.
+8. Click the **Acme** host card.
    *Expect:* you land on `/dashboard/<hostId>`.
-7. Click the **Past** tab.
-8. Click the row for **Intro to LLM Agents**.
-9. Click **RSVPs** in the manage page header.
-10. Click **Export CSV**.
+9. Click the **Past** tab.
+10. Click **Manage** on the **Intro to LLM Agents** card.
+11. Click **RSVPs** in the manage page header.
+12. Click **Export CSV**.
     *Expect:* a file downloads, e.g. `rsvps-intro-to-llm-agents.csv`.
-11. Open the file in Excel or Google Sheets.
+13. Open the file in Excel or Google Sheets.
     *Expect:*
     - Encoding is **UTF-8 with BOM** — names like *Müller* render
       correctly without mojibake.
@@ -349,7 +353,7 @@ Open a second **private / incognito** window for Window 2.
     - `check_in_time` is **ISO-8601** with the event's TZ offset, blank
       for non-checked-in rows.
     - At least ~6 rows, including both `going` and `waitlist`.
-12. Click your avatar (top-right) → **Sign out**.
+14. Click your avatar (top-right) → **Sign out**.
 
 ---
 
