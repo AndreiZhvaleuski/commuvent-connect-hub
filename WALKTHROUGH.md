@@ -349,9 +349,9 @@ Open a second **private / incognito** window for Window 2.
     *Expect:*
     - Encoding is **UTF-8 with BOM** — names like *Müller* render
       correctly without mojibake.
-    - Columns are exactly: `name, email, rsvp_status, check_in_time`.
-    - `check_in_time` is **ISO-8601** with the event's TZ offset, blank
-      for non-checked-in rows.
+    - Columns are exactly: `Name, Email, RSVP Status, Check-in Time (UTC)`.
+    - `Check-in Time (UTC)` is **ISO-8601 in UTC** (e.g.
+      `2026-06-12T17:04:31Z`), blank for non-checked-in rows.
     - At least ~6 rows, including both `going` and `waitlist`.
 14. Click your avatar (top-right) → **Sign out**.
 
