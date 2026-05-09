@@ -136,7 +136,7 @@ export default function Explore() {
                       key={opt.v}
                       htmlFor={`mode-${opt.v}`}
                       className={cn(
-                        "flex h-8 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border px-2.5 text-sm transition-colors whitespace-nowrap",
+                        "flex h-8 flex-1 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 text-sm transition-colors whitespace-nowrap",
                         selected ? "border-primary bg-primary/5" : "hover:bg-accent"
                       )}
                     >
