@@ -371,21 +371,23 @@ The gallery + moderation queue is **already populated** by the seed.
 5. Click the **Hosts** tab.
 6. Click the row for `host.alice@demo.commuvent.app` to auto-fill, then
    click **Sign in**.
-7. Click **Dashboard** in the top nav (if not already there).
-8. Click **Moderation** in the dashboard header.
-9. Click the **Gallery queue** tab.
-   *Expect:* several pending photos across Acme's events, each
-   labelled with the uploader's name.
-10. On the **first** pending row, click **Approve**.
-    *Expect:* toast confirmation; the row disappears.
-11. On the next pending row, click **Reject**.
-    *Expect:* toast confirmation; the row disappears.
-12. Click the **Commuvent** header/logo to open the main page, then
-    click **Explore** → toggle **Include past events** ON → open the
-    event you just approved a photo for.
-13. Scroll to the **Gallery** section.
-    *Expect:* the newly-approved photo renders in the public grid.
-14. Click your avatar (top-right) → **Sign out**.
+7. Click **Dashboard** in the top nav.
+   *Expect:* `/dashboard` shows the Acme host card.
+8. Click the **Acme** host card.
+9. Switch to the **Past** tab and click the title of
+   **Intro to LLM Agents** to open its public event page (`/e/<id>`).
+10. Scroll to the **Gallery** section, then click **View all** to open
+    the full gallery page (`/e/<id>/gallery`).
+11. Click the **Pending review** tab (visible only to hosts).
+    *Expect:* a list of photos awaiting approval.
+12. On the first photo, click **Approve**.
+    *Expect:* toast `Photo approved`; the photo disappears from the
+    Pending review tab.
+13. On the next photo, click **Reject**.
+    *Expect:* toast `Photo rejected`; the photo disappears.
+14. Click the **Published** tab.
+    *Expect:* the just-approved photo appears here.
+15. Click your avatar (top-right) → **Sign out**.
 
 ### Part 2 — Attendee uploads (`att.gina`)
 
