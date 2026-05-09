@@ -87,12 +87,21 @@ export function TopNav() {
           {links.map((l) => (
             <NavLink key={l.to} to={l.to}
               className={({ isActive }) =>
-                `rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent ${isActive ? "text-foreground" : "text-muted-foreground"}`
+                `relative inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent ${isActive ? "text-foreground" : "text-muted-foreground"}`
               }>
               {l.label}
+              {l.to === "/tickets" && unreadPromotions > 0 && (
+                <span
+                  aria-label={`${unreadPromotions} new waitlist promotion${unreadPromotions === 1 ? "" : "s"}`}
+                  className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground"
+                >
+                  {unreadPromotions}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
+
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
