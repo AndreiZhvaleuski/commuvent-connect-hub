@@ -52,18 +52,20 @@ in-progress event has 1 pending photo.
 2. If a user avatar shows in the top-right, click it → **Sign out**.
 3. Click **Explore** in the top nav.
    *Expect:* a grid of upcoming event cards and a Filters card.
-4. In the **Search** field, type `AI`.
-   *Expect:* the grid filters live as you type.
-5. In the **Location** row, click the **Offline** chip.
-6. Toggle **Include past events** ON.
+4. Toggle **Include past events** ON.
    *Expect:* cards with an **"Ended"** badge appear.
-7. Click the **Earliest** sort tab.
-8. Click the card titled **Intro to LLM Agents**.
+5. In the **Location** row, click the **Offline** chip.
+6. Click the **Earliest** sort tab.
+7. In the **Search** field, type `LLM`.
+   *Expect:* the grid filters live as you type and shows
+   **Intro to LLM Agents** (an Ended event).
+8. Click the **Intro to LLM Agents** card.
    *Expect:* event page shows an **Ended** banner; **no RSVP button**.
 9. Click the browser **Back** button.
 10. In the Filters card, click **Clear filters**.
-11. Click the card titled **AI Hack Night**.
-12. Click **RSVP**.
+11. In the **Search** field, type `AI Hack`.
+12. Click the **AI Hack Night** card.
+13. Click **RSVP**.
     *Expect:* redirect to `/sign-in?redirect=/e/<id>`.
 
 ### Recording
