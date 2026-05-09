@@ -275,9 +275,11 @@ Open a second **private / incognito** window for Window 2.
 5. Click the **Checkers** tab.
 6. Click the row for `checker.dan@demo.commuvent.app` to auto-fill,
    then click **Sign in**.
+   *Expect:* you land on the home page (no auto-redirect for checkers).
+7. Click **Dashboard** in the top nav.
    *Expect:* `/dashboard` shows a single Acme host card labelled
    *"Checker · Check-in events"*.
-7. Click the **Acme** host card.
+8. Click the **Acme** host card.
    *Expect:* you land on `/dashboard/<hostId>`; each event card exposes
    only a **Check-in** action (no Manage / Edit / RSVPs / New event /
    Moderation).
