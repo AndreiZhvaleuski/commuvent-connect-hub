@@ -393,7 +393,20 @@ function TicketCard({ row, qr, onCancel, pastView, hidden, onToggleHidden, promo
         </div>
       </CardHeader>
       <CardContent>
+        {promoted && (
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3 rounded-md border border-primary/40 bg-primary/10 p-3">
+            <div className="flex items-start gap-2">
+              <Sparkle className="mt-0.5 h-5 w-5 text-primary" />
+              <div>
+                <p className="text-sm font-medium text-foreground">You were promoted from the waitlist</p>
+                <p className="text-xs text-muted-foreground">Your seat is confirmed — your QR ticket below is ready to use.</p>
+              </div>
+            </div>
+            <Button size="sm" onClick={onAcknowledgePromotion}>Acknowledge</Button>
+          </div>
+        )}
         <div className="grid gap-4 sm:grid-cols-[160px_1fr] items-center">
+
           {row.status === "going" ? (
             qr ? (
               <div className="flex flex-col items-center gap-1">
