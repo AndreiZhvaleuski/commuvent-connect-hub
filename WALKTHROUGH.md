@@ -28,7 +28,22 @@ The deployed app is pre-seeded — no setup required.
 
 **Events:** 9 total (3 per host × completed / in-progress / upcoming).
 The upcoming **AI Hack Night** (Acme) has **capacity 4** — used for the
-waitlist demo.
+waitlist demo. The seed RSVPs all 8 attendees in deterministic order, so
+`att.gina/henry/ivy/jack` are **going** and `att.kate/liam/mia/noah` sit
+on the **waitlist** (in that order).
+
+**Gallery:** every completed event is pre-loaded with **5 photos from 5
+different attendees** — 2 approved, 2 pending, 1 rejected. Each
+in-progress event has 1 pending photo. The moderation queue is
+non-empty out of the box.
+
+**Reports:** the Reports tab is pre-populated with **3 open** reports
+(2 events + 1 photo, from different attendees) and **2 historical**
+reports (1 hidden event, 1 dismissed photo).
+
+> If anything looks stale or empty, re-run the `seed_demo` edge function
+> (`POST /functions/v1/seed_demo` with header `x-seed-secret: <secret>`).
+> It wipes everything and re-seeds in ~30s.
 
 > Each step lists **As** (which user to sign in as), **Do** (what to
 > click), and **Expect** (the observable outcome). Sign out between
