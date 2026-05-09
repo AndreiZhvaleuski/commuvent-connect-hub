@@ -7,6 +7,7 @@ events, attendees RSVP and grab a digital ticket, and checkers verify codes
 at the door — all in one mobile-first app.
 
 **Live demo:** https://commuvent-connect-hub.lovable.app
+> If the site doesn't load in your region, try using a VPN — the Lovable hosting service may be blocked in some countries.
 
 ---
 
