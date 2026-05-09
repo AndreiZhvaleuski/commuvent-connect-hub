@@ -142,7 +142,10 @@ in-progress event has 1 pending photo.
 
 ---
 
-## Flow C — RSVP, ticket & calendar (Attendee)
+## Flow C — Ticket, calendar & cancel/re-RSVP (Attendee)
+
+We use `att.henry` and **Farm-to-Table Dinner** here so we don't disturb
+Gina's RSVP (needed by Flows D and E) or the AI Hack Night waitlist.
 
 1. Click the **Commuvent** header/logo (top-left) to open the main page.
 2. If a user avatar shows in the top-right, click it → **Sign out**.
@@ -150,23 +153,27 @@ in-progress event has 1 pending photo.
 4. On the sign-in card, click the **user-icon** button to open the
    **Demo accounts** panel.
 5. Click the **Attendees** tab.
-6. Click the row for `att.gina@demo.commuvent.app` to auto-fill, then
+6. Click the row for `att.henry@demo.commuvent.app` to auto-fill, then
    click **Sign in**.
-7. Click the **Commuvent** header/logo to open the main page.
-8. Click **Explore** in the top nav.
-9. In **Search**, type `AI Hack Night`.
-10. Click the **AI Hack Night** card.
-11. Click **RSVP**.
-12. In the confirmation dialog, click **Confirm**.
-    *Expect:* toast `You're going`; the header pill shows **Going**.
-13. Click **My Tickets** in the top nav.
-    *Expect:* a ticket card with QR code and a 6-character ticket code.
-14. Click **Add to calendar** on the ticket.
-15. Click **Download .ics**.
-    *Expect:* a `.ics` file downloads with the correct title and times.
-16. Click **Cancel RSVP** on the ticket.
-17. In the confirmation dialog, click **Confirm**.
+7. Click **My Tickets** in the top nav.
+   *Expect:* a list of seeded tickets, each with a QR code and a
+   6-character ticket code.
+8. Find the ticket for **Farm-to-Table Dinner** and click
+   **Add to calendar**.
+9. Click **Download .ics**.
+   *Expect:* a `.ics` file downloads with the correct title and times.
+10. On the same ticket, click **Cancel RSVP**.
+11. In the confirmation dialog, click **Confirm**.
     *Expect:* toast `RSVP cancelled`; the ticket disappears.
+12. Click the **Commuvent** header/logo, then click **Explore**.
+13. In **Search**, type `Farm-to-Table`.
+14. Click the **Farm-to-Table Dinner** card.
+15. Click **RSVP**.
+16. In the confirmation dialog, click **Confirm**.
+    *Expect:* toast `You're going`; the header pill shows **Going**.
+17. Click **My Tickets** in the top nav.
+    *Expect:* the **Farm-to-Table Dinner** ticket is back with a fresh
+    QR code.
 18. Click your avatar (top-right) → **Sign out**.
 
 ### Recording
