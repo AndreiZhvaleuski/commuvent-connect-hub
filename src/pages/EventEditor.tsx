@@ -17,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { MarkdownEditor } from "@/components/markdown-editor";
+import { Textarea } from "@/components/ui/textarea";
 import { ImageUpload } from "@/components/image-upload";
 import { TimezonePicker } from "@/components/timezone-picker";
 import { DateTimePicker } from "@/components/datetime-picker";
@@ -367,10 +367,12 @@ export default function EventEditor() {
                 error={form.formState.errors.description?.message}
                 hint={`${description.length}/${MAX_DESC}`}
               >
-                <MarkdownEditor
+                <Textarea
                   value={description}
-                  onChange={(md) => form.setValue("description", md, { shouldValidate: true, shouldDirty: true })}
-                  placeholder="What is this event about? Use the toolbar for formatting."
+                  onChange={(e) => form.setValue("description", e.target.value, { shouldValidate: true, shouldDirty: true })}
+                  placeholder="What is this event about?"
+                  rows={8}
+                  maxLength={MAX_DESC}
                 />
               </Field>
             </CardContent>

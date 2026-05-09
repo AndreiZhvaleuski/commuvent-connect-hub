@@ -1,5 +1,5 @@
 import { escape } from "jsr:@std/html";
-import removeMd from "npm:remove-markdown@0.5.5";
+
 import { admin, corsHeaders } from "../_shared/auth.ts";
 
 const APP_URL = Deno.env.get("APP_URL") ?? "https://commuvent-connect-hub.lovable.app";
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
 
     if (data) {
       const isPast = new Date(data.end_at) < new Date();
-      const baseDescription = data.description ? truncate(removeMd(data.description), 150) : "Community event on Commuvent.";
+      const baseDescription = data.description ? truncate(data.description, 150) : "Community event on Commuvent.";
 
       const tzForTitle = data.time_zone ?? "UTC";
       let dateLabel = "";
@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
 
     if (data) {
       title = `${data.name} · Commuvent`;
-      description = data.bio ? truncate(removeMd(data.bio), 160) : description;
+      description = data.bio ? truncate(data.bio, 160) : description;
       image = data.logo_url ?? "";
 
       jsonLd = JSON.stringify({

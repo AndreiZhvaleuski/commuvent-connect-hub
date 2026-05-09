@@ -8,8 +8,6 @@ import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/empty-state";
 import { PublicEventCard, type PublicEvent } from "@/components/public-event-card";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { useAsyncResource } from "@/hooks/use-async-resource";
 import { PageSpinner } from "@/components/page-spinner";
 import { ErrorState } from "@/components/error-state";
@@ -143,9 +141,7 @@ export default function HostPublic() {
             <div className="min-w-0 flex-1">
               <h1 className="text-3xl font-semibold tracking-tight">{host.name}</h1>
               {host.bio && (
-                <div className="mt-2 prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{host.bio}</ReactMarkdown>
-                </div>
+                <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">{host.bio}</p>
               )}
               {host.contact_email && (
                 <a href={`mailto:${host.contact_email}`} className="mt-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">

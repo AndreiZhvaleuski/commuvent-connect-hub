@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MarkdownEditor } from "@/components/markdown-editor";
+import { Textarea } from "@/components/ui/textarea";
 import { ImageUpload } from "@/components/image-upload";
 
 const Schema = z.object({
@@ -197,10 +197,13 @@ export default function HostEditor({ mode }: Props) {
                   <Label htmlFor="bio">Bio</Label>
                   <span className="text-xs text-muted-foreground">{bioValue.length}/2000</span>
                 </div>
-                <MarkdownEditor
+                <Textarea
+                  id="bio"
                   value={bioValue}
-                  onChange={(md) => form.setValue("bio", md, { shouldValidate: true, shouldDirty: true })}
-                  placeholder="What does your community do? Use the toolbar to format text, add headings, lists, quotes, and links."
+                  onChange={(e) => form.setValue("bio", e.target.value, { shouldValidate: true, shouldDirty: true })}
+                  placeholder="What does your community do?"
+                  rows={6}
+                  maxLength={2000}
                 />
                 {form.formState.errors.bio && <p className="text-sm text-destructive">{form.formState.errors.bio.message}</p>}
               </div>

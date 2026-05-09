@@ -1,30 +1,56 @@
 ## Goal
-Harden the `feedback` table with DB-level constraints and surface clear, friendly errors in the UI when a constraint is violated.
+Replace all rich-text/markdown descriptions and bios with plain-text inputs, and remove every related package, sanitiser, and CSS leftover.
 
-## Database migration
-Add to `public.feedback`:
-1. `CHECK (rating BETWEEN 1 AND 5)` — constraint `feedback_rating_range`
-2. `UNIQUE (event_id, user_id)` — constraint `feedback_event_user_unique` (also de-dupes any existing duplicates first, keeping the earliest row)
-3. `CHECK (comment IS NULL OR char_length(comment) <= 1000)` — constraint `feedback_comment_length`
+## Affected fields
+- `events.description` — currently markdown via `MarkdownEditor` / rendered via `MarkdownView`
+- `hosts.bio` — currently markdown via `MarkdownEditor` / rendered via `ReactMarkdown`
 
-Pre-migration cleanup:
-- Delete duplicate feedback rows keeping the oldest per `(event_id, user_id)`.
-- Truncate any existing comments longer than 1000 chars (or fail loudly — will choose truncate to avoid migration failure).
+(DB columns stay as `text`; no migration needed. Existing markdown syntax in stored values will simply render as literal characters going forward.)
 
-## Frontend changes (`src/components/event-feedback.tsx`)
-1. **Comment length cap (1000 chars):**
-   - Add `maxLength={1000}` to the `<Textarea>`.
-   - Show a live counter `{comment.length}/1000` under the textarea, muted, turning destructive when at limit.
+## Frontend changes
 
-2. **Friendly error mapping on submit:**
-   - Inspect Supabase error `code` / `message`:
-     - `23505` (unique_violation) → toast: "You've already submitted feedback for this event." then reload to show their existing entry.
-     - `23514` (check_violation) on rating → toast: "Rating must be between 1 and 5 stars."
-     - `23514` on comment → toast: "Comment must be 1000 characters or less."
-     - Fallback → existing generic message.
+### Replace editors with plain `<Textarea>`
+- `src/pages/EventEditor.tsx` — swap `MarkdownEditor` for `<Textarea rows={8}>` bound to `description`. Keep the existing `MAX_DESC` char counter and Zod validation.
+- `src/pages/HostEditor.tsx` — swap `MarkdownEditor` for `<Textarea rows={6}>` bound to `bio`. Keep the 2000-char counter and validation.
 
-3. **Client-side guard for rating** already exists (1–5 buttons + `rating < 1` disabled); no change needed beyond the new server-side error mapping.
+### Replace renderers with plain text (preserving line breaks)
+- `src/pages/EventPage.tsx` — replace `<MarkdownView>{event.description}</MarkdownView>` with `<p className="whitespace-pre-line text-sm leading-relaxed">{event.description}</p>`.
+- `src/pages/HostPublic.tsx` — replace the `ReactMarkdown` block with `<p className="whitespace-pre-line text-sm text-muted-foreground">{host.bio}</p>`. Drop `ReactMarkdown` and `remarkGfm` imports.
+- `src/pages/Dashboard.tsx` — delete the `stripMarkdown` helper; render `h.bio` directly (still inside `line-clamp-2`).
+
+### Delete files
+- `src/components/markdown-editor.tsx`
+- `src/components/markdown-view.tsx`
+
+### Update placeholders/copy
+- Event description placeholder → "What is this event about?"
+- Host bio placeholder → "What does your community do?"
+
+## Edge function changes
+- `supabase/functions/og-preview/index.ts`
+  - Remove `import removeMd from "npm:remove-markdown@0.5.5"`.
+  - Replace both `removeMd(...)` calls with the raw string (still wrapped in `truncate(...)` and HTML-escaped downstream).
+
+## CSS cleanup (`src/index.css`)
+- Remove all `.tiptap-content` rules.
+- Remove `.prose` overrides that exist only to support markdown rendering (blockquote / code / pre rules currently shared with `.tiptap-content`). Keep no orphan `.prose` styles since `@tailwindcss/typography` is not installed.
+
+## Package removals (`package.json`)
+- `@tiptap/extension-link`
+- `@tiptap/extension-placeholder`
+- `@tiptap/pm`
+- `@tiptap/react`
+- `@tiptap/starter-kit`
+- `tiptap-markdown`
+- `react-markdown`
+- `remark-gfm`
+
+(`remove-markdown` is only loaded inside the edge function via `npm:` specifier — no package.json change needed there.)
+
+## Verification
+- Grep for `markdown`, `tiptap`, `remark`, `rehype`, `dompurify`, `sanitize`, `MarkdownView`, `MarkdownEditor`, `ReactMarkdown`, `stripMarkdown`, `tiptap-content`, `prose ` after the change to confirm zero residual references.
+- Build should pass with no TS/import errors.
 
 ## Out of scope
-- No changes to RLS policies, the moderation page, or other components.
-- No schema changes beyond the three constraints.
+- No data migration — old markdown characters in existing `events.description` / `hosts.bio` will display literally. Acceptable per request.
+- No changes to other description-like fields (none exist).
