@@ -48,11 +48,27 @@ export function EventFeedback({ eventId, eventEnded }: { eventId: string; eventE
     if (!user) return;
     if (rating < 1) { toast.error("Pick a rating"); return; }
     setBusy(true);
+    const trimmed = comment.trim();
+    if (trimmed.length > 1000) { toast.error("Comment must be 1000 characters or less."); return; }
     const { error } = await supabase.from("feedback").insert({
-      event_id: eventId, user_id: user.id, rating, comment: comment.trim() || null,
+      event_id: eventId, user_id: user.id, rating, comment: trimmed || null,
     });
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      const code = (error as { code?: string }).code;
+      const msg = error.message || "";
+      if (code === "23505") {
+        toast.error("You've already submitted feedback for this event.");
+        load();
+      } else if (code === "23514" && /comment/i.test(msg)) {
+        toast.error("Comment must be 1000 characters or less.");
+      } else if (code === "23514" && /rating/i.test(msg)) {
+        toast.error("Rating must be between 1 and 5 stars.");
+      } else {
+        toast.error(msg || "Could not submit feedback.");
+      }
+      return;
+    }
     toast.success("Thanks for your feedback!");
     setRating(0); setComment("");
     load();
@@ -103,7 +119,18 @@ export function EventFeedback({ eventId, eventEnded }: { eventId: string; eventE
                 </button>
               ))}
             </div>
-            <Textarea placeholder="Optional comment" value={comment} onChange={(e) => setComment(e.target.value)} rows={3} />
+            <div className="space-y-1">
+              <Textarea
+                placeholder="Optional comment"
+                value={comment}
+                onChange={(e) => setComment(e.target.value.slice(0, 1000))}
+                rows={3}
+                maxLength={1000}
+              />
+              <p className={`text-xs text-right ${comment.length >= 1000 ? "text-destructive" : "text-muted-foreground"}`}>
+                {comment.length}/1000
+              </p>
+            </div>
             <Button onClick={submit} disabled={busy || rating < 1}>Submit feedback</Button>
           </div>
         )}
