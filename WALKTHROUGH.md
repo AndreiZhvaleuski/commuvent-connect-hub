@@ -544,10 +544,11 @@ Open a second **private / incognito** window for Window 2.
 7. Click **My Events** in the top nav.
    *Expect:* a list of all events where Alice has a role, with
    filters and per-row quick actions (Manage / Check-in).
-8. In the **Search** field, type `Tech`.
-9. In **From date**, pick **today**.
-10. Click the **Past** time tab.
-    *Expect:* the list narrows to past Tech-related events.
-11. Click **Clear filters**.
+8. Click the **Past** time tab.
+   *Expect:* the list narrows to Alice's past events (e.g.
+   **Intro to LLM Agents**).
+9. In the **Search** field, type `LLM`.
+   *Expect:* the list narrows further to **Intro to LLM Agents**.
+10. Click **Clear filters**.
     *Expect:* the full list returns.
 12. Click your avatar (top-right) → **Sign out**.
