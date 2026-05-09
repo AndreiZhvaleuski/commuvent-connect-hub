@@ -1,3 +1,5 @@
+
+
 # Reviewer walkthrough
 
 Click-by-click guide covering every graded flow on the live demo:
@@ -92,10 +94,7 @@ in-progress event has 1 pending photo.
 
 ### Recording
 
-<video src="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-a.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-a.mp4">Download the recording</a>.
-</video>
+https://github.com/user-attachments/assets/7b362903-872e-4f58-bc0f-12a5563b47a9
 
 ---
 
@@ -136,10 +135,7 @@ in-progress event has 1 pending photo.
 
 ### Recording
 
-<video src="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-b.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-b.mp4">Download the recording</a>.
-</video>
+https://github.com/user-attachments/assets/4011a622-8878-431f-a2aa-112cfd69f2aa
 
 ---
 
@@ -176,13 +172,6 @@ Gina's RSVP (needed by Flows D and E) or the AI Hack Night waitlist.
     *Expect:* the **Farm-to-Table Dinner** ticket is back with a fresh
     QR code.
 18. Click your avatar (top-right) → **Sign out**.
-
-### Recording
-
-<video src="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-c.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-c.mp4">Download the recording</a>.
-</video>
 
 ---
 
@@ -239,13 +228,6 @@ Window 2 so the two sessions don't collide.
     *Expect:* the badge stays at zero (acknowledgement persisted).
 21. In **both** windows, click the avatar (top-right) → **Sign out**.
 
-### Recording
-
-<video src="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-d.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-d.mp4">Download the recording</a>.
-</video>
-
 ---
 
 ## Flow E — Run the door (Checker, two windows)
@@ -300,13 +282,6 @@ Open a second **private / incognito** window for Window 2.
     submit button is blocked.
 22. In **both** windows, click the avatar (top-right) → **Sign out**.
 
-### Recording
-
-<video src="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-e.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-e.mp4">Download the recording</a>.
-</video>
-
 ---
 
 ## Flow F — Export RSVPs CSV (Host)
@@ -334,13 +309,6 @@ Open a second **private / incognito** window for Window 2.
       for non-checked-in rows.
     - At least ~6 rows, including both `going` and `waitlist`.
 12. Click your avatar (top-right) → **Sign out**.
-
-### Recording
-
-<video src="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-f.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-f.mp4">Download the recording</a>.
-</video>
 
 ---
 
@@ -391,13 +359,6 @@ The gallery + moderation queue is **already populated** by the seed.
     *Expect:* the photo appears in your "Pending" tray; not yet public.
 25. Click your avatar (top-right) → **Sign out**.
 
-### Recording
-
-<video src="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-g.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-g.mp4">Download the recording</a>.
-</video>
-
 ---
 
 ## Flow H — Feedback (post-event, gated)
@@ -428,13 +389,6 @@ The gallery + moderation queue is **already populated** by the seed.
     *Expect:* **no** feedback form — only an info note that feedback
     opens after the event ends.
 17. Click your avatar (top-right) → **Sign out**.
-
-### Recording
-
-<video src="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-h.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-h.mp4">Download the recording</a>.
-</video>
 
 ---
 
@@ -480,13 +434,6 @@ The Reports tab is **already populated** by the seed.
     *Expect:* toast `Report submitted`.
 25. Click your avatar (top-right) → **Sign out**.
 
-### Recording
-
-<video src="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-i.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-i.mp4">Download the recording</a>.
-</video>
-
 ---
 
 ## Flow J — Invite a member (two windows)
@@ -528,13 +475,6 @@ Open a second **private / incognito** window for Window 2.
     appears for Noah with **Checker** scope.
 20. In **both** windows, click the avatar (top-right) → **Sign out**.
 
-### Recording
-
-<video src="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-j.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-j.mp4">Download the recording</a>.
-</video>
-
 ---
 
 ## Flow K — My Events aggregate
@@ -557,13 +497,6 @@ Open a second **private / incognito** window for Window 2.
 11. Click **Clear filters**.
     *Expect:* the full list returns.
 12. Click your avatar (top-right) → **Sign out**.
-
-### Recording
-
-<video src="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-k.mp4" controls playsinline muted width="640">
-  Your browser doesn't support inline video.
-  <a href="https://github.com/AndreiZhvaleuski/commuvent-connect-hub/raw/main/videos/flow-k.mp4">Download the recording</a>.
-</video>
 
 ---
 
