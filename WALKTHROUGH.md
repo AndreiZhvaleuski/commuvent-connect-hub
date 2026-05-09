@@ -192,22 +192,31 @@ so two users stay signed in side-by-side.
 
 ## Flow G — Gallery upload + host approval
 
-- **As:** `att.gina@demo.commuvent.app`
-
-1. **Do:** Open a completed event (e.g. *Intro to LLM Agents*) →
-   scroll to **Gallery** → **Upload photo** → pick any image →
-   submit.
-   **Expect:** Photo appears in your "Pending" tray with a "Pending
-   approval" notice; it does **not** show on the public gallery yet.
+The gallery + moderation queue is **already populated** by the seed:
+each completed event has 2 approved + 2 pending + 1 rejected photo,
+each from a different attendee.
 
 - **As:** `host.alice@demo.commuvent.app`
 
-2. **Do:** `/dashboard/<hostId>/moderation` → **Gallery queue** tab.
-   **Expect:** The new photo is listed.
-3. **Do:** Click **Approve**.
-   **Expect:** It disappears from the queue.
-4. **Do:** Open the public event page in another tab.
-   **Expect:** The photo now renders in the gallery grid for everyone.
+1. **Do:** Sign in → `/dashboard/<hostId>/moderation` → **Gallery queue**
+   tab.
+   **Expect:** Several pending photos listed (across Acme's events),
+   each labelled with the uploader's name.
+2. **Do:** Click **Approve** on one and **Reject** on another.
+   **Expect:** Both rows disappear from the queue. Toast confirmations.
+3. **Do:** Open the public page of the event whose photo you approved.
+   **Expect:** The newly-approved photo now renders in the public
+   Gallery grid alongside the seed's approved photos.
+
+Optional second pass — upload as an attendee:
+
+- **As:** `att.gina@demo.commuvent.app`
+
+4. **Do:** Open a completed event (e.g. *Intro to LLM Agents*) → scroll
+   to **Gallery** → **Upload photo** → pick any image → submit.
+   **Expect:** Photo appears in your "Pending" tray; not yet public.
+   Sign back in as Alice to approve it from the Gallery queue.
+
 
 ---
 
