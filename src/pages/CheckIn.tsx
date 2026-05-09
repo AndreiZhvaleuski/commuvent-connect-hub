@@ -215,16 +215,10 @@ export default function CheckIn() {
           <StatBox label="Checked-in" value={counters.checkedIn} icon={<CheckCircle2 className="h-4 w-4" />} highlight />
         </div>
 
-        {ended && !isHost && (
+        {ended && (
           <Alert variant="destructive">
             <AlertTitle>Check-in is closed</AlertTitle>
             <AlertDescription>This event has ended. New check-ins and undos are no longer allowed.</AlertDescription>
-          </Alert>
-        )}
-        {ended && isHost && (
-          <Alert>
-            <AlertTitle>Event has ended — host override</AlertTitle>
-            <AlertDescription>Late check-ins will still be recorded.</AlertDescription>
           </Alert>
         )}
 
