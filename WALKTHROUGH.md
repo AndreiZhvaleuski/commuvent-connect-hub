@@ -28,7 +28,22 @@ The deployed app is pre-seeded — no setup required.
 
 **Events:** 9 total (3 per host × completed / in-progress / upcoming).
 The upcoming **AI Hack Night** (Acme) has **capacity 4** — used for the
-waitlist demo.
+waitlist demo. The seed RSVPs all 8 attendees in deterministic order, so
+`att.gina/henry/ivy/jack` are **going** and `att.kate/liam/mia/noah` sit
+on the **waitlist** (in that order).
+
+**Gallery:** every completed event is pre-loaded with **5 photos from 5
+different attendees** — 2 approved, 2 pending, 1 rejected. Each
+in-progress event has 1 pending photo. The moderation queue is
+non-empty out of the box.
+
+**Reports:** the Reports tab is pre-populated with **3 open** reports
+(2 events + 1 photo, from different attendees) and **2 historical**
+reports (1 hidden event, 1 dismissed photo).
+
+> If anything looks stale or empty, re-run the `seed_demo` edge function
+> (`POST /functions/v1/seed_demo` with header `x-seed-secret: <secret>`).
+> It wipes everything and re-seeds in ~30s.
 
 > Each step lists **As** (which user to sign in as), **Do** (what to
 > click), and **Expect** (the observable outcome). Sign out between
@@ -103,21 +118,26 @@ Sign out first if needed (or use a private window).
 
 ## Flow D — Waitlist + automatic FIFO promotion
 
-This proves capacity enforcement and realtime promotion. Use a private
-window so you can stay signed in as one user while opening the app as
-another.
+The seed already over-subscribes **AI Hack Night** (capacity = 4):
+`att.gina/henry/ivy/jack` are **going**, `att.kate/liam/mia/noah` sit
+on the waitlist. Use two browsers (or one normal + one private window)
+so two users stay signed in side-by-side.
 
-1. RSVP **AI Hack Night** as each of these in turn (sign in / RSVP /
-   sign out): `att.gina`, `att.henry`, `att.ivy`, `att.jack`.
-   **Expect:** All four show **Going** (capacity = 4).
-2. **As:** `att.kate@demo.commuvent.app` → `/explore` → AI Hack Night
-   → **RSVP**.
-   **Expect:** Status becomes **Waitlist · position 1**.
-3. **As:** `att.gina@…` → `/tickets` → **Cancel RSVP** for AI Hack Night.
-4. **As:** `att.kate@…` → `/tickets`.
-   **Expect:** Status flipped to **Going** automatically (no reload
-   needed — pushed via realtime). The bell icon in the header shows an
-   unread notification "You're off the waitlist".
+1. **As:** `att.kate@demo.commuvent.app` (private window) → sign in →
+   `/tickets`.
+   **Expect:** A waitlist card for **AI Hack Night** showing
+   **Waitlist · position 1**. No QR ticket yet. The bell icon in the
+   header already shows an unread notification *"You're on the waitlist
+   for AI Hack Night"*.
+2. **As:** `att.gina@demo.commuvent.app` (other window) → sign in →
+   `/tickets` → on the **AI Hack Night** ticket click **Cancel RSVP**
+   → confirm.
+   **Expect:** Toast `RSVP cancelled`; ticket disappears.
+3. Switch back to **Kate's** window — do **not** reload.
+   **Expect:** The waitlist card flips to a real **Going** ticket with
+   a QR code, automatically (pushed via Realtime). A new unread
+   notification appears in the bell icon.
+
 
 ---
 
@@ -172,22 +192,31 @@ another.
 
 ## Flow G — Gallery upload + host approval
 
-- **As:** `att.gina@demo.commuvent.app`
-
-1. **Do:** Open a completed event (e.g. *Intro to LLM Agents*) →
-   scroll to **Gallery** → **Upload photo** → pick any image →
-   submit.
-   **Expect:** Photo appears in your "Pending" tray with a "Pending
-   approval" notice; it does **not** show on the public gallery yet.
+The gallery + moderation queue is **already populated** by the seed:
+each completed event has 2 approved + 2 pending + 1 rejected photo,
+each from a different attendee.
 
 - **As:** `host.alice@demo.commuvent.app`
 
-2. **Do:** `/dashboard/<hostId>/moderation` → **Gallery queue** tab.
-   **Expect:** The new photo is listed.
-3. **Do:** Click **Approve**.
-   **Expect:** It disappears from the queue.
-4. **Do:** Open the public event page in another tab.
-   **Expect:** The photo now renders in the gallery grid for everyone.
+1. **Do:** Sign in → `/dashboard/<hostId>/moderation` → **Gallery queue**
+   tab.
+   **Expect:** Several pending photos listed (across Acme's events),
+   each labelled with the uploader's name.
+2. **Do:** Click **Approve** on one and **Reject** on another.
+   **Expect:** Both rows disappear from the queue. Toast confirmations.
+3. **Do:** Open the public page of the event whose photo you approved.
+   **Expect:** The newly-approved photo now renders in the public
+   Gallery grid alongside the seed's approved photos.
+
+Optional second pass — upload as an attendee:
+
+- **As:** `att.gina@demo.commuvent.app`
+
+4. **Do:** Open a completed event (e.g. *Intro to LLM Agents*) → scroll
+   to **Gallery** → **Upload photo** → pick any image → submit.
+   **Expect:** Photo appears in your "Pending" tray; not yet public.
+   Sign back in as Alice to approve it from the Gallery queue.
+
 
 ---
 
@@ -209,19 +238,32 @@ another.
 
 ## Flow I — Report + moderation hide
 
-- **As:** `att.henry@demo.commuvent.app`
-
-1. **Do:** Open any event → scroll to the bottom → **Report event** →
-   pick a reason → submit.
-   **Expect:** Toast `Report submitted`.
+The Reports tab is **already populated** by the seed: 3 open reports
+(2 events from `att.henry` / `att.liam`, 1 photo from `att.mia`) and
+2 historical reports (1 hidden event by `att.noah`, 1 dismissed photo
+by `att.jack`).
 
 - **As:** `host.alice@demo.commuvent.app`
 
-2. **Do:** `/dashboard/<hostId>/moderation` → **Reports** tab.
-   **Expect:** The new report is listed with reason and reporter.
-3. **Do:** Click **Hide**.
-   **Expect:** Confirmation dialog → confirm → row updates to
-   `hidden`. The reported item is removed from public listings.
+1. **Do:** `/dashboard/<hostId>/moderation` → **Reports** tab.
+   **Expect:** A list with mixed `open` / `hidden` / `dismissed`
+   statuses, each showing reason, reporter and target.
+2. **Do:** On an `open` event report click **Hide** → confirm.
+   **Expect:** Status flips to `hidden`. Open the reported event in a
+   private window — it no longer surfaces in public listings.
+3. **Do:** On an `open` photo report click **Hide** (rejects the photo)
+   or **Dismiss**.
+   **Expect:** Status updates accordingly; if hidden, the photo
+   disappears from the public gallery.
+
+Optional second pass — file a fresh report:
+
+- **As:** `att.henry@demo.commuvent.app`
+
+4. **Do:** Open any event → scroll to the bottom → **Report event** →
+   pick a reason → submit.
+   **Expect:** Toast `Report submitted`. Switch back to Alice's
+   Reports tab — the new entry appears as `open`.
 
 ---
 

@@ -321,18 +321,43 @@ Deno.serve(async (req) => {
 
     // ---- FEEDBACK + GALLERY for completed events ----
     console.log("seed: feedback + gallery");
-    let feedbackCount = 0, photoCount = 0;
+    let feedbackCount = 0;
+    let photosApproved = 0, photosPending = 0, photosRejected = 0;
+    const approvedPhotos: { id: string; event_id: string }[] = [];
     const feedbackComments = [
       "Loved it! Great energy and learned a ton.",
       "Well organized, will come again.",
       "Excellent host and venue. Top notch.",
       "Fantastic — exceeded expectations.",
     ];
+
+    // helper to upload + insert a gallery photo with explicit final status
+    async function seedPhoto(eventId: string, userId: string, suffix: string, srcIdx: number, finalStatus: "approved" | "pending" | "rejected") {
+      const path = `event-${eventId}/${suffix}.jpg`;
+      try { await upload("gallery", path, IMG.gallery[srcIdx % IMG.gallery.length]); }
+      catch (e) { console.warn("gallery upload", e); return null; }
+      const { data: row, error } = await db.from("gallery_photos").insert({
+        event_id: eventId, user_id: userId, storage_path: path,
+      }).select("id").single();
+      if (error || !row) { console.warn("gallery insert", error?.message); return null; }
+      // trigger forces 'approved' if uploader is a host member, else 'pending'
+      // Force the desired final status with an update (service role bypasses RLS).
+      if (finalStatus !== "approved" || row) {
+        await db.from("gallery_photos").update({ status: finalStatus }).eq("id", row.id);
+      }
+      return row.id as string;
+    }
+
     for (const ev of events) {
       if (ev.lifecycle !== "completed") continue;
-      const { data: rsvps } = await db.from("rsvps").select("user_id").eq("event_id", ev.id).eq("status", "going").is("cancelled_at", null).limit(3);
+      // pull up to 5 distinct attendees who RSVPd "going"
+      const { data: rsvps } = await db.from("rsvps")
+        .select("user_id")
+        .eq("event_id", ev.id).eq("status", "going").is("cancelled_at", null)
+        .limit(5);
       const attendeeUserIds = (rsvps ?? []).map(r => r.user_id);
-      // feedback
+
+      // feedback (2 entries from first 2 attendees)
       for (let i = 0; i < Math.min(2, attendeeUserIds.length); i++) {
         const { error } = await db.from("feedback").insert({
           event_id: ev.id, user_id: attendeeUserIds[i],
@@ -341,24 +366,106 @@ Deno.serve(async (req) => {
         });
         if (!error) feedbackCount++;
       }
-      // gallery — upload 2 photos, then approve them
-      for (let i = 0; i < 2 && i < attendeeUserIds.length; i++) {
-        const srcIdx = (ev.hostIdx * 2 + i) % IMG.gallery.length;
-        const path = `event-${ev.id}/photo-${i}.jpg`;
-        try {
-          await upload("gallery", path, IMG.gallery[srcIdx]);
-        } catch (e) { console.warn("gallery upload", e); continue; }
-        const { data: row, error } = await db.from("gallery_photos").insert({
-          event_id: ev.id, user_id: attendeeUserIds[i], storage_path: path,
-        }).select("id").single();
-        if (error || !row) { console.warn("gallery insert", error?.message); continue; }
-        // trigger forced 'pending' → flip to approved
-        await db.from("gallery_photos").update({ status: "approved" }).eq("id", row.id);
-        photoCount++;
+
+      // 5 photos per completed event from up to 5 different attendees:
+      //   2 approved, 2 pending, 1 rejected
+      const slots: { idx: number; status: "approved" | "pending" | "rejected" }[] = [
+        { idx: 0, status: "approved" },
+        { idx: 1, status: "approved" },
+        { idx: 2, status: "pending" },
+        { idx: 3, status: "pending" },
+        { idx: 4, status: "rejected" },
+      ];
+      for (const slot of slots) {
+        const uid = attendeeUserIds[slot.idx];
+        if (!uid) continue;
+        const id = await seedPhoto(
+          ev.id, uid, `photo-${slot.idx}-${slot.status}`,
+          ev.hostIdx * 5 + slot.idx, slot.status,
+        );
+        if (!id) continue;
+        if (slot.status === "approved") { photosApproved++; approvedPhotos.push({ id, event_id: ev.id }); }
+        else if (slot.status === "pending") photosPending++;
+        else photosRejected++;
       }
     }
+
+    // Also seed 1 pending photo on each in-progress event so the moderation queue
+    // is non-empty even before any completed-event interaction.
+    for (const ev of events) {
+      if (ev.lifecycle !== "in_progress") continue;
+      const { data: rsvps } = await db.from("rsvps")
+        .select("user_id").eq("event_id", ev.id).eq("status", "going").is("cancelled_at", null).limit(1);
+      const uid = rsvps?.[0]?.user_id;
+      if (!uid) continue;
+      const id = await seedPhoto(ev.id, uid, "photo-live-pending", ev.hostIdx + 1, "pending");
+      if (id) photosPending++;
+    }
+
     summary.feedback = feedbackCount;
-    summary.photos = photoCount;
+    summary.photos_approved = photosApproved;
+    summary.photos_pending = photosPending;
+    summary.photos_rejected = photosRejected;
+
+    // ---- REPORTS in mixed states ----
+    console.log("seed: reports");
+    let reportsOpen = 0, reportsActioned = 0;
+    const reasons = ["Spam", "Inappropriate content", "Misleading info", "Off-topic"];
+    const completedEvents = events.filter(e => e.lifecycle === "completed");
+    const inProgressEvents = events.filter(e => e.lifecycle === "in_progress");
+
+    async function seedReport(targetType: "event" | "photo", targetId: string, reporterEmail: string, reasonIdx: number, status: "open" | "hidden" | "dismissed") {
+      const reporterId = userIds[reporterEmail];
+      if (!reporterId || !targetId) return;
+      const { data, error } = await db.from("reports").insert({
+        target_type: targetType, target_id: targetId,
+        reporter_id: reporterId, reason: reasons[reasonIdx % reasons.length],
+      }).select("id").single();
+      if (error || !data) { console.warn("report insert", error?.message); return; }
+      if (status !== "open") {
+        await db.from("reports").update({ status }).eq("id", data.id);
+        reportsActioned++;
+      } else {
+        reportsOpen++;
+      }
+    }
+
+    // 2 open event reports
+    if (completedEvents[0]) await seedReport("event", completedEvents[0].id, "att.henry@demo.commuvent.app", 0, "open");
+    if (inProgressEvents[0]) await seedReport("event", inProgressEvents[0].id, "att.liam@demo.commuvent.app", 1, "open");
+    // 1 open photo report
+    if (approvedPhotos[0]) await seedReport("photo", approvedPhotos[0].id, "att.mia@demo.commuvent.app", 2, "open");
+    // 1 historical hidden event report
+    if (completedEvents[1]) await seedReport("event", completedEvents[1].id, "att.noah@demo.commuvent.app", 3, "hidden");
+    // 1 historical dismissed photo report
+    if (approvedPhotos[1]) await seedReport("photo", approvedPhotos[1].id, "att.jack@demo.commuvent.app", 0, "dismissed");
+
+    summary.reports_open = reportsOpen;
+    summary.reports_actioned = reportsActioned;
+
+    // ---- NOTIFICATIONS (cosmetic) ----
+    console.log("seed: notifications");
+    let notifs = 0;
+    const aiHack = events.find(e => e.capacity === 4);
+    if (aiHack) {
+      const kateId = userIds["att.kate@demo.commuvent.app"];
+      if (kateId) {
+        const { error } = await db.from("notifications").insert({
+          user_id: kateId, type: "waitlist_added",
+          payload: { event_id: aiHack.id, message: "You're on the waitlist for AI Hack Night (position 1)." },
+        });
+        if (!error) notifs++;
+      }
+    }
+    const ginaId = userIds["att.gina@demo.commuvent.app"];
+    if (ginaId && completedEvents[0]) {
+      const { error } = await db.from("notifications").insert({
+        user_id: ginaId, type: "checked_in",
+        payload: { event_id: completedEvents[0].id, message: "Thanks for checking in!" },
+      });
+      if (!error) notifs++;
+    }
+    summary.notifications = notifs;
 
     return new Response(JSON.stringify({ ok: true, summary }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
