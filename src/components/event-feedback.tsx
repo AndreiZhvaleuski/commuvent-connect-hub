@@ -119,7 +119,18 @@ export function EventFeedback({ eventId, eventEnded }: { eventId: string; eventE
                 </button>
               ))}
             </div>
-            <Textarea placeholder="Optional comment" value={comment} onChange={(e) => setComment(e.target.value)} rows={3} />
+            <div className="space-y-1">
+              <Textarea
+                placeholder="Optional comment"
+                value={comment}
+                onChange={(e) => setComment(e.target.value.slice(0, 1000))}
+                rows={3}
+                maxLength={1000}
+              />
+              <p className={`text-xs text-right ${comment.length >= 1000 ? "text-destructive" : "text-muted-foreground"}`}>
+                {comment.length}/1000
+              </p>
+            </div>
             <Button onClick={submit} disabled={busy || rating < 1}>Submit feedback</Button>
           </div>
         )}
