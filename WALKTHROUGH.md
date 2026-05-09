@@ -7,8 +7,11 @@ Click-by-click guide covering every graded flow on the live demo:
 > hosting service may be blocked in some countries.
 
 > Each flow ends with a **Recording** section embedding a short iPhone
-> screen recording (`videos/flow-<letter>.mp4`). Convert iPhone `.mov`
-> files to `.mp4` (H.264 + AAC) so GitHub plays them inline.
+> screen recording served from the deployed site
+> (`https://commuvent-connect-hub.lovable.app/videos/flow-<letter>.mp4`).
+> Files live in `public/videos/` in the repo. Use absolute URLs so the
+> `<video>` tag renders inline on GitHub. Convert iPhone `.mov` to
+> `.mp4` (H.264 + AAC) for inline playback.
 
 > **Demo password (all accounts):** `Password123!`
 
