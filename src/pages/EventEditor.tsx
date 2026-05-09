@@ -17,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { MarkdownEditor } from "@/components/markdown-editor";
+import { Textarea } from "@/components/ui/textarea";
 import { ImageUpload } from "@/components/image-upload";
 import { TimezonePicker } from "@/components/timezone-picker";
 import { DateTimePicker } from "@/components/datetime-picker";
