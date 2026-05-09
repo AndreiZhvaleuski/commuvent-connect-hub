@@ -283,12 +283,12 @@ Open a second **private / incognito** window for Window 2.
    *Expect:* you land on `/dashboard/<hostId>`; each event card exposes
    only a **Check-in** action (no Manage / Edit / RSVPs / New event /
    Moderation).
-8. On the **Upcoming** tab, click **Check-in** on the
+9. On the **Upcoming** tab, click **Check-in** on the
    **Live: TypeScript Performance** card (in-progress).
    *Expect:* you land on `/checkin/<eventId>` with three live counters
    labelled **Going / Waitlist / Checked-in** (Going includes
    `/ capacity`).
-9. Leave this window open.
+10. Leave this window open.
 
 ### Window 2 — Attendee Gina (private / incognito window)
 
