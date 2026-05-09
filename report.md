@@ -1,141 +1,103 @@
 # Commuvent — build report
 
-## Overview
-
-Commuvent is a lightweight community event hosting & attendance platform
-built end-to-end during a short MVP time-box on Lovable. It covers the
-full lifecycle: a host self-registers, publishes an event, attendees
-RSVP and receive a QR ticket, a checker verifies codes at the door,
-and the host exports attendance and reviews post-event feedback,
-photos and reports.
-
-The full reviewer-facing flow is documented in
+Commuvent is a community event platform: hosts publish events, attendees
+RSVP and get a QR ticket, checkers verify codes at the door, hosts export
+attendance and review feedback. Built end-to-end on Lovable during a short
+MVP time-box. The reviewer-facing click-through lives in
 [WALKTHROUGH.md](./WALKTHROUGH.md).
 
----
+## Tools and techniques
 
-## Tools & techniques
-
-- **Lovable** as the AI-pair build environment, generating React
-  components, routes, edge functions and SQL migrations from chat
-  iterations.
+- **Lovable** as the AI build environment. GitHub and Supabase connected
+  early, so all source, edge functions, migrations and config are
+  versioned in this repo from the first commit.
 - **Frontend:** React 18 + Vite 5 + TypeScript 5 + Tailwind 3 +
-  shadcn/ui, with `framer-motion` for hero motion and
-  `@phosphor-icons/react` for iconography.
-- **Backend:** Supabase end-to-end — Postgres with strict RLS, Auth
-  (email/password + magic link), Storage (`event-covers`,
-  `host-logos`, `gallery`), Edge Functions for privileged writes, and
-  Realtime for live RSVP / check-in / notification updates.
-- **Notable libraries:** `qrcode.react` for ticket QR generation,
-  `ics` for calendar export, custom CSV builder with UTF-8 BOM and
-  formula-injection guard.
-- **One-shot demo seed:** an idempotent `seed_demo` edge function
-  (guarded by `SEED_SECRET`) wipes auth users + tables + storage
-  buckets and re-seeds 3 hosts × 3 events with attendees, RSVPs,
-  check-ins, photos and feedback — used both for the deployed demo and
-  for local resets.
-
----
-
-## Architecture decisions
-
-- **RLS-first access control with `SECURITY DEFINER` helpers.** All
-  cross-table membership checks live in stable security-definer
-  functions (`is_host_member`, `has_host_role`, `is_event_host_member`,
-  `is_report_target_host_member`, `can_view_profile`). This avoids the
-  classic recursive-RLS pitfall where a policy on table A queries
-  table B which queries table A.
-- **Privileged writes go through Edge Functions, not the client.**
-  `rsvp_create`, `rsvp_cancel`, `event_set_capacity`,
-  `check_in_by_code`, `check_in_undo` all run with the service role
-  internally. The corresponding tables (`check_ins`, `rsvps`) have
-  **no client-facing INSERT/UPDATE/DELETE policies at all** — the
-  edge functions are the only write path. This makes capacity
-  enforcement, FIFO waitlist promotion, duplicate check-in prevention
-  and the "no check-in after end_at" rule authoritative on the server.
-- **Validation triggers, not CHECK constraints**, for time-based
-  rules (e.g. `end_at > start_at + 30 min`) so they remain mutable
-  and safely restorable.
-- **Realtime channels** on `rsvps`, `check_ins` and `notifications`
-  with `replica identity full` — the check-in page and tickets page
-  update without polling, and waitlist promotions notify the affected
-  attendee instantly.
-- **CSV export client-side** with three concrete guarantees: UTF-8
-  BOM (so Excel reads it as Unicode), a formula-injection guard that
-  prefixes `=`, `+`, `-`, `@` with `'`, and ISO-8601 timestamps in
-  the event's IANA TZ.
-- **No client mock data, ever.** Every list has a real empty state and
-  a real error state; the seed function is the single source of demo
-  content.
-
----
+  shadcn/ui. `framer-motion` for one hero animation,
+  `@phosphor-icons/react` for icons.
+- **Backend:** Supabase — Postgres with RLS, Auth (email/password +
+  magic link), Storage (`event-covers`, `host-logos`, `gallery`), Edge
+  Functions for privileged writes, Realtime for live RSVP / check-in /
+  notifications.
+- **Notable libs:** `qrcode.react` for tickets, `ics` for calendar
+  export, a small CSV builder with UTF-8 BOM and formula-injection guard.
+- **Workflow:** prompt one feature at a time, review the diff, iterate.
 
 ## What worked
 
-- **Lovable iteration speed.** Going from a SQL schema sketch to a
-  working dashboard with realtime counters took an evening. Schema
-  changes flow through one tool call and the generated types update
-  automatically.
-- **shadcn/ui primitives** kept the visual language consistent across
-  ~20 pages without bespoke component work.
-- **Edge Functions as the only write path** for sensitive tables made
-  the security review trivial — all the rules live in one place per
-  operation, instead of being spread across multiple RLS policies.
-- **The `seed_demo` function** turned demo upkeep into a one-click
-  reset right before submission. Reviewers see fresh "in-progress"
-  and "upcoming" timestamps without us hand-editing rows.
-- **The `useAsyncResource` hook** (debounce + keep-previous-data)
-  made filtered list pages (Explore, My Events) feel snappy even
-  while waiting for new query results.
+**Going feature by feature.** I started by asking Claude Sonnet 4.6 to
+draft one big Lovable prompt covering the whole MVP. The result compiled
+but had missing logic, wrong logic and visible UI issues. Switching to
+small sequential prompts — one screen, one rule, one migration at a
+time — produced something I could actually read and trust.
 
----
+**Versioning everything early.** Connecting GitHub and Supabase in the
+first session meant migrations and edge functions landed as files I
+could diff. When an RLS policy or a seed broke, I could see exactly
+what had changed.
 
-## What didn't / trade-offs
+**shadcn/ui** kept ~20 pages visually consistent without me touching
+component internals.
 
-- **Markdown editor removed late.** We initially shipped Tiptap +
-  `react-markdown` for event and host descriptions. After auditing
-  the XSS surface and considering MVP scope, we ripped it out
-  (~5 packages, two components, sanitisation logic in `og-preview`)
-  in favour of a plain `<textarea>` + `whitespace-pre-line`.
-- **Paid events stubbed.** The Free/Paid toggle is in the editor with
-  Paid disabled and a "Coming soon" tooltip — payment integration is
-  out of MVP scope.
-- **Location filter is mode-only.** We render Any / Offline / Online
-  chips and a free-text search across `venue_address`. There is no
-  city/region dropdown because there is no normalised city column on
-  events; adding one is a future migration.
-- **No QR camera scanning.** The spec explicitly allows manual entry,
-  and a code input keeps the check-in flow keyboard-friendly and
-  works on every device without permission prompts.
-- **Email notifications not wired.** Waitlist promotions and other
-  state changes show up as in-app notifications + realtime UI updates
-  only.
-- **Shared demo password printed in-UI.** `Password123!` is shown on
-  the `/sign-in` demo panel. Acceptable for a review-only deployment;
-  it would be removed before any real-world launch.
-- **No soft-delete.** Reports hide rather than delete content. We
-  judged that adequate for the MVP review queue.
+**Edge functions as the only write path** for sensitive tables
+(`rsvps`, `check_ins`, capacity changes). Those tables have no
+client-facing INSERT/UPDATE/DELETE policies at all — the rules
+(capacity, FIFO waitlist promotion, no-check-in-after-end) live in one
+place per operation instead of being spread across multiple RLS
+policies.
 
----
+## What didn't work / trade-offs
+
+**The mega-prompt approach.** Useful as a skeleton, useless as a
+deliverable. Lovable wants conversation, not a spec dump.
+
+**SEO / social previews — the hardest part of the build.** The brief
+requires Open Graph metadata on event and host pages. Lovable's first
+instinct was a Next.js / SSG approach, which doesn't apply here — the
+app is a client-rendered Vite SPA on Lovable hosting, so meta tags
+injected at runtime are invisible to social scrapers. The workaround:
+an `og-preview` Supabase edge function that branches on the request's
+`Accept` header. Real browsers get a 302 to the SPA route; scrapers
+(Facebook, Twitter, Slack, LinkedIn, WhatsApp, opengraph.xyz, curl)
+get a small HTML document with OG tags and JSON-LD. Not elegant, but
+it ships the requirement without leaving Lovable hosting.
+
+**Markdown editor removed late.** Tiptap + `react-markdown` were in for
+a while. After looking at the XSS surface against MVP scope I ripped
+them out in favour of a plain textarea + `whitespace-pre-line`.
+
+**Stubbed:** paid events (toggle disabled with a "coming soon" note);
+QR camera scanning (manual code entry only — the spec allows it);
+email notifications (in-app + realtime only); the shared demo password
+printed on `/sign-in` (fine for a review-only deploy, would go before
+any real launch).
 
 ## Notable decisions
 
-- **Profiles vs auth.users.** All user-facing metadata lives in
-  `public.profiles` keyed by `auth.uid()` and populated by a
-  `handle_new_user` trigger. We never reference `auth.users` from the
-  client.
-- **Roles via `host_members`, not on the user.** Users are members of
-  hosts with a role (`host` or `checker`). This keeps role checks
-  scoped per-host and lets one user be a host of one org and a
-  checker of another.
-- **Visibility separated from status.** `visibility` (`public` |
-  `unlisted`) is independent from `status` (`draft` | `published`).
-  Unlisted-published events render publicly only via direct link;
-  drafts are invisible to non-members.
+- **RLS with `SECURITY DEFINER` helpers** (`is_host_member`,
+  `has_host_role`, `is_event_host_member`, …) to avoid recursive-policy
+  loops where a policy on table A queries table B which queries table A.
+- **Roles live in `host_members`, not on the user.** The same person
+  can be a host of one org and a checker of another.
+- **Visibility is separate from status.** `visibility`
+  (`public` / `unlisted`) is independent from `status`
+  (`draft` / `published`). Unlisted-published events render publicly
+  only via direct link.
 - **Time zones are first-class.** Every timestamp is `timestamptz`,
-  every event carries an IANA `time_zone`, the UI displays in the
-  event's TZ with a tooltip showing the viewer's local equivalent,
-  and CSV exports use the event's TZ offset.
-- **Storage policies mirror RLS.** All three buckets are public-read;
-  inserts require auth; gallery rows are forced to `pending` by a
-  trigger, regardless of what the client tries to insert.
+  every event carries an IANA `time_zone`, the UI shows event TZ with
+  a tooltip for the viewer's local equivalent, CSV export uses the
+  event's TZ offset.
+- **Storage policies mirror RLS.** Public-read buckets, auth-required
+  inserts, gallery rows forced to `pending` by a trigger regardless of
+  what the client sends.
+- **Idempotent `seed_demo` edge function** guarded by `SEED_SECRET`.
+  One source of truth for both the deployed demo and local resets.
+
+## Reflection
+
+I didn't write a line of code for this app and it works. That said, I
+think the result would be tighter with more direct control over the
+output — something closer to Claude Code, where I edit alongside the
+model instead of describing every change in chat. Lovable's strength is
+speed from zero to a working, deployed app; its weakness, for me, is
+the gap between "it generated something" and "I understand and trust
+every line." For an MVP under time pressure, the trade was worth it.
