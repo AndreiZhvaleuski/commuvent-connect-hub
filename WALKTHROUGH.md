@@ -67,6 +67,19 @@ in-progress event has 1 pending photo.
 12. Click the **AI Hack Night** card.
 13. Click **RSVP**.
     *Expect:* redirect to `/sign-in?redirect=/e/<id>`.
+14. On the sign-in card, click the **user-icon** button to open the
+    **Demo accounts** panel.
+15. Click the **Attendees** tab.
+16. Click the row for `att.gina@demo.commuvent.app` to auto-fill, then
+    click **Sign in**.
+    *Expect:* you bounce back to the **AI Hack Night** event page.
+17. Click **RSVP** again.
+18. In the confirmation dialog, click **Confirm**.
+    *Expect:* toast `You're going`; the header pill shows **Going**.
+19. Click **My Tickets** in the top nav.
+    *Expect:* a ticket card for **AI Hack Night** with QR code and
+    a 6-character ticket code.
+20. Click your avatar (top-right) → **Sign out**.
 
 ### Recording
 
