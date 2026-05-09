@@ -92,7 +92,8 @@ in-progress event has 1 pending photo.
 10. In the Filters card, click **Clear filters**.
 11. In the **Search** field, type `AI Hack`.
 12. Click the **AI Hack Night** card.
-13. Click **RSVP**.
+13. Click **Join waitlist** (the event is fully booked from the seed,
+    so guests see Join waitlist instead of RSVP).
     *Expect:* redirect to `/sign-in?redirect=/e/<id>`.
 14. On the sign-in card, click the **user-icon** button to open the
     **Demo accounts** panel.
@@ -102,15 +103,12 @@ in-progress event has 1 pending photo.
     *Expect:* you bounce back to the **AI Hack Night** event page.
 17. *Expect:* the **AI Hack Night** event page shows the **Going**
     pill in the header — `att.gina` is already seeded as going to this
-    event, so the page reflects that state instead of showing an RSVP
-    button.
+    event, so the page reflects that state instead of showing the
+    Join waitlist button.
 18. Click **My Tickets** in the top nav.
     *Expect:* a ticket card for **AI Hack Night** with QR code and
     a 6-character ticket code.
 19. Click your avatar (top-right) → **Sign out**.
-
-> Do **not** click *Cancel RSVP* here — Gina's RSVP is reused by
-> Flows D and E.
 
 ### Recording
 
@@ -161,8 +159,9 @@ https://github.com/user-attachments/assets/4011a622-8878-431f-a2aa-112cfd69f2aa
 
 ## Flow C — Ticket, calendar & cancel/re-RSVP (Attendee)
 
-We use `att.henry` and **Farm-to-Table Dinner** here so we don't disturb
-Gina's RSVP (needed by Flows D and E) or the AI Hack Night waitlist.
+We use `att.henry` and **Farm-to-Table Dinner** so this flow stays
+self-contained and doesn't touch the AI Hack Night waitlist used in
+Flow D.
 
 1. Click the **Commuvent** header/logo (top-left) to open the main page.
 2. If a user avatar shows in the top-right, click it → **Sign out**.

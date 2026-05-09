@@ -1,28 +1,55 @@
 ## Goal
 
-Let any reviewer reset the demo to the documented baseline using the existing **Re-seed demo data** button on the Sign-in page, without us changing the UI or weakening the edge-function check. The `SEED_SECRET` value will be published in `WALKTHROUGH.md` for them to paste.
+Fix three doc-only inconsistencies in `WALKTHROUGH.md` left over from the pre-reseed model and the original AI Hack Night choice in Flow A.
+
+## Findings
+
+### 1. Flow A step 13 — wrong button label
+
+`AI Hack Night` (capacity 4) is fully booked by the seed
+(Gina/Henry/Ivy/Jack going). The EventPage shows **"Join waitlist"**
+for a logged-out guest, not **"RSVP"**. After sign-in, Gina is
+already going, so the button is replaced by the "You're going"
+panel — which step 17 already describes correctly.
+
+### 2. Flow A lines 112–113 — stale cross-reference
+
+> *"Do not click Cancel RSVP here — Gina's RSVP is reused by Flows D and E."*
+
+- Flow E doesn't reuse the AI Hack Night RSVP at all (it uses
+  Gina's seeded RSVP for **Live: TypeScript Performance**).
+- Re-seeding is now required before Flow D, so any leftover state
+  from Flow A is wiped automatically.
+
+### 3. Flow C lines 164–165 — stale cross-reference
+
+> *"We use `att.henry` and Farm-to-Table Dinner here so we don't
+> disturb Gina's RSVP (needed by Flows D and E) or the AI Hack
+> Night waitlist."*
+
+Same problem as #2 — the dependency is moot after re-seeding.
+Henry/Farm-to-Table is still a fine choice (keeps Flow C
+self-contained), the *reason* just needs rewording.
 
 ## Steps
 
-1. **Reseed now (one-time).**  
-   Trigger `seed_demo` to restore the baseline so the next recording works. Verify with a quick `rsvps` query that **AI Hack Night** shows:
-   - Going: Gina, Henry, Ivy, Jack
-   - Waitlist: Kate (1), Liam (2), Mia (3), Noah (4)
+1. **Flow A step 13:** change *"Click RSVP"* to *"Click Join waitlist"*
+   (event is full from the seed). Keep the rest of step 13 unchanged.
 
-2. **Document the reset in `WALKTHROUGH.md`.**  
-   Add a short section near the top (right after the seeded-data table), titled something like **"Reset the demo before each session"**, that:
-   - Tells the reviewer to open Sign-in → the user-icon button → **Demo accounts** dialog → **Re-seed demo data** section.
-   - Provides the `SEED_SECRET` value to paste into the input.
-   - Notes that Flow D in particular consumes the AI Hack Night waitlist baseline and isn't idempotent, so reseed before re-running it.
+2. **Flow A lines 112–113:** drop the warning. Flow D's re-seed
+   callout is the canonical guard now.
 
-3. **Add a per-flow precondition note.**  
-   At the top of Flow D (and Flow E if it depends on Gina's seed RSVP), add a one-liner: *"Re-seed before running this flow if you've already played it once."* Cross-link to the reset section.
+3. **Flow C lines 164–165:** reword to:
+   *"We use `att.henry` and Farm-to-Table Dinner so this flow stays
+   self-contained and doesn't touch the AI Hack Night waitlist used
+   in Flow D."*
+
+4. **Sweep once more** for any other "Flow X needs / reuses..."
+   cross-refs and fix in the same pass.
 
 ## Out of scope
 
-- No code changes (UI, edge function, or schema).
-- Not changing `rsvp_create`'s UPDATE-on-re-RSVP behavior — separate concern.
-
-## Risk
-
-Anyone with the published `WALKTHROUGH.md` can wipe demo data. That's acceptable for this project (synthetic data, fully rebuildable in ~10s). If you'd rather not publish the secret, share `WALKTHROUGH.md` privately or replace the secret value with a placeholder like `<ask the project owner>`.
+- No code changes.
+- No flow restructuring beyond the wording fixes above.
+- Recordings stay as-is (the "Join waitlist" wording fix matches
+  what the existing recording actually shows).
