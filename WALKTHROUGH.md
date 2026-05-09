@@ -118,21 +118,26 @@ Sign out first if needed (or use a private window).
 
 ## Flow D — Waitlist + automatic FIFO promotion
 
-This proves capacity enforcement and realtime promotion. Use a private
-window so you can stay signed in as one user while opening the app as
-another.
+The seed already over-subscribes **AI Hack Night** (capacity = 4):
+`att.gina/henry/ivy/jack` are **going**, `att.kate/liam/mia/noah` sit
+on the waitlist. Use two browsers (or one normal + one private window)
+so two users stay signed in side-by-side.
 
-1. RSVP **AI Hack Night** as each of these in turn (sign in / RSVP /
-   sign out): `att.gina`, `att.henry`, `att.ivy`, `att.jack`.
-   **Expect:** All four show **Going** (capacity = 4).
-2. **As:** `att.kate@demo.commuvent.app` → `/explore` → AI Hack Night
-   → **RSVP**.
-   **Expect:** Status becomes **Waitlist · position 1**.
-3. **As:** `att.gina@…` → `/tickets` → **Cancel RSVP** for AI Hack Night.
-4. **As:** `att.kate@…` → `/tickets`.
-   **Expect:** Status flipped to **Going** automatically (no reload
-   needed — pushed via realtime). The bell icon in the header shows an
-   unread notification "You're off the waitlist".
+1. **As:** `att.kate@demo.commuvent.app` (private window) → sign in →
+   `/tickets`.
+   **Expect:** A waitlist card for **AI Hack Night** showing
+   **Waitlist · position 1**. No QR ticket yet. The bell icon in the
+   header already shows an unread notification *"You're on the waitlist
+   for AI Hack Night"*.
+2. **As:** `att.gina@demo.commuvent.app` (other window) → sign in →
+   `/tickets` → on the **AI Hack Night** ticket click **Cancel RSVP**
+   → confirm.
+   **Expect:** Toast `RSVP cancelled`; ticket disappears.
+3. Switch back to **Kate's** window — do **not** reload.
+   **Expect:** The waitlist card flips to a real **Going** ticket with
+   a QR code, automatically (pushed via Realtime). A new unread
+   notification appears in the bell icon.
+
 
 ---
 
