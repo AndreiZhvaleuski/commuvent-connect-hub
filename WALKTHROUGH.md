@@ -525,7 +525,7 @@ Open a second **private / incognito** window for Window 2.
 18. Paste the copied invite URL into the address bar and press Enter.
     *Expect:* an invite preview showing the host name, logo and role.
 19. Click **Accept**.
-    *Expect:* redirect to `/dashboard`; **Acme Tech Talks** now
+    *Expect:* redirect to `/dashboard` for a given host; **Acme Tech Talks** now
     appears for Noah with **Checker** scope.
 20. In **both** windows, click the avatar (top-right) → **Sign out**.
 
