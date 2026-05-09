@@ -14,8 +14,33 @@ Click-by-click guide covering every graded flow on the live demo:
 > **Demo password (all accounts):** `Password123!`
 
 > **Run flows in order (A → K).** Several flows rely on the pristine
-> seed state (especially Flow D's waitlist). If you skip ahead and
-> something looks off, re-run the `seed_demo` edge function to reset.
+> seed state (especially Flow D's waitlist). If you skip ahead or
+> replay a flow, **re-seed first** (instructions below).
+
+---
+
+## Reset the demo before each session
+
+Several flows are **not idempotent** — Flow D in particular consumes the
+**AI Hack Night** waitlist baseline (Gina cancels → Kate auto-promotes
+from the waitlist). Replay it without resetting and the starting state
+will be wrong.
+
+To restore the documented baseline at any time:
+
+1. Go to **Sign in** (top-right of the site).
+2. Click the **user-icon** button on the sign-in card to open the
+   **Demo accounts** dialog.
+3. Scroll to the **Re-seed demo data** section at the bottom.
+4. Paste the seed secret into the input:
+   ```
+   SEED_SECRET = <PASTE_SECRET_HERE>
+   ```
+5. Click **Re-seed demo data**. Wait ~20–30s for the toast confirming
+   the rebuild.
+
+The reseed wipes ALL data, auth users, and storage, then rebuilds the
+deterministic dataset described above. Safe to run anytime.
 
 ---
 
