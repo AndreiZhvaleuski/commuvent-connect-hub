@@ -34,7 +34,7 @@ To restore the documented baseline at any time:
 3. Scroll to the **Re-seed demo data** section at the bottom.
 4. Paste the seed secret into the input:
    ```
-   SEED_SECRET = <PASTE_SECRET_HERE>
+   SEED_SECRET = XEDa7^RBCUmdFPfg7)nxeTdz8Ek6d4>K6:u)P.<PtM<:70B#CmWb>4aaR34w9Y[
    ```
 5. Click **Re-seed demo data**. Wait ~20–30s for the toast confirming
    the rebuild.
