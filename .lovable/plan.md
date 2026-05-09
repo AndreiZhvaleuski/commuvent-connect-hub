@@ -1,20 +1,30 @@
-## Fix: hiding a reported event
+## Goal
+Harden the `feedback` table with DB-level constraints and surface clear, friendly errors in the UI when a constraint is violated.
 
-### Problem
-The Hide action on event reports tries to set `visibility = 'private'`, but the `events_validate` trigger only allows `public` or `unlisted`, so the update is rejected.
+## Database migration
+Add to `public.feedback`:
+1. `CHECK (rating BETWEEN 1 AND 5)` — constraint `feedback_rating_range`
+2. `UNIQUE (event_id, user_id)` — constraint `feedback_event_user_unique` (also de-dupes any existing duplicates first, keeping the earliest row)
+3. `CHECK (comment IS NULL OR char_length(comment) <= 1000)` — constraint `feedback_comment_length`
 
-### Approach
-Drop the `visibility` change entirely. Setting `status = 'draft'` is enough — the `events_select_public` RLS policy requires `status = 'published'` for the public/unlisted view paths, so a draft event becomes invisible to non-host members. No migration needed.
+Pre-migration cleanup:
+- Delete duplicate feedback rows keeping the oldest per `(event_id, user_id)`.
+- Truncate any existing comments longer than 1000 chars (or fail loudly — will choose truncate to avoid migration failure).
 
-### Changes (single file: `src/pages/Moderation.tsx`)
+## Frontend changes (`src/components/event-feedback.tsx`)
+1. **Comment length cap (1000 chars):**
+   - Add `maxLength={1000}` to the `<Textarea>`.
+   - Show a live counter `{comment.length}/1000` under the textarea, muted, turning destructive when at limit.
 
-1. In `confirmResolve`, when `report.target_type === 'event'` and the action is `hide`:
-   - Update the event with `{ status: 'draft' }` only (remove `visibility: 'private'`).
-2. Update the confirmation dialog description for hiding an event to reflect the new behavior:
-   - From: "reverted to a private draft and removed from public listings"
-   - To: "reverted to a draft and removed from public listings. The host can republish it later."
+2. **Friendly error mapping on submit:**
+   - Inspect Supabase error `code` / `message`:
+     - `23505` (unique_violation) → toast: "You've already submitted feedback for this event." then reload to show their existing entry.
+     - `23514` (check_violation) on rating → toast: "Rating must be between 1 and 5 stars."
+     - `23514` on comment → toast: "Comment must be 1000 characters or less."
+     - Fallback → existing generic message.
 
-### Out of scope
-- No DB migration.
-- Photo hide flow is unchanged (still sets `gallery_photos.status = 'rejected'`).
-- No RLS changes — existing policies already hide drafts from the public.
+3. **Client-side guard for rating** already exists (1–5 buttons + `rating < 1` disabled); no change needed beyond the new server-side error mapping.
+
+## Out of scope
+- No changes to RLS policies, the moderation page, or other components.
+- No schema changes beyond the three constraints.
