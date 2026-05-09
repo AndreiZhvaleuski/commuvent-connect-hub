@@ -345,7 +345,7 @@ export default function Tickets() {
   );
 }
 
-function TicketCard({ row, qr, onCancel, pastView, hidden, onToggleHidden }: { row: Row; qr?: string; onCancel: () => void; pastView?: boolean; hidden?: boolean; onToggleHidden?: () => void }) {
+function TicketCard({ row, qr, onCancel, pastView, hidden, onToggleHidden, promoted, onAcknowledgePromotion }: { row: Row; qr?: string; onCancel: () => void; pastView?: boolean; hidden?: boolean; onToggleHidden?: () => void; promoted?: boolean; onAcknowledgePromotion?: () => void }) {
   const e = row.events;
   if (!e) return null;
   const checkedIn = (row.check_ins ?? []).some((c) => !c.undone);
