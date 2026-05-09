@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
     if (!m) return json({ error: "forbidden" }, 403);
 
     const ended = new Date(ev.end_at).getTime() < Date.now();
-    if (ended && m.role !== "host") return json({ ok: false, error: "event_ended" });
+    if (ended) return json({ ok: false, error: "event_ended" });
 
     const { data: last } = await db.from("check_ins").select("*").eq("event_id", event_id).eq("undone", false).order("checked_in_at", { ascending: false }).limit(1).maybeSingle();
     if (!last) return json({ ok: false, error: "nothing_to_undo" });
