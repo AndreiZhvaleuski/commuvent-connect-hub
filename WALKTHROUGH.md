@@ -12,6 +12,10 @@ Click-by-click guide covering every graded flow on the live demo:
 
 > **Demo password (all accounts):** `Password123!`
 
+> **Run flows in order (A → K).** Several flows rely on the pristine
+> seed state (especially Flow D's waitlist). If you skip ahead and
+> something looks off, re-run the `seed_demo` edge function to reset.
+
 ---
 
 ## Seeded data this walkthrough relies on
