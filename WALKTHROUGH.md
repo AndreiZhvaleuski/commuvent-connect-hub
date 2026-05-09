@@ -501,12 +501,3 @@ Open a second **private / incognito** window for Window 2.
 11. Click **Clear filters**.
     *Expect:* the full list returns.
 12. Click your avatar (top-right) → **Sign out**.
-
----
-
-## Done
-
-If every flow above produced the expected outcome, the MVP requirements
-(publishing, discovery, RSVP, tickets, waitlist + FIFO, roles, host
-dashboard with stats + CSV, check-in with undo, gallery moderation,
-post-event feedback, reports, invites, My Events) are all covered.
