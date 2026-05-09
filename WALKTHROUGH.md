@@ -173,6 +173,10 @@ Gina's RSVP (needed by Flows D and E) or the AI Hack Night waitlist.
     QR code.
 18. Click your avatar (top-right) → **Sign out**.
 
+### Recording
+
+https://github.com/user-attachments/assets/543285b0-4ad4-4515-99c4-d1adc87066e4
+
 ---
 
 ## Flow D — Waitlist + automatic FIFO promotion (two windows)
