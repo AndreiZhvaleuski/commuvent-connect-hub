@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
     if (!m) return json({ error: "forbidden" }, 403);
 
     const ended = new Date(ev.end_at).getTime() < Date.now();
-    if (ended && m.role !== "host") return json({ status: "event_ended" });
+    if (ended) return json({ status: "event_ended" });
 
     const { data: rsvp } = await db.from("rsvps").select("*").eq("code", code.toUpperCase()).maybeSingle();
     if (!rsvp) return json({ status: "not_found" });
