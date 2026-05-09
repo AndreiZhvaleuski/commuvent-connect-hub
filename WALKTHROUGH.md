@@ -444,7 +444,7 @@ The gallery + moderation queue is **already populated** by the seed.
 
 ## Flow I — Report + moderation hide
 
-The Reports tab is **already populated** by the seed.
+The Reports list is **already populated** by the seed.
 
 ### Part 1 — Host hides a report (`host.alice`)
 
@@ -457,12 +457,15 @@ The Reports tab is **already populated** by the seed.
 6. Click the row for `host.alice@demo.commuvent.app` to auto-fill, then
    click **Sign in**.
 7. Click **Dashboard** in the top nav.
-8. Click **Moderation** in the dashboard header.
-9. Click the **Reports** tab.
-   *Expect:* a list with mixed `open` / `hidden` / `dismissed` rows.
-10. On the first **open** event report, click **Hide**.
+   *Expect:* `/dashboard` shows the Acme host card.
+8. Click the **Acme** host card.
+9. Click **Reports** in the dashboard header.
+   *Expect:* heading **Reports** with an `N open` badge; oldest-first
+   list of open reports only (hidden / dismissed reports are not shown).
+10. On the first **event** report, click **Hide**.
 11. In the confirmation dialog, click **Hide**.
-    *Expect:* status flips to `hidden`.
+    *Expect:* the row disappears and the open count decreases.
+    (Hiding an event reverts it to draft; hiding a photo rejects it.)
 12. Click your avatar (top-right) → **Sign out**.
 
 ### Part 2 — Attendee files a fresh report (`att.henry`)
@@ -478,11 +481,11 @@ The Reports tab is **already populated** by the seed.
 19. Click any event card.
 20. Scroll to the bottom of the event page.
 21. Click **Report event**.
-22. Pick reason `Spam`.
-23. In the comment field, type `Looks like a spam listing.`.
-24. Click **Submit report**.
+22. In the **Reason** textarea, type `Looks like a spam listing.`
+    (must be 5–500 characters).
+23. Click **Submit report**.
     *Expect:* toast `Report submitted`.
-25. Click your avatar (top-right) → **Sign out**.
+24. Click your avatar (top-right) → **Sign out**.
 
 ---
 
