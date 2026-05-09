@@ -238,19 +238,32 @@ Optional second pass — upload as an attendee:
 
 ## Flow I — Report + moderation hide
 
-- **As:** `att.henry@demo.commuvent.app`
-
-1. **Do:** Open any event → scroll to the bottom → **Report event** →
-   pick a reason → submit.
-   **Expect:** Toast `Report submitted`.
+The Reports tab is **already populated** by the seed: 3 open reports
+(2 events from `att.henry` / `att.liam`, 1 photo from `att.mia`) and
+2 historical reports (1 hidden event by `att.noah`, 1 dismissed photo
+by `att.jack`).
 
 - **As:** `host.alice@demo.commuvent.app`
 
-2. **Do:** `/dashboard/<hostId>/moderation` → **Reports** tab.
-   **Expect:** The new report is listed with reason and reporter.
-3. **Do:** Click **Hide**.
-   **Expect:** Confirmation dialog → confirm → row updates to
-   `hidden`. The reported item is removed from public listings.
+1. **Do:** `/dashboard/<hostId>/moderation` → **Reports** tab.
+   **Expect:** A list with mixed `open` / `hidden` / `dismissed`
+   statuses, each showing reason, reporter and target.
+2. **Do:** On an `open` event report click **Hide** → confirm.
+   **Expect:** Status flips to `hidden`. Open the reported event in a
+   private window — it no longer surfaces in public listings.
+3. **Do:** On an `open` photo report click **Hide** (rejects the photo)
+   or **Dismiss**.
+   **Expect:** Status updates accordingly; if hidden, the photo
+   disappears from the public gallery.
+
+Optional second pass — file a fresh report:
+
+- **As:** `att.henry@demo.commuvent.app`
+
+4. **Do:** Open any event → scroll to the bottom → **Report event** →
+   pick a reason → submit.
+   **Expect:** Toast `Report submitted`. Switch back to Alice's
+   Reports tab — the new entry appears as `open`.
 
 ---
 
