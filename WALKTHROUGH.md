@@ -435,9 +435,9 @@ The gallery + moderation queue is **already populated** by the seed.
 14. Click the **Commuvent** header/logo to open the main page.
 15. Click **Explore** → in **Search** type `AI Hack Night` → click the
     card.
-16. Scroll down looking for a Feedback form.
-    *Expect:* **no** feedback form — only an info note that feedback
-    opens after the event ends.
+16. Scroll down looking for a Feedback section.
+    *Expect:* **no Feedback section at all** — the section only renders
+    after the event ends, so it's absent for an in-progress event.
 17. Click your avatar (top-right) → **Sign out**.
 
 ---
