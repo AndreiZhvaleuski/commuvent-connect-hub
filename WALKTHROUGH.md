@@ -263,6 +263,10 @@ Window 2 so the two sessions don't collide.
 
 ## Flow E — Run the door (Checker, two windows)
 
+> **Re-seed first** if you've already played Flow D or this flow —
+> check-ins and Gina's RSVP state are not idempotent.
+> See [Reset the demo before each session](#reset-the-demo-before-each-session).
+
 Open a second **private / incognito** window for Window 2.
 
 ### Window 1 — Checker Dan
