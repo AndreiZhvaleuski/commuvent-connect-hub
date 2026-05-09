@@ -77,13 +77,17 @@ in-progress event has 1 pending photo.
 16. Click the row for `att.gina@demo.commuvent.app` to auto-fill, then
     click **Sign in**.
     *Expect:* you bounce back to the **AI Hack Night** event page.
-17. Click **RSVP** again.
-18. In the confirmation dialog, click **Confirm**.
-    *Expect:* toast `You're going`; the header pill shows **Going**.
-19. Click **My Tickets** in the top nav.
+17. *Expect:* the **AI Hack Night** event page shows the **Going**
+    pill in the header — `att.gina` is already seeded as going to this
+    event, so the page reflects that state instead of showing an RSVP
+    button.
+18. Click **My Tickets** in the top nav.
     *Expect:* a ticket card for **AI Hack Night** with QR code and
     a 6-character ticket code.
-20. Click your avatar (top-right) → **Sign out**.
+19. Click your avatar (top-right) → **Sign out**.
+
+> Do **not** click *Cancel RSVP* here — Gina's RSVP is reused by
+> Flows D and E.
 
 ### Recording
 
