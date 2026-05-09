@@ -159,18 +159,11 @@ Deno.serve(async (req) => {
     console.log("wipe: storage");
     for (const b of ["event-covers", "host-logos", "gallery"]) await emptyBucket(db, b);
 
-    console.log("wipe: tables");
-    const tables = ["check_ins", "feedback", "gallery_photos", "notifications", "reports", "rsvps", "host_invites", "events", "host_members", "hosts", "profiles"];
-    for (const t of tables) {
-      const { error } = await db.from(t).delete().not("created_at", "is", null);
-      // some tables (host_members) have no created_at? all listed do. fallback:
-      if (error) {
-        const { error: e2 } = await db.from(t).delete().gte("created_at", "1970-01-01");
-        if (e2) console.warn("wipe table err", t, e2.message);
-      }
+    console.log("wipe: tables (rpc seed_wipe_all)");
+    {
+      const { error } = await db.rpc("seed_wipe_all");
+      if (error) throw new Error(`seed_wipe_all rpc: ${error.message}`);
     }
-    // host_members: delete all
-    await db.from("host_members").delete().gte("created_at", "1970-01-01");
 
     console.log("wipe: auth users");
     let page = 1;
@@ -270,51 +263,58 @@ Deno.serve(async (req) => {
     }
     summary.events = events.length;
 
-    // ---- SIGN IN ATTENDEES + RSVP via edge function ----
-    console.log("seed: rsvps");
-    const attendeeJwts: Record<string, string> = {};
-    const anonClient = createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: false } });
-    for (const a of ATTENDEES) {
-      const { data, error } = await anonClient.auth.signInWithPassword({ email: a.email, password: PASSWORD });
-      if (error || !data.session) { console.warn("signin", a.email, error?.message); continue; }
-      attendeeJwts[a.email] = data.session.access_token;
+    // ---- RSVPs (direct DB inserts; bypasses edge-function rate limits) ----
+    console.log("seed: rsvps (direct)");
+    let rsvpCount = 0, goingTotal = 0, waitlistTotal = 0;
+    function nano(n = 8) {
+      const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let s = "";
+      for (let i = 0; i < n; i++) s += alphabet[Math.floor(Math.random() * alphabet.length)];
+      return s;
     }
-
-    let rsvpCount = 0;
-    // every attendee RSVPs to every event (over-subscribes the small "AI Hack Night" → waitlist)
     for (const ev of events) {
+      let going = 0;
+      let waitPos = 0;
       for (const a of ATTENDEES) {
-        const jwt = attendeeJwts[a.email];
-        if (!jwt) continue;
-        const r = await callFn("rsvp_create", jwt, { event_id: ev.id });
-        if (r.status === 200) rsvpCount++;
-        else console.warn("rsvp", ev.id, a.email, r.status, r.body);
+        const uid = userIds[a.email];
+        if (!uid) continue;
+        let status: "going" | "waitlist" = "going";
+        let position: number | null = null;
+        if (ev.capacity > 0 && going >= ev.capacity) {
+          status = "waitlist";
+          waitPos += 1;
+          position = waitPos;
+        }
+        const code = nano(8);
+        const { error } = await db.from("rsvps").insert({
+          event_id: ev.id, user_id: uid, status, position, code,
+        });
+        if (error) { console.warn("rsvp insert", ev.id, a.email, error.message); continue; }
+        rsvpCount++;
+        if (status === "going") { going++; goingTotal++; } else waitlistTotal++;
       }
     }
     summary.rsvps = rsvpCount;
+    summary.going = goingTotal;
+    summary.waitlist = waitlistTotal;
 
-    // ---- HOST JWTS ----
-    const hostJwts: string[] = [];
-    for (const h of HOSTS) {
-      const { data } = await anonClient.auth.signInWithPassword({ email: h.email, password: PASSWORD });
-      hostJwts.push(data?.session?.access_token ?? "");
-    }
-
-    // ---- CHECK-INS for completed + in_progress events ----
-    console.log("seed: check-ins");
+    // ---- CHECK-INS (direct inserts) ----
+    console.log("seed: check-ins (direct)");
     let checkinCount = 0;
     for (const ev of events) {
       if (ev.lifecycle === "upcoming") continue;
-      const { data: rsvps } = await db.from("rsvps").select("code, user_id").eq("event_id", ev.id).eq("status", "going").is("cancelled_at", null);
+      const { data: rsvps } = await db.from("rsvps")
+        .select("id, user_id").eq("event_id", ev.id)
+        .eq("status", "going").is("cancelled_at", null);
       const list = rsvps ?? [];
-      // completed → check in ~80%, in_progress → ~30%
       const ratio = ev.lifecycle === "completed" ? 0.85 : 0.35;
       const target = Math.max(1, Math.floor(list.length * ratio));
-      const jwt = hostJwts[ev.hostIdx];
-      if (!jwt) continue;
+      const checker = userIds[HOSTS[ev.hostIdx].email];
       for (let i = 0; i < target && i < list.length; i++) {
-        const r = await callFn("check_in_by_code", jwt, { event_id: ev.id, code: list[i].code });
-        if (r.status === 200) checkinCount++;
+        const { error } = await db.from("check_ins").insert({
+          event_id: ev.id, rsvp_id: list[i].id, checked_in_by: checker,
+        });
+        if (!error) checkinCount++;
       }
     }
     summary.checkins = checkinCount;
