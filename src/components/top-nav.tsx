@@ -168,12 +168,17 @@ export function TopNav() {
                     key={l.to}
                     to={l.to}
                     className={({ isActive }) =>
-                      `rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent ${
+                      `flex items-center justify-between rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent ${
                         isActive ? "bg-accent text-foreground" : "text-muted-foreground"
                       }`
                     }
                   >
-                    {l.label}
+                    <span>{l.label}</span>
+                    {l.to === "/tickets" && unreadPromotions > 0 && (
+                      <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
+                        {unreadPromotions}
+                      </span>
+                    )}
                   </NavLink>
                 ))}
               </nav>
