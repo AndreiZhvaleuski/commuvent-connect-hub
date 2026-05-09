@@ -282,7 +282,9 @@ export default function EventGalleryPage() {
           {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
         </div>
         <div className="flex items-center gap-2">
-          {user ? (
+          {!user ? (
+            <Button render={<Link to="/sign-in" />} size="sm" variant="outline">Sign in to upload</Button>
+          ) : canUpload ? (
             <>
               <input ref={fileRef} type="file" accept={ACCEPT} onChange={onFile} className="hidden" />
               <Button size="sm" onClick={onPick} disabled={uploading}>
@@ -291,7 +293,7 @@ export default function EventGalleryPage() {
               </Button>
             </>
           ) : (
-            <Button render={<Link to="/sign-in" />} size="sm" variant="outline">Sign in to upload</Button>
+            <p className="text-xs text-muted-foreground">Only checked-in attendees can upload</p>
           )}
         </div>
       </div>
