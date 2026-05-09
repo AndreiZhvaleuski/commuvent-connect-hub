@@ -14,8 +14,33 @@ Click-by-click guide covering every graded flow on the live demo:
 > **Demo password (all accounts):** `Password123!`
 
 > **Run flows in order (A → K).** Several flows rely on the pristine
-> seed state (especially Flow D's waitlist). If you skip ahead and
-> something looks off, re-run the `seed_demo` edge function to reset.
+> seed state (especially Flow D's waitlist). If you skip ahead or
+> replay a flow, **re-seed first** (instructions below).
+
+---
+
+## Reset the demo before each session
+
+Several flows are **not idempotent** — Flow D in particular consumes the
+**AI Hack Night** waitlist baseline (Gina cancels → Kate auto-promotes
+from the waitlist). Replay it without resetting and the starting state
+will be wrong.
+
+To restore the documented baseline at any time:
+
+1. Go to **Sign in** (top-right of the site).
+2. Click the **user-icon** button on the sign-in card to open the
+   **Demo accounts** dialog.
+3. Scroll to the **Re-seed demo data** section at the bottom.
+4. Paste the seed secret into the input:
+   ```
+   SEED_SECRET = <PASTE_SECRET_HERE>
+   ```
+5. Click **Re-seed demo data**. Wait ~20–30s for the toast confirming
+   the rebuild.
+
+The reseed wipes ALL data, auth users, and storage, then rebuilds the
+deterministic dataset described above. Safe to run anytime.
 
 ---
 
@@ -179,6 +204,10 @@ https://github.com/user-attachments/assets/543285b0-4ad4-4515-99c4-d1adc87066e4
 
 ## Flow D — Waitlist + automatic FIFO promotion (two windows)
 
+> **Re-seed first** if you've already played this flow once — it
+> consumes the AI Hack Night waitlist baseline and is not idempotent.
+> See [Reset the demo before each session](#reset-the-demo-before-each-session).
+
 The seed already over-subscribes **AI Hack Night** (capacity = 4):
 `att.gina/henry/ivy/jack` are **going**, `att.kate/liam/mia/noah` sit
 on the waitlist. Open a second **private / incognito** window for
@@ -233,6 +262,10 @@ Window 2 so the two sessions don't collide.
 ---
 
 ## Flow E — Run the door (Checker, two windows)
+
+> **Re-seed first** if you've already played Flow D or this flow —
+> check-ins and Gina's RSVP state are not idempotent.
+> See [Reset the demo before each session](#reset-the-demo-before-each-session).
 
 Open a second **private / incognito** window for Window 2.
 
