@@ -24,7 +24,7 @@ type SortDir = "asc" | "desc";
 
 const PAGE_SIZE = 12;
 
-type LocationMode = "any" | "in_person" | "online";
+type LocationMode = "any" | "offline" | "online";
 
 type Ev = {
   id: string; title: string; description: string | null; cover_image_url: string | null;
@@ -38,7 +38,7 @@ export default function Explore() {
   const from = searchParams.get("from") ?? "";
   const to = searchParams.get("to") ?? "";
   const includePast = searchParams.get("past") === "1";
-  const mode = (searchParams.get("type") as LocationMode) || "any";
+  const mode = (searchParams.get("location") as LocationMode) || "any";
   const sortDir = (searchParams.get("sort") as SortDir) === "desc" ? "desc" : "asc";
 
   const updateParam = (key: string, value: string | null) => {
@@ -53,7 +53,7 @@ export default function Explore() {
   const setFrom = (v: string) => updateParam("from", v);
   const setTo = (v: string) => updateParam("to", v);
   const setIncludePast = (v: boolean) => updateParam("past", v ? "1" : null);
-  const setMode = (v: LocationMode) => updateParam("type", v === "any" ? null : v);
+  const setMode = (v: LocationMode) => updateParam("location", v === "any" ? null : v);
   const setSortDir = (v: SortDir) => updateParam("sort", v === "desc" ? "desc" : null);
   const clearAll = () => setSearchParams({}, { replace: true });
 
@@ -83,7 +83,7 @@ export default function Explore() {
         qb = qb.or(`title.ilike.%${safe}%,venue_address.ilike.%${safe}%`);
       }
       if (mode === "online") qb = qb.not("online_url", "is", null);
-      else if (mode === "in_person") qb = qb.not("venue_address", "is", null);
+      else if (mode === "offline") qb = qb.not("venue_address", "is", null);
 
       const { data, error, count } = await qb.abortSignal(signal);
       if (error) throw new Error(error.message);
@@ -119,21 +119,26 @@ export default function Explore() {
               </div>
             </div>
             <div className="space-y-2 lg:col-span-2">
-              <Label>Type</Label>
+              <Label>Location</Label>
               <RadioGroup
                 value={mode}
                 onValueChange={(v) => setMode(v as LocationMode)}
                 className="flex flex-wrap gap-2"
               >
                 {([
-                  { v: "any", label: "Any", icon: <SparkleIcon className="h-4 w-4 shrink-0" /> },
-                  { v: "in_person", label: "In person", icon: <MapPin className="h-4 w-4 shrink-0" /> },
+                  { v: "offline", label: "Offline", icon: <MapPin className="h-4 w-4 shrink-0" /> },
                   { v: "online", label: "Online", icon: <GlobeIcon className="h-4 w-4 shrink-0" /> },
                 ] as const).map((opt) => {
                   const selected = mode === opt.v;
                   const content = (
                     <label
                       htmlFor={`mode-${opt.v}`}
+                      onClick={(e) => {
+                        if (selected) {
+                          e.preventDefault();
+                          setMode("any");
+                        }
+                      }}
                       className={cn(
                         "flex h-8 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 text-sm transition-colors whitespace-nowrap",
                         selected ? "border-primary bg-primary/5 flex-1" : "hover:bg-accent"
@@ -141,7 +146,7 @@ export default function Explore() {
                     >
                       <RadioGroupItem value={opt.v} id={`mode-${opt.v}`} className="shrink-0" />
                       {opt.icon}
-                      {selected && <span className="truncate">{opt.label}</span>}
+                      <span className="truncate">{opt.label}</span>
                     </label>
                   );
                   return selected ? (
