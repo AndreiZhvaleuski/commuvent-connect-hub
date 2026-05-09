@@ -110,6 +110,25 @@ export default function EventGalleryPage() {
     [user?.id, event?.host_id]
   );
 
+  const { data: hasCheckedIn } = useAsyncResource<boolean>(
+    async (signal) => {
+      if (!user || !eventId) return false;
+      const { data, error } = await supabase
+        .from("check_ins")
+        .select("id, rsvps!inner(user_id)")
+        .eq("event_id", eventId)
+        .eq("undone", false)
+        .eq("rsvps.user_id", user.id)
+        .limit(1)
+        .abortSignal(signal);
+      if (error) throw new Error(error.message);
+      return (data ?? []).length > 0;
+    },
+    [user?.id, eventId]
+  );
+
+  const canUpload = !!user && (isHost || hasCheckedIn);
+
   const { data, loading, error, refetch } = useAsyncResource<{ photos: Photo[]; total: number }>(
     async (signal) => {
       let q = supabase
@@ -263,7 +282,9 @@ export default function EventGalleryPage() {
           {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
         </div>
         <div className="flex items-center gap-2">
-          {user ? (
+          {!user ? (
+            <Button render={<Link to="/sign-in" />} size="sm" variant="outline">Sign in to upload</Button>
+          ) : canUpload ? (
             <>
               <input ref={fileRef} type="file" accept={ACCEPT} onChange={onFile} className="hidden" />
               <Button size="sm" onClick={onPick} disabled={uploading}>
@@ -272,7 +293,7 @@ export default function EventGalleryPage() {
               </Button>
             </>
           ) : (
-            <Button render={<Link to="/sign-in" />} size="sm" variant="outline">Sign in to upload</Button>
+            <p className="text-xs text-muted-foreground">Only checked-in attendees can upload</p>
           )}
         </div>
       </div>
@@ -338,7 +359,7 @@ export default function EventGalleryPage() {
       ) : photos.length === 0 ? (
         <EmptyState
           title="No photos yet"
-          description={user ? "Be the first to share!" : "Sign in to upload one."}
+          description={!user ? "Sign in to upload one." : canUpload ? "Be the first to share!" : "Only attendees who checked in can add photos."}
         />
       ) : (
         <>
