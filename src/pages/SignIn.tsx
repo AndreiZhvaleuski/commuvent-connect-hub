@@ -98,7 +98,14 @@ export default function SignIn({ mode = "signin" }: { mode?: "signin" | "signup"
         setSeedError(message);
         return toast.error(message);
       }
-      toast.success(`Re-seeded! ${JSON.stringify(data.summary ?? {})}`);
+      const s = data.summary ?? {};
+      const parts = [
+        s.users != null ? `${s.users} users` : null,
+        s.events != null ? `${s.events} events` : null,
+        s.rsvps != null ? `${s.rsvps} RSVPs` : null,
+      ].filter(Boolean).join(" · ");
+      toast.success(parts ? `Demo data re-seeded — ${parts}` : "Demo data re-seeded");
+      setSeedSecret("");
     } catch (e: any) {
       const message = e.message ?? "Re-seed failed";
       setSeedError(message);
