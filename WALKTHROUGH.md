@@ -503,9 +503,10 @@ Open a second **private / incognito** window for Window 2.
 5. Click the **Hosts** tab.
 6. Click the row for `host.alice@demo.commuvent.app` to auto-fill, then
    click **Sign in**.
-7. Click **Dashboard** in the top nav.
+   *Expect:* you land on the home page (no auto-redirect after sign-in).
+7. Click **Dashboard** in the top nav, then click the **Acme** host card.
 8. Click **Members** in the dashboard header.
-9. In the **Invite by link** card, find the **Checker** card.
+9. In the **Invite by link** card, find the **Checker** row.
 10. Click **Create checker link**.
     *Expect:* toast `Invite link created`; a new row appears.
 11. On the new row, click the **eye** icon to reveal the token.
