@@ -359,7 +359,7 @@ export default function EventGalleryPage() {
       ) : photos.length === 0 ? (
         <EmptyState
           title="No photos yet"
-          description={user ? "Be the first to share!" : "Sign in to upload one."}
+          description={!user ? "Sign in to upload one." : canUpload ? "Be the first to share!" : "Only attendees who checked in can add photos."}
         />
       ) : (
         <>
