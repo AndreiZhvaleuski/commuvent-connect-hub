@@ -371,38 +371,43 @@ The gallery + moderation queue is **already populated** by the seed.
 5. Click the **Hosts** tab.
 6. Click the row for `host.alice@demo.commuvent.app` to auto-fill, then
    click **Sign in**.
-7. Click **Dashboard** in the top nav (if not already there).
-8. Click **Moderation** in the dashboard header.
-9. Click the **Gallery queue** tab.
-   *Expect:* several pending photos across Acme's events, each
-   labelled with the uploader's name.
-10. On the **first** pending row, click **Approve**.
-    *Expect:* toast confirmation; the row disappears.
-11. On the next pending row, click **Reject**.
-    *Expect:* toast confirmation; the row disappears.
-12. Click the **Commuvent** header/logo to open the main page, then
-    click **Explore** → toggle **Include past events** ON → open the
-    event you just approved a photo for.
-13. Scroll to the **Gallery** section.
-    *Expect:* the newly-approved photo renders in the public grid.
-14. Click your avatar (top-right) → **Sign out**.
+7. Click **Dashboard** in the top nav.
+   *Expect:* `/dashboard` shows the Acme host card.
+8. Click the **Acme** host card.
+9. Switch to the **Past** tab and click the title of
+   **Intro to LLM Agents** to open its public event page (`/e/<id>`).
+10. Scroll to the **Gallery** section, then click **View all** to open
+    the full gallery page (`/e/<id>/gallery`).
+11. Click the **Pending review** tab (visible only to hosts).
+    *Expect:* a list of photos awaiting approval.
+12. On the first photo, click **Approve**.
+    *Expect:* toast `Photo approved`; the photo disappears from the
+    Pending review tab.
+13. On the next photo, click **Reject**.
+    *Expect:* toast `Photo rejected`; the photo disappears.
+14. Click the **Published** tab.
+    *Expect:* the just-approved photo appears here.
+15. Click your avatar (top-right) → **Sign out**.
 
 ### Part 2 — Attendee uploads (`att.gina`)
 
-15. Click the **Commuvent** header/logo to open the main page.
-16. Click **Sign in** in the top-right.
-17. On the sign-in card, click the **user-icon** button to open the
+16. Click the **Commuvent** header/logo to open the main page.
+17. Click **Sign in** in the top-right.
+18. On the sign-in card, click the **user-icon** button to open the
     **Demo accounts** panel.
-18. Click the **Attendees** tab.
-19. Click the row for `att.gina@demo.commuvent.app` to auto-fill, then
+19. Click the **Attendees** tab.
+20. Click the row for `att.gina@demo.commuvent.app` to auto-fill, then
     click **Sign in**.
-20. Click **Explore** in the top nav.
-21. Toggle **Include past events** ON.
-22. Click the card titled **Intro to LLM Agents**.
-23. Scroll to the **Gallery** section.
-24. Click **Upload photo**, pick any image, then submit.
-    *Expect:* the photo appears in your "Pending" tray; not yet public.
-25. Click your avatar (top-right) → **Sign out**.
+21. Click **Explore** in the top nav.
+22. Toggle **Include past events** ON.
+23. Click the card titled **Intro to LLM Agents**.
+24. Scroll to the **Gallery** section, then click **View all** to open
+    the full gallery page.
+25. Click **Upload photo**, pick any image, then confirm.
+    *Expect:* toast `Photo uploaded — pending host approval`; the
+    filter switches to **My pending** and the photo appears there
+    (not yet on the public **Published** tab).
+26. Click your avatar (top-right) → **Sign out**.
 
 ---
 
@@ -439,7 +444,7 @@ The gallery + moderation queue is **already populated** by the seed.
 
 ## Flow I — Report + moderation hide
 
-The Reports tab is **already populated** by the seed.
+The Reports list is **already populated** by the seed.
 
 ### Part 1 — Host hides a report (`host.alice`)
 
@@ -452,12 +457,15 @@ The Reports tab is **already populated** by the seed.
 6. Click the row for `host.alice@demo.commuvent.app` to auto-fill, then
    click **Sign in**.
 7. Click **Dashboard** in the top nav.
-8. Click **Moderation** in the dashboard header.
-9. Click the **Reports** tab.
-   *Expect:* a list with mixed `open` / `hidden` / `dismissed` rows.
-10. On the first **open** event report, click **Hide**.
+   *Expect:* `/dashboard` shows the Acme host card.
+8. Click the **Acme** host card.
+9. Click **Reports** in the dashboard header.
+   *Expect:* heading **Reports** with an `N open` badge; oldest-first
+   list of open reports only (hidden / dismissed reports are not shown).
+10. On the first **event** report, click **Hide**.
 11. In the confirmation dialog, click **Hide**.
-    *Expect:* status flips to `hidden`.
+    *Expect:* the row disappears and the open count decreases.
+    (Hiding an event reverts it to draft; hiding a photo rejects it.)
 12. Click your avatar (top-right) → **Sign out**.
 
 ### Part 2 — Attendee files a fresh report (`att.henry`)
@@ -473,11 +481,11 @@ The Reports tab is **already populated** by the seed.
 19. Click any event card.
 20. Scroll to the bottom of the event page.
 21. Click **Report event**.
-22. Pick reason `Spam`.
-23. In the comment field, type `Looks like a spam listing.`.
-24. Click **Submit report**.
+22. In the **Reason** textarea, type `Looks like a spam listing.`
+    (must be 5–500 characters).
+23. Click **Submit report**.
     *Expect:* toast `Report submitted`.
-25. Click your avatar (top-right) → **Sign out**.
+24. Click your avatar (top-right) → **Sign out**.
 
 ---
 
@@ -495,9 +503,10 @@ Open a second **private / incognito** window for Window 2.
 5. Click the **Hosts** tab.
 6. Click the row for `host.alice@demo.commuvent.app` to auto-fill, then
    click **Sign in**.
-7. Click **Dashboard** in the top nav.
+   *Expect:* you land on the home page (no auto-redirect after sign-in).
+7. Click **Dashboard** in the top nav, then click the **Acme** host card.
 8. Click **Members** in the dashboard header.
-9. In the **Invite by link** card, find the **Checker** card.
+9. In the **Invite by link** card, find the **Checker** row.
 10. Click **Create checker link**.
     *Expect:* toast `Invite link created`; a new row appears.
 11. On the new row, click the **eye** icon to reveal the token.
