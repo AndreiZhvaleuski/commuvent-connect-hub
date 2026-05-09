@@ -7,8 +7,11 @@ Click-by-click guide covering every graded flow on the live demo:
 > hosting service may be blocked in some countries.
 
 > Each flow ends with a **Recording** section embedding a short iPhone
-> screen recording (`videos/flow-<letter>.mp4`). Convert iPhone `.mov`
-> files to `.mp4` (H.264 + AAC) so GitHub plays them inline.
+> screen recording served from the deployed site
+> (`https://commuvent-connect-hub.lovable.app/videos/flow-<letter>.mp4`).
+> Files live in `public/videos/` in the repo. Use absolute URLs so the
+> `<video>` tag renders inline on GitHub. Convert iPhone `.mov` to
+> `.mp4` (H.264 + AAC) for inline playback.
 
 > **Demo password (all accounts):** `Password123!`
 
@@ -91,9 +94,9 @@ in-progress event has 1 pending photo.
 
 ### Recording
 
-<video src="./videos/flow-a.mp4" controls playsinline muted width="640">
+<video src="https://commuvent-connect-hub.lovable.app/videos/flow-a.mp4" controls playsinline muted width="640">
   Your browser doesn't support inline video.
-  <a href="./videos/flow-a.mp4">Download the recording</a>.
+  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-a.mp4">Download the recording</a>.
 </video>
 
 ---
@@ -135,9 +138,9 @@ in-progress event has 1 pending photo.
 
 ### Recording
 
-<video src="./videos/flow-b.mp4" controls playsinline muted width="640">
+<video src="https://commuvent-connect-hub.lovable.app/videos/flow-b.mp4" controls playsinline muted width="640">
   Your browser doesn't support inline video.
-  <a href="./videos/flow-b.mp4">Download the recording</a>.
+  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-b.mp4">Download the recording</a>.
 </video>
 
 ---
@@ -178,9 +181,9 @@ Gina's RSVP (needed by Flows D and E) or the AI Hack Night waitlist.
 
 ### Recording
 
-<video src="./videos/flow-c.mp4" controls playsinline muted width="640">
+<video src="https://commuvent-connect-hub.lovable.app/videos/flow-c.mp4" controls playsinline muted width="640">
   Your browser doesn't support inline video.
-  <a href="./videos/flow-c.mp4">Download the recording</a>.
+  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-c.mp4">Download the recording</a>.
 </video>
 
 ---
@@ -240,9 +243,9 @@ Window 2 so the two sessions don't collide.
 
 ### Recording
 
-<video src="./videos/flow-d.mp4" controls playsinline muted width="640">
+<video src="https://commuvent-connect-hub.lovable.app/videos/flow-d.mp4" controls playsinline muted width="640">
   Your browser doesn't support inline video.
-  <a href="./videos/flow-d.mp4">Download the recording</a>.
+  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-d.mp4">Download the recording</a>.
 </video>
 
 ---
@@ -301,9 +304,9 @@ Open a second **private / incognito** window for Window 2.
 
 ### Recording
 
-<video src="./videos/flow-e.mp4" controls playsinline muted width="640">
+<video src="https://commuvent-connect-hub.lovable.app/videos/flow-e.mp4" controls playsinline muted width="640">
   Your browser doesn't support inline video.
-  <a href="./videos/flow-e.mp4">Download the recording</a>.
+  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-e.mp4">Download the recording</a>.
 </video>
 
 ---
@@ -336,9 +339,9 @@ Open a second **private / incognito** window for Window 2.
 
 ### Recording
 
-<video src="./videos/flow-f.mp4" controls playsinline muted width="640">
+<video src="https://commuvent-connect-hub.lovable.app/videos/flow-f.mp4" controls playsinline muted width="640">
   Your browser doesn't support inline video.
-  <a href="./videos/flow-f.mp4">Download the recording</a>.
+  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-f.mp4">Download the recording</a>.
 </video>
 
 ---
@@ -392,9 +395,9 @@ The gallery + moderation queue is **already populated** by the seed.
 
 ### Recording
 
-<video src="./videos/flow-g.mp4" controls playsinline muted width="640">
+<video src="https://commuvent-connect-hub.lovable.app/videos/flow-g.mp4" controls playsinline muted width="640">
   Your browser doesn't support inline video.
-  <a href="./videos/flow-g.mp4">Download the recording</a>.
+  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-g.mp4">Download the recording</a>.
 </video>
 
 ---
@@ -430,9 +433,9 @@ The gallery + moderation queue is **already populated** by the seed.
 
 ### Recording
 
-<video src="./videos/flow-h.mp4" controls playsinline muted width="640">
+<video src="https://commuvent-connect-hub.lovable.app/videos/flow-h.mp4" controls playsinline muted width="640">
   Your browser doesn't support inline video.
-  <a href="./videos/flow-h.mp4">Download the recording</a>.
+  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-h.mp4">Download the recording</a>.
 </video>
 
 ---
@@ -481,9 +484,9 @@ The Reports tab is **already populated** by the seed.
 
 ### Recording
 
-<video src="./videos/flow-i.mp4" controls playsinline muted width="640">
+<video src="https://commuvent-connect-hub.lovable.app/videos/flow-i.mp4" controls playsinline muted width="640">
   Your browser doesn't support inline video.
-  <a href="./videos/flow-i.mp4">Download the recording</a>.
+  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-i.mp4">Download the recording</a>.
 </video>
 
 ---
@@ -529,9 +532,9 @@ Open a second **private / incognito** window for Window 2.
 
 ### Recording
 
-<video src="./videos/flow-j.mp4" controls playsinline muted width="640">
+<video src="https://commuvent-connect-hub.lovable.app/videos/flow-j.mp4" controls playsinline muted width="640">
   Your browser doesn't support inline video.
-  <a href="./videos/flow-j.mp4">Download the recording</a>.
+  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-j.mp4">Download the recording</a>.
 </video>
 
 ---
@@ -559,9 +562,9 @@ Open a second **private / incognito** window for Window 2.
 
 ### Recording
 
-<video src="./videos/flow-k.mp4" controls playsinline muted width="640">
+<video src="https://commuvent-connect-hub.lovable.app/videos/flow-k.mp4" controls playsinline muted width="640">
   Your browser doesn't support inline video.
-  <a href="./videos/flow-k.mp4">Download the recording</a>.
+  <a href="https://commuvent-connect-hub.lovable.app/videos/flow-k.mp4">Download the recording</a>.
 </video>
 
 ---
