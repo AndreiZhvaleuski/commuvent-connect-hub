@@ -159,8 +159,9 @@ https://github.com/user-attachments/assets/4011a622-8878-431f-a2aa-112cfd69f2aa
 
 ## Flow C — Ticket, calendar & cancel/re-RSVP (Attendee)
 
-We use `att.henry` and **Farm-to-Table Dinner** here so we don't disturb
-Gina's RSVP (needed by Flows D and E) or the AI Hack Night waitlist.
+We use `att.henry` and **Farm-to-Table Dinner** so this flow stays
+self-contained and doesn't touch the AI Hack Night waitlist used in
+Flow D.
 
 1. Click the **Commuvent** header/logo (top-left) to open the main page.
 2. If a user avatar shows in the top-right, click it → **Sign out**.
