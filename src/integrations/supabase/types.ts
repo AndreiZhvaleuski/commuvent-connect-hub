@@ -496,6 +496,7 @@ export type Database = {
           report_id: string
         }[]
       }
+      seed_wipe_all: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
