@@ -367,10 +367,12 @@ export default function EventEditor() {
                 error={form.formState.errors.description?.message}
                 hint={`${description.length}/${MAX_DESC}`}
               >
-                <MarkdownEditor
+                <Textarea
                   value={description}
-                  onChange={(md) => form.setValue("description", md, { shouldValidate: true, shouldDirty: true })}
-                  placeholder="What is this event about? Use the toolbar for formatting."
+                  onChange={(e) => form.setValue("description", e.target.value, { shouldValidate: true, shouldDirty: true })}
+                  placeholder="What is this event about?"
+                  rows={8}
+                  maxLength={MAX_DESC}
                 />
               </Field>
             </CardContent>
