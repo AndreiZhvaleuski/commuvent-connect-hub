@@ -112,8 +112,8 @@ in-progress event has 1 pending photo.
    with **Upcoming** / **Past** tabs.
 7. Click **New event** (top right).
    *Expect:* the editor at `/dashboard/<hostId>/events/new`.
-8. In **Title**, type `Reviewer Test Event`.
-9. In **Description**, type `A short test event created during review.`.
+8. In **Title**, type `AI Agents Meetup — March`.  
+9. In **Description**, type `An evening of demos and networking for builders working with autonomous agents.`
 10. In **Start time**, pick a time roughly **+1 hour from now**.
 11. In **End time**, pick a time roughly **+3 hours from now**.
 12. In **Time zone**, select `Europe/Berlin`.
