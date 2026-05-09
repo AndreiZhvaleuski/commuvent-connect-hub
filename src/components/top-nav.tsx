@@ -27,13 +27,18 @@ export function TopNav() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profile, setProfile] = useState<{ id: string; display_name: string | null; avatar_url: string | null } | null>(null);
+  const [unreadPromotions, setUnreadPromotions] = useState(0);
 
   useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
   useEffect(() => {
     let cancelled = false;
 
-    if (!user?.id) return;
+    if (!user?.id) {
+      setProfile(null);
+      setUnreadPromotions(0);
+      return;
+    }
 
     supabase
       .from("profiles")
@@ -44,8 +49,29 @@ export function TopNav() {
         if (!cancelled) setProfile(data ?? null);
       });
 
+    const refreshCount = async () => {
+      const { count } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("type", "waitlist_promoted")
+        .is("read_at", null);
+      if (!cancelled) setUnreadPromotions(count ?? 0);
+    };
+    refreshCount();
+
+    const ch = supabase
+      .channel(`nav-notif-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        refreshCount,
+      )
+      .subscribe();
+
     return () => {
       cancelled = true;
+      supabase.removeChannel(ch);
     };
   }, [user?.id]);
 
