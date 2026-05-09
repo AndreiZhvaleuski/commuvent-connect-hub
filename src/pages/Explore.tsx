@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 import { MapPinIcon as MapPin } from "@phosphor-icons/react";
 import { MagnifyingGlassIcon as Search, GlobeIcon, SparkleIcon, CalendarBlankIcon } from "@phosphor-icons/react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
