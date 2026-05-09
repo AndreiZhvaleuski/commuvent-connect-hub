@@ -127,7 +127,7 @@ export default function CheckIn() {
   const capacitySuffix = event.capacity ? `/ ${event.capacity}` : "";
 
   const ended = event ? new Date(event.end_at).getTime() < now : false;
-  const checkInDisabled = ended && !isHost;
+  const checkInDisabled = ended;
 
   async function submit(e?: React.FormEvent) {
     e?.preventDefault();
