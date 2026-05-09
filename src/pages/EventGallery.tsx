@@ -110,6 +110,25 @@ export default function EventGalleryPage() {
     [user?.id, event?.host_id]
   );
 
+  const { data: hasCheckedIn } = useAsyncResource<boolean>(
+    async (signal) => {
+      if (!user || !eventId) return false;
+      const { data, error } = await supabase
+        .from("check_ins")
+        .select("id, rsvps!inner(user_id)")
+        .eq("event_id", eventId)
+        .eq("undone", false)
+        .eq("rsvps.user_id", user.id)
+        .limit(1)
+        .abortSignal(signal);
+      if (error) throw new Error(error.message);
+      return (data ?? []).length > 0;
+    },
+    [user?.id, eventId]
+  );
+
+  const canUpload = !!user && (isHost || hasCheckedIn);
+
   const { data, loading, error, refetch } = useAsyncResource<{ photos: Photo[]; total: number }>(
     async (signal) => {
       let q = supabase
