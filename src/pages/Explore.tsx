@@ -131,26 +131,19 @@ export default function Explore() {
                   { v: "online", label: "Online", icon: <GlobeIcon className="h-4 w-4 shrink-0" /> },
                 ] as const).map((opt) => {
                   const selected = mode === opt.v;
-                  const content = (
+                  return (
                     <label
+                      key={opt.v}
                       htmlFor={`mode-${opt.v}`}
                       className={cn(
-                        "flex h-8 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 text-sm transition-colors whitespace-nowrap",
-                        selected ? "border-primary bg-primary/5 flex-1" : "hover:bg-accent"
+                        "flex h-8 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border px-2.5 text-sm transition-colors whitespace-nowrap",
+                        selected ? "border-primary bg-primary/5" : "hover:bg-accent"
                       )}
                     >
                       <RadioGroupItem value={opt.v} id={`mode-${opt.v}`} className="shrink-0" />
                       {opt.icon}
-                      {selected && <span className="truncate">{opt.label}</span>}
+                      <span className="truncate">{opt.label}</span>
                     </label>
-                  );
-                  return selected ? (
-                    <div key={opt.v} className="flex-1">{content}</div>
-                  ) : (
-                    <Tooltip key={opt.v}>
-                      <TooltipTrigger render={content} />
-                      <TooltipContent>{opt.label}</TooltipContent>
-                    </Tooltip>
                   );
                 })}
               </RadioGroup>
