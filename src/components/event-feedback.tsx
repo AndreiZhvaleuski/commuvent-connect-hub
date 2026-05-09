@@ -6,8 +6,12 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { ListPagination } from "@/components/list-pagination";
 
 type Feedback = { id: string; rating: number; comment: string | null; user_id: string; created_at: string };
+
+const PAGE_SIZE = 5;
 
 export function EventFeedback({ eventId, eventEnded }: { eventId: string; eventEnded: boolean }) {
   const { user } = useAuth();
